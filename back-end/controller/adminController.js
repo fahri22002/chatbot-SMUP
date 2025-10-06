@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const { Admin } = require('../models/adminModel');
 
 const login = async (req, res) => {
@@ -6,33 +7,30 @@ const login = async (req, res) => {
   try {
     // Cari admin berdasarkan username
     const admin = await Admin.findOne({ username });
-
     if (!admin) {
-      return res.status(401).json({ error: true, message: 'Username tidak ditemukan' });
+      return res.status(401).json({ error: true, message: 'Username atau password salah' });
     }
 
-    // Cek password (kalau plain text)
-    if (password !== admin.password) {
-      return res.status(401).json({ error: true, message: 'Password salah' });
+    // Bandingkan password yang dikirim dengan yang di-hash di DB
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: true, message: 'Username atau password salah' });
     }
 
     // Set session
     req.session.adminId = admin._id;
     req.session.username = admin.username;
 
-    // Simpan session
     req.session.save(err => {
       if (err) {
         console.error('Session save error:', err);
-        return res.status(500).json({ error: 'Gagal menyimpan session' });
+        return res.status(500).json({ error: 'Session save failed' });
       }
 
-      // Set cookie untuk Railway deployment
       // res.setHeader('Set-Cookie', [
       //   `cm_auth=${req.sessionID}; Domain=.railway.app; Path=/; Secure; SameSite=None; HttpOnly; Max-Age=${14 * 24 * 60 * 60}`
       // ]);
 
-      // Kirim respons sukses
       res.json({
         error: false,
         message: 'Berhasil Sign In',
@@ -44,8 +42,8 @@ const login = async (req, res) => {
     console.error("Login error:", error);
     res.status(500).json({
       error: true,
-      message: 'Terjadi kesalahan saat login',
-      details: error.message
+      message: 'Terjadi kesalahan server',
+      detail: error.message
     });
   }
 };
