@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/fahri22002/chatbot-SMUP/issues"
   },
-  "homepage": "https://github.com/fahri22002/chatbot-SMUP#readme"
+  "homepage": "https://github.com/fahri22002/chatbot-SMUP#readme",
+  "dependencies": {
+    "bcrypt": "^6.0.0"
+  }
 }
