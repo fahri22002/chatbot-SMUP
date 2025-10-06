@@ -1,6 +1,7 @@
 const { Chat } = require('../models/chatModel');
 const { Message } = require('../models/messageModel');
 const { Admin } = require('../models/adminModel');
+const axios = require('axios');
 // const { admin } = require("../auth/middleware.js");
 
 
@@ -40,7 +41,7 @@ const getChat = async (req, res) => {
         ]);
 
         if (messages.length === 0) {
-            return res.status(404).json({ error: false, message: "Chat history tidak ditemukan" });
+            return res.status(404).json({ error: true, message: "Chat history tidak ditemukan" });
         }
 
         res.status(200).json({ error: false, data: messages });
@@ -52,5 +53,17 @@ const getChat = async (req, res) => {
     }
 };
 
+const getReply = async (req, res) => {
+    try{
+        // Panggil endpoint FastAPI
+        const response = await axios.get('http://127.0.0.1:8080/');
+        // Kirim hasilnya ke client
+        res.json(response.data);
+    } catch (error) {
+    console.error('Error fetching data from FastAPI:', error.message);
+    res.status(500).json({ error: 'Failed to fetch data from FastAPI' });
+  }
+}
 
-module.exports = { getChat };
+
+module.exports = { getChat, getReply };
