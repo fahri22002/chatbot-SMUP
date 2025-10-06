@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import scrapping as sc
 
 app = FastAPI()
 
@@ -19,6 +20,11 @@ def read_root():
     global temp
     temp += 1
     return {"Hello": "World", "Temp": temp}
+
+@app.get("/do-scrapping")
+def do_scrapping():
+    sc.mainscrapping()
+    return {"Status": "Succeed", "Temp": temp}
 
 if __name__ == "__main__":
     import uvicorn
