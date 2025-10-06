@@ -22,9 +22,9 @@ const host = process.env.HOST || 'localhost';
 const allowedOrigins = [
   "http://localhost:5500",
   "http://127.0.0.1:5500", 
-  "http://localhost:5173",
-  "https://cardiomind-production.up.railway.app",
-  "https://cardio-mind-khaki.vercel.app"
+  // "http://localhost:5173",
+  // "https://cardiomind-production.up.railway.app",
+  // "https://cardio-mind-khaki.vercel.app"
 ];
 
 app.use(cors({
