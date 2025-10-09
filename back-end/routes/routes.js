@@ -1,5 +1,6 @@
 const express = require("express");
 const { getChat, getReply, createChat, nonactiveChat, postMsg } = require("../controller/appController.js");
+const { login, createAccount} = require("../controller/adminController.js");
 // const { postReply, getReplies ,editProfile, profile, saveSuicidePrediction, newsUpdate, getSuicidePredictions, getHealthArticles, articleById, postComments, getComments, postCardioPredict, postImageProfile, getCardioHistory } = require("../controller/appController.js");
 // const { authUser } = require("../auth/middleware.js")
 // const { getTotalMedics, getTotalNews, getTotalUsers, getAllMedics, getAllUsers, searchUser, promoteToMedic, deleteUser, changeToUser } = require("../controller/adminController.js")
@@ -15,7 +16,8 @@ const router = express.Router();
 // router.post('/resetPassword', resetPassword);
 
 // admin
-
+router.post('/create-account', createAccount)
+router.post('/login', login)
 // router.get('/admin/users', getTotalUsers);
 // router.get('/admin/medics', getTotalMedics);
 // router.get('/admin/news', getTotalNews);

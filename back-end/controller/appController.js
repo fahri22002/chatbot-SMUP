@@ -8,6 +8,9 @@ const axios = require('axios');
 
 
 const getChat = async (req, res) => {
+  if(!req.session._id){
+    return res.status(404).json({ error: true, message: "login required" });
+  }
     try {
         const chatId = req.params.chatId;
 
