@@ -1,5 +1,5 @@
 const express = require("express");
-const { getChat, getReply, createChat, nonactiveChat } = require("../controller/appController.js");
+const { getChat, getReply, createChat, nonactiveChat, postMsg } = require("../controller/appController.js");
 // const { postReply, getReplies ,editProfile, profile, saveSuicidePrediction, newsUpdate, getSuicidePredictions, getHealthArticles, articleById, postComments, getComments, postCardioPredict, postImageProfile, getCardioHistory } = require("../controller/appController.js");
 // const { authUser } = require("../auth/middleware.js")
 // const { getTotalMedics, getTotalNews, getTotalUsers, getAllMedics, getAllUsers, searchUser, promoteToMedic, deleteUser, changeToUser } = require("../controller/adminController.js")
@@ -33,6 +33,7 @@ const router = express.Router();
 router.get('/reply', getReply)
 router.post('/create-chat', createChat)
 router.post('/nonactive', nonactiveChat)
+router.post('/send-msg', postMsg)
 // router.put('/profile', editProfile);
 // router.get('/profile', profile);
 // router.post('/suicideHistory', saveSuicidePrediction);
