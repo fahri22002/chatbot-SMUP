@@ -32,7 +32,6 @@ router.post('/login', login)
 
 
 // app
-router.get('/reply', getReply)
 router.get('/chat', getChat)
 router.post('/create-chat', createChat)
 router.get('/nonactive', nonactiveChat)

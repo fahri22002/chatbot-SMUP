@@ -146,4 +146,4 @@ const nonactiveChat = async (req, res) => {
 
 
 
-module.exports = { getChat, getReply, createChat, nonactiveChat, postMsg };
+module.exports = { getChat, createChat, nonactiveChat, postMsg };
