@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import scrapping as sc
 import rag
@@ -21,6 +21,15 @@ def read_root():
     global temp
     temp += 1
     return {"Hello": "World", "Temp": temp}
+
+@app.post("/reply")
+async def reply(req: Request):
+    global temp
+    temp += 1
+    data = await req.json()  # Ambil isi body JSON
+    message = data.get("message", "")  # Ambil key 'message' dari body
+    reply_text = "Jawab " + message
+    return {"Reply": reply_text, "Temp": temp}
 
 @app.get("/do-scrapping")
 def do_scrapping():

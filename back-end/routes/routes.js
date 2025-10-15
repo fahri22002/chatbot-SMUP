@@ -33,8 +33,9 @@ router.post('/login', login)
 
 // app
 router.get('/reply', getReply)
+router.get('/chat', getChat)
 router.post('/create-chat', createChat)
-router.post('/nonactive', nonactiveChat)
+router.get('/nonactive', nonactiveChat)
 router.post('/send-msg', postMsg)
 // router.put('/profile', editProfile);
 // router.get('/profile', profile);
