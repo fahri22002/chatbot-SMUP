@@ -4,7 +4,7 @@ const { Admin } = require('../models/adminModel');
 const axios = require('axios');
 // const { admin } = require("../auth/middleware.js");
 
-
+console.log("🔥 appController loaded — siap jalan!");
 
 
 const getChat = async (req, res) => {
@@ -39,7 +39,26 @@ const postMsg = async (req, res) => {
     if (!req.session.chatId) {
       return res.status(400).json({ 
         error: true,
+        refresh: true,
         message: 'Chat harus dibuat terlebih dahulu.'
+      });
+    }
+    // Cek apakah chat dengan chatId ini masih aktif
+    const chat = await Chat.findById(req.session.chatId);
+
+    if (!chat) {
+      return res.status(404).json({
+        error: true,
+        refresh: true,
+        message: 'Chat tidak ditemukan.'
+      });
+    }
+
+    if (chat.status !== "ACTIVE") {
+      return res.status(400).json({
+        error: true,
+        refresh: true,
+        message: 'Chat sudah tidak aktif. Silakan buat chat baru.'
       });
     }
 
@@ -96,6 +115,10 @@ const postMsg = async (req, res) => {
 
 const createChat = async (req, res) => {
   try {
+    if (req.session.chatId){
+      setChatNonActive(req.session.chatId);
+      delete req.session.chatId;
+    }
     const status  = "ACTIVE";
 
     // Buat dan simpan chat
@@ -113,37 +136,100 @@ const createChat = async (req, res) => {
   }
 };
 
+const setChatNonActive = async (chatId) => {
+  try {
+    // Cek apakah chat dengan chatId ini masih aktif
+    const chat = await Chat.findById(chatId);
+
+    if (!chat) {
+      console.log('Chat tidak ditemukan.')
+      return null;
+    }
+
+    if (chat.status !== "ACTIVE") {
+      console.log('Chat sudah tidak aktif.');
+      return null;
+    }
+    const updatedChat = await Chat.findByIdAndUpdate(
+      chatId,
+      { status: "NONACTIVE" },
+      { new: true }
+    );
+
+    if (!updatedChat) {
+      console.log(`⚠️ Chat ${chatId} tidak ditemukan`);
+      return null;
+    }
+    // Hapus dari Map
+    lastHeartbeat.delete(chatId);
+    
+
+    console.log(`✅ Chat ${chatId} berhasil diubah menjadi NONACTIVE`);
+    return updatedChat;
+  } catch (error) {
+    console.error(`❌ Gagal mengubah status chat ${chatId}:`, error);
+    throw error;
+  }
+};
+
+
 const nonactiveChat = async (req, res) => {
   try {
-
     if (!req.session.chatId) {
       return res.status(400).json({ error: true, message: 'Chat belum dibuat' });
     }
 
-    // update chat berdasarkan req.session.chatId
-    const updatedChat = await Chat.findByIdAndUpdate(
-      req.session.chatId,
-      { status: "NONACTIVE" },
-      { new: true } // return data chat setelah diupdate
-    );
+    // Panggil fungsi logic
+    const updatedChat = await setChatNonActive(req.session.chatId);
 
     if (!updatedChat) {
       return res.status(404).json({ error: true, message: 'Chat tidak ditemukan' });
     }
+    // Hapus session setelah di-nonaktifkan
     delete req.session.chatId;
 
-
-    res.status(200).json({
+    return res.status(200).json({
       message: 'Status chat berhasil diubah menjadi NONACTIVE',
       data: updatedChat
     });
   } catch (error) {
     console.error('Error saat mengubah status chat:', error);
-    res.status(500).json({ error: 'Gagal mengubah status chat' });
+    return res.status(500).json({ error: 'Gagal mengubah status chat' });
   }
 };
 
 
 
+// Menyimpan waktu terakhir heartbeat untuk setiap chat
+const lastHeartbeat = new Map();
 
-module.exports = { getChat, createChat, nonactiveChat, postMsg };
+// Endpoint heartbeat
+const postHeartbeat = async (req, res) => {
+
+  // Simpan waktu terakhir heartbeat (timestamp sekarang)
+  lastHeartbeat.set(req.session.chatId, Date.now());
+  console.log(`💓 Heartbeat diterima dari chatId ${req.session.chatId} pada ${new Date().toLocaleTimeString()}`);
+
+  res.status(200).json({ message: "Heartbeat diterima" });
+};
+
+// Interval pengecekan tiap 1 menit
+setInterval(async () => {
+  const now = Date.now();
+  const TIMEOUT = 5 * 60 * 1000; // 5 menit
+
+  for (const [chatId, lastTime] of lastHeartbeat.entries()) {
+    if (now - lastTime > TIMEOUT) {
+      console.log(`⚠️ Chat ${chatId} tidak aktif selama >5 menit. Menonaktifkan...`);
+
+      try {
+        setChatNonActive(chatId);
+      } catch (err) {
+        console.error(`❌ Gagal menonaktifkan chat ${chatId}:`, err.message);
+      }
+    }
+  }
+}, 2 * 60 * 1000); // periksa setiap 1 menit
+
+
+module.exports = { getChat, createChat, nonactiveChat, postMsg, setInterval, postHeartbeat };

@@ -62,6 +62,11 @@ app.get('/', (req, res) => {
 });
 
 // ========================
+// HEARTBEAT
+// ========================
+require('./controller/appController');
+
+// ========================
 // EXPRESS KE FASTAPI
 // ========================
 app.get('/get-message', async (req, res) => {
