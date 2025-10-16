@@ -1,7 +1,11 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+// Perubahan: Mengimpor ikon dari library 'lucide-react'
+import { Send, Bot } from 'lucide-react';
 
-const initialMessages = [{ sender: 'bot', text: 'Hi! How can I help you today?' }];
+const initialMessages = [
+  { sender: 'bot', text: 'Selamat datang! Ada yang bisa saya bantu terkait informasi kampus?' },
+];
 
 export default function Chatbot() {
   const [messages, setMessages] = useState(initialMessages);
@@ -9,7 +13,6 @@ export default function Chatbot() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  // 🔹 Kirim pesan ke backend FastAPI
   const sendToBackend = async (userMsg: string) => {
     try {
       setLoading(true);
@@ -22,10 +25,10 @@ export default function Chatbot() {
       if (!res.ok) throw new Error('Server error');
 
       const data = await res.json();
-      return data.answer || 'No response from backend.';
+      return data.answer || 'Maaf, saya tidak dapat menemukan jawaban.';
     } catch (error) {
       console.error('Error fetching from FastAPI:', error);
-      return '⚠️ Failed to reach backend. Please check if FastAPI is running.';
+      return '⚠️ Gagal terhubung ke server. Pastikan server FastAPI Anda berjalan.';
     } finally {
       setLoading(false);
     }
@@ -35,12 +38,11 @@ export default function Chatbot() {
     if (!input.trim()) return;
 
     const userMsg = input;
+    setMessages((prev) => [...prev, { sender: 'user', text: userMsg }]);
     setInput('');
 
-    setMessages((msgs) => [...msgs, { sender: 'user', text: userMsg }]);
-
     const botResponse = await sendToBackend(userMsg);
-    setMessages((msgs) => [...msgs, { sender: 'bot', text: botResponse }]);
+    setMessages((prev) => [...prev, { sender: 'bot', text: botResponse }]);
   };
 
   useEffect(() => {
@@ -48,51 +50,70 @@ export default function Chatbot() {
   }, [messages]);
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-neutral-900 p-4">
-      <div className="w-full max-w-4xl bg-neutral-800 border border-neutral-700 rounded-2xl shadow-xl flex flex-col min-h-[600px]">
-        {/* Header */}
-        <header className="bg-neutral-900 border-b border-neutral-700 px-6 py-4">
-          <h1 className="text-lg font-bold text-gray-100 tracking-wide">Chatbot</h1>
+    // Perubahan: Latar belakang sedikit lebih gelap untuk kontras
+    <section className="min-h-screen flex items-center justify-center bg-gray-900 p-4 font-sans">
+      <div className="w-full max-w-4xl bg-neutral-800 border border-neutral-700 rounded-2xl shadow-2xl flex flex-col min-h-[700px]">
+        {/* Perubahan: Header dibuat lebih menarik dengan ikon dan status */}
+        <header className="flex items-center gap-4 bg-neutral-900/70 backdrop-blur-sm border-b border-neutral-700 px-6 py-4 rounded-t-2xl">
+          <div className="p-2 bg-blue-500/20 rounded-full">
+            <Bot className="w-6 h-6 text-blue-400" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-gray-100 tracking-wide">Asisten Akademik</h1>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+              <p className="text-xs text-green-400">Online</p>
+            </div>
+          </div>
         </header>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-6 py-4">
+        <div className="flex-1 overflow-y-auto flex flex-col gap-5 px-6 py-4">
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`max-w-[80%] px-4 py-2 rounded-2xl text-base break-words ${
+              className={`max-w-[85%] px-5 py-3 rounded-2xl text-base break-words shadow-md ${
                 msg.sender === 'user'
-                  ? 'self-end bg-gradient-to-r from-neutral-700 to-neutral-400 text-gray-100 rounded-br-sm'
-                  : 'self-start bg-gradient-to-r from-neutral-700 to-neutral-600 text-gray-200 rounded-bl-sm'
+                  // Perubahan: Menggunakan warna aksen biru untuk pesan pengguna
+                  ? 'self-end bg-blue-600 text-white rounded-br-lg'
+                  : 'self-start bg-neutral-700 text-gray-200 rounded-bl-lg'
               }`}
             >
               {msg.text}
             </div>
           ))}
+          {/* Perubahan: Indikator loading yang lebih menarik */}
           {loading && (
-            <div className="self-start bg-neutral-700 text-gray-300 px-4 py-2 rounded-2xl animate-pulse">
-              Typing...
+            <div className="self-start flex items-center gap-2">
+              <div className="p-2 bg-neutral-700 rounded-full">
+                <Bot className="w-5 h-5 text-gray-300" />
+              </div>
+              <div className="bg-neutral-700 text-gray-300 px-5 py-3 rounded-2xl flex items-center gap-1">
+                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
+                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></span>
+                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-300"></span>
+              </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
-        <div className="flex items-center gap-3 border-t border-neutral-700 bg-neutral-900 px-4 py-3">
+        {/* Perubahan: Input area dengan desain lebih modern */}
+        <div className="flex items-center gap-3 border-t border-neutral-700 bg-neutral-900/50 backdrop-blur-sm px-4 py-3 rounded-b-2xl">
           <input
             type="text"
-            placeholder="Type your message..."
+            placeholder="Ketik pertanyaan Anda di sini..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            className="flex-1 bg-neutral-800 text-gray-100 rounded-xl border border-neutral-700 focus:border-gray-300 focus:outline-none px-4 py-2"
+            onKeyDown={(e) => e.key === 'Enter' && !loading && handleSend()}
+            className="flex-1 bg-neutral-800 text-gray-100 rounded-xl border border-neutral-700 focus:ring-2 focus:ring-blue-500 focus:outline-none px-4 py-3 transition-all duration-300"
           />
           <button
             onClick={handleSend}
-            disabled={loading}
-            className="bg-gray-300 hover:bg-white text-neutral-900 font-semibold px-4 py-2 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition"
+            disabled={loading || !input.trim()}
+            className="p-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-full disabled:bg-neutral-600 disabled:cursor-not-allowed transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {loading ? '...' : 'Send'}
+            <Send className="w-5 h-5" />
           </button>
         </div>
       </div>

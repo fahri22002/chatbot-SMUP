@@ -1,10 +1,10 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import Chatbot from '../chatbot/chatbot';
 
 export default function Home() {
-  const router = useRouter();
+  // const router = useRouter();
 
   return (
     <main className="max-w-screen flex items-center justify-center bg-background text-foreground p-2">

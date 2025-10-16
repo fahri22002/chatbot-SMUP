@@ -1,9 +1,9 @@
-import Chatbot from "./chatbot";
+import AdminDashboard from "./admin";
 
 export default function Home() {
   return (
     <main>
-      <Chatbot />
+      <AdminDashboard />
      
     </main>
   );
