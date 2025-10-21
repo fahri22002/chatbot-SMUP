@@ -1,38 +1,35 @@
 const bcrypt = require('bcrypt');
 const { Admin } = require('../models/adminModel');
+// Impor ini diperlukan untuk getChatHistory dan deleteOldChats
+const { Chat } = require('../models/chatModel');
+const { Message } = require('../models/messageModel');
 
 /**
- * @description Membuat akun admin baru
+ * @description Membuat akun admin baru (Hanya bisa oleh admin lain yang sudah login)
  */
 const createAccount = async (req, res) => {
   const { username, password } = req.body;
 
-  // Validasi input dasar
   if (!username || !password) {
     return res.status(400).json({ error: true, message: 'Username dan password diperlukan' });
   }
 
   try {
-    // 1. Cek apakah username sudah ada
     const existingAdmin = await Admin.findOne({ username });
     if (existingAdmin) {
       return res.status(409).json({ error: true, message: 'Username sudah digunakan' });
     }
 
-    // 2. Hash password sebelum disimpan
-    const salt = await bcrypt.genSalt(10); // Angka 10 adalah "salt rounds", standar yang baik
+    const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 3. Buat admin baru dengan password yang sudah di-hash
     const newAdmin = new Admin({
       username,
-      password: hashedPassword, // Simpan password yang sudah di-hash
+      password: hashedPassword,
     });
 
-    // 4. Simpan ke database
     await newAdmin.save();
 
-    // 5. Kirim respons sukses
     res.status(201).json({
       error: false,
       message: 'Akun berhasil dibuat',
@@ -60,19 +57,16 @@ const login = async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    // Cari admin berdasarkan username
     const admin = await Admin.findOne({ username });
     if (!admin) {
       return res.status(401).json({ error: true, message: 'Username atau password salah' });
     }
 
-    // Bandingkan password yang dikirim dengan yang di-hash di DB
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
       return res.status(401).json({ error: true, message: 'Username atau password salah' });
     }
 
-    // Set session
     req.session.adminId = admin._id;
     req.session.username = admin.username;
 
@@ -99,30 +93,50 @@ const login = async (req, res) => {
   }
 };
 
+/**
+ * @description Logout admin
+ */
+const logout = (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Logout error:', err);
+      return res.status(500).json({ error: true, message: 'Gagal logout' });
+    }
+    
+    res.clearCookie('connect.sid'); 
+    res.status(200).json({ error: false, message: 'Berhasil logout' });
+  });
+};
+
+/**
+ * @description Mendapatkan riwayat chat berdasarkan chatId
+ */
 const getChatHistory = async (req, res) => {
-  if(!req.session.adminId){
-    return res.status(404).json({ error: true, message: "login required" });
-  }
+    // Fungsi ini SUDAH SESUAI dan tidak perlu diubah.
     try {
-        const chatId = req.body.chatId;
+        const { chatId } = req.query; 
+
+        if (!chatId) {
+          return res.status(400).json({ error: true, message: "Parameter 'chatId' diperlukan" });
+        }
 
         const messages = await Message.aggregate([
           {
-            $match: { chatId: chatId }
+            $match: { chatId: chatId } // Mencocokkan String
           },
           {
             $lookup: {
-              from: "chat",
+              from: "chat", 
               let: { chatIdString: "$chatId" },
               pipeline: [
                 {
                   $addFields: {
-                    _idStr: { $toString: "$_id" }
+                    _idStr: { $toString: "$_id" } // Mengubah ObjectId -> String
                   }
                 },
                 {
                   $match: {
-                    $expr: { $eq: ["$_idStr", "$$chatIdString"] }
+                    $expr: { $eq: ["$_idStr", "$$chatIdString"] } // Membandingkan String vs String
                   }
                 }
               ],
@@ -156,9 +170,11 @@ const getChatHistory = async (req, res) => {
     }
 };
 
+/**
+ * @description Menghapus chat lama (status NONACTIVE & > 7 hari)
+ */
 const deleteOldChats = async (req, res) => {
   try {
-    // Hitung tanggal 7 hari yang lalu
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -174,22 +190,36 @@ const deleteOldChats = async (req, res) => {
       });
     }
 
-    // Ambil semua _id chat
-    const chatIds = oldChats.map(chat => chat._id);
+    // --- PENYESUAIAN DIMULAI DI SINI ---
 
-    // Hapus semua message yang memiliki chatId dari chat yang dihapus
-    await Message.deleteMany({ chatId: { $in: chatIds } });
+    // 1. Buat array berisi ObjectId untuk menghapus dari koleksi 'chat'
+    const chatObjectIds = oldChats.map(chat => chat._id);
 
-    // Hapus chat yang memenuhi kondisi
-    await Chat.deleteMany({ _id: { $in: chatIds } });
+    // 2. Buat array berisi String untuk menghapus dari koleksi 'message'
+    const chatStringIds = oldChats.map(chat => chat._id.toString());
+
+    // Hapus semua message yang memiliki chatId (String)
+    await Message.deleteMany({ chatId: { $in: chatStringIds } });
+
+    // Hapus chat yang memenuhi kondisi (menggunakan ObjectId)
+    await Chat.deleteMany({ _id: { $in: chatObjectIds } });
+    
+    // --- PENYESUAIAN SELESAI ---
 
     res.status(200).json({
-      message: `Berhasil menghapus ${chatIds.length} chat dan pesan terkait.`,
-      deletedChatIds: chatIds
+      message: `Berhasil menghapus ${chatObjectIds.length} chat dan pesan terkait.`,
+      deletedChatIds: chatStringIds // Kirim string ID agar mudah dibaca di JSON
     });
   } catch (error) {
     console.error('Error saat menghapus chat:', error);
     res.status(500).json({ error: 'Gagal menghapus chat lama' });
   }
 };
-module.exports = { login, createAccount };
+
+module.exports = { 
+  login, 
+  logout,
+  createAccount, 
+  getChatHistory, 
+  deleteOldChats 
+};

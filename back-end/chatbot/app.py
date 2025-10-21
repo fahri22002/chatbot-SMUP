@@ -1,12 +1,10 @@
+# app.py
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import scrapping as sc
-import rag
+import rag  # <-- Pastikan ini diimpor
 
 app = FastAPI()
-
-# Variabel global
-temp = 0
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,29 +16,35 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    global temp
-    temp += 1
-    return {"Hello": "World", "Temp": temp}
+    return {"Hello": "Ini adalah server AI untuk Chatbot Unpad"}
 
 @app.post("/reply")
 async def reply(req: Request):
-    global temp
-    temp += 1
-    data = await req.json()  # Ambil isi body JSON
-    message = data.get("message", "")  # Ambil key 'message' dari body
-    reply_text = "Jawab " + message
-    return {"Reply": reply_text, "Temp": temp}
+    data = await req.json()
+    message = data.get("message", "")
+    
+    # --- PERUBAHAN DI SINI ---
+    # Panggil fungsi RAG untuk mendapatkan jawaban
+    reply_text = rag.get_rag_response(message)
+    # -------------------------
+    
+    return {"Reply": reply_text}
 
 @app.get("/do-scrapping")
-def do_scrapping():
-    sc.mainscrapping()
-    return {"Status": "Succeed", "Work": "Scrapping", "Temp": temp}
+def do_scrapping_route(): # Ganti nama fungsi agar tidak bentrok
+    print("Menerima permintaan /do-scrapping...")
+    result = sc.mainscrapping() # Panggil fungsi dari scrapping.py
+    print(f"Scrapping selesai: {result}")
+    return {"Status": "Succeed", "Work": "Scrapping", "Detail": result}
 
 @app.get("/do-rag")
-def do_scrapping():
-    rag.mainrag()
-    return {"Status": "Succeed", "Work": "RAG", "Temp": temp}
+def do_rag_route(): # Ganti nama fungsi agar tidak bentrok
+    print("Menerima permintaan /do-rag...")
+    processed_chunks = rag.mainrag() # Panggil fungsi dari rag.py
+    print(f"RAG selesai: {processed_chunks} chunks diproses.")
+    return {"Status": "Succeed", "Work": "RAG", "ProcessedChunks": processed_chunks}
 
 if __name__ == "__main__":
     import uvicorn
+    # Jalankan di port 8080
     uvicorn.run(app, host="127.0.0.1", port=8080)
