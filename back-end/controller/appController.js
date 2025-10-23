@@ -12,9 +12,9 @@ const getChat = async (req, res) => {
   //   return res.status(404).json({ error: true, message: "login required" });
   // }
     try {
-        const chatId = req.session.chatId;
-
-        const messages = await Message.find({ chatId: req.session.chatId }).sort({ createdAt: -1 });
+        chatid = req.session.chatId;
+        console.log(chatid);
+        const messages = await Message.find({ chatId: chatid }).sort({ createdAt: -1 });
 
 
         if (messages.length === 0) {
@@ -36,6 +36,8 @@ const getChat = async (req, res) => {
 const postMsg = async (req, res) => {
   try {
     // Pastikan chat sudah dibuat
+    chatid = req.session.chatId;
+        console.log(chatid);
     if (!req.session.chatId) {
       return res.status(400).json({ 
         error: true,
@@ -158,6 +160,7 @@ const setChatNonActive = async (chatId) => {
 
     if (!updatedChat) {
       console.log(`⚠️ Chat ${chatId} tidak ditemukan`);
+      lastHeartbeat.delete(chatId);
       return null;
     }
     // Hapus dari Map
