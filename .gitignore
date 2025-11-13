@@ -45,3 +45,6 @@ Thumbs.db
 
 # TypeScript build (kalau pakai TS)
 *.tsbuildinfo
+
+#scrapping output
+doc/

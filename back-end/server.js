@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
@@ -7,58 +8,70 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 
 // Import routes
-// const adminRoutes = require('./routes/adminRoutes');
 const routes = require('./routes/routes');
 
 const app = express();
 
-// Middleware dasar
+// ========================
+// MIDDLEWARE DASAR
+// ========================
 app.use(cors({
-  origin: true, // atau ['http://localhost:3000'] kalau frontend ada
+  origin: true, // atau ['http://localhost:3000']
   credentials: true
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Koneksi ke MongoDB lokal
-// mongoose.connect('mongodb://127.0.0.1:27017/chatdb', {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true
-// }).then(() => console.log('✅ MongoDB connected'))
-//   .catch(err => console.error('❌ MongoDB connection error:', err));
+// ========================
+// KONEKSI MONGODB
+// ========================
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('✅ MongoDB connected'))
+.catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Konfigurasi session
+// ========================
+// KONFIGURASI SESSION
+// ========================
 app.use(session({
-  secret: 'supersecretkey', // ubah ke env variable untuk produksi
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-//   store: MongoStore.create({
-//     mongoUrl: 'mongodb://127.0.0.1:27017/chatdb',
-//     collectionName: 'sessions',
-//   }),
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: 'sessions',
+    ttl: 14 * 24 * 60 * 60 // 14 hari
+  }),
   cookie: {
-    maxAge: 14 * 24 * 60 * 60 * 1000, // 14 hari
-    secure: false, // true kalau pakai HTTPS
+    maxAge: 14 * 24 * 60 * 60 * 1000,
+    secure: false, // ubah ke true kalau pakai HTTPS
     httpOnly: true,
     sameSite: 'lax'
   }
 }));
 
-// Routes
-// app.use('/api/admin', adminRoutes);
+// ========================
+// ROUTES
+// ========================
 app.use('/api', routes);
 
-// Root
 app.get('/', (req, res) => {
   res.send('Server running...');
 });
 
-// Endpoint di Express yang memanggil FastAPI
+// ========================
+// HEARTBEAT
+// ========================
+require('./controller/appController');
+
+// ========================
+// EXPRESS KE FASTAPI
+// ========================
 app.get('/get-message', async (req, res) => {
   try {
-    const response = await axios.get('http://127.0.0.1:8080/');
-    
-    // Kirimkan hasil dari FastAPI ke client
+    const response = await axios.get(process.env.FASTAPI_URL);
     res.json({
       from: 'FastAPI',
       data: response.data
@@ -69,6 +82,8 @@ app.get('/get-message', async (req, res) => {
   }
 });
 
-// Jalankan server
+// ========================
+// START SERVER
+// ========================
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
