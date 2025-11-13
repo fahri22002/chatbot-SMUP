@@ -17,7 +17,7 @@ app.add_middleware(
 )
 
 @app.get("/")
-def read_root():
+async def read_root():
     global temp
     temp += 1
     return {"Hello": "World", "Temp": temp}
@@ -28,16 +28,16 @@ async def reply(req: Request):
     temp += 1
     data = await req.json()  # Ambil isi body JSON
     message = data.get("message", "")  # Ambil key 'message' dari body
-    reply_text = "Jawab " + message
+    reply_text = rag.mainrag(message)
     return {"Reply": reply_text, "Temp": temp}
 
 @app.get("/do-scrapping")
-def do_scrapping():
+async def do_scrapping():
     sc.mainscrapping()
     return {"Status": "Succeed", "Work": "Scrapping", "Temp": temp}
 
 @app.get("/do-rag")
-def do_scrapping():
+async def do_scrapping():
     rag.mainrag()
     return {"Status": "Succeed", "Work": "RAG", "Temp": temp}
 

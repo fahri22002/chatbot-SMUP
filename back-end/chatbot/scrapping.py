@@ -128,7 +128,8 @@ def crawl(url, depth=0, max_depth=2):
             full_url = urljoin(url, link["href"])
             if is_valid_url(full_url) and full_url not in visited:
                 if "fakultas" in full_url or "program-studi" in full_url:
-                    max_depth = depth+2
+                # if full_url.rstrip("/").endswith(("fakultas", "program-studi")):
+                    max_depth = depth+1
                 time.sleep(1)
                 crawl(full_url, depth + 1, max_depth)
 

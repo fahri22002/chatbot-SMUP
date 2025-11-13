@@ -117,4 +117,5 @@ def mainrag(input):
         question = input
         if question.lower() == "berhenti":
             break
-        answer_question(question, indexed_docs, history, k=3)
+        return answer_question(question, indexed_docs, history, k=3)
+    return "break"
