@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from pathlib import Path
 from collections import deque  # untuk menyimpan history percakapan
 
+documents = None
+indexed_docs = None
 # 1. Load environment variables
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -102,13 +104,15 @@ Pertanyaan: {question}
 
 # 8. Main execution
 def mainrag(input):
-    documents = load_documents()
+    if documents is None:
+        documents = load_documents()
 
     total_bytes = sum(count_bytes(doc["text"]) for doc in documents)
     print(f"\n=== Total ukuran semua file di doc/pages ===")
     print(f"{total_bytes} bytes")
 
-    indexed_docs = index_documents(documents)
+    if indexed_docs is None:
+        indexed_docs = index_documents(documents)
 
     # deque dengan batas 5 percakapan terakhir
     history = deque(maxlen=5)
