@@ -46,6 +46,10 @@ def remove_duplicate_blocks_auto(lines, max_block=20):
             i += 1
             continue
 
+        if i > 0 and lines[i] == lines[i - 1]:
+            i += 1
+            continue
+
         # Cari ukuran block yang mungkin (3 - 20 baris)
         found_duplicate = False
         for block_size in range(3, max_block + 1):
@@ -179,11 +183,14 @@ def crawl(url, depth=0, max_depth=2):
         for link in links:
             full_url = urljoin(url, link["href"])
             if is_valid_url(full_url) and full_url not in visited:
-                # if "fakultas" in full_url or "program-studi" in full_url:
-                if full_url.rstrip("/").endswith(("fakultas", "program-studi")):
-                    max_depth = depth+1
+                next_depth_limit = max_depth
+                if "fakultas" in full_url or "program-studi" in full_url:
+                # if full_url.rstrip("/").endswith(("fakultas", "program-studi")):
+                    next_depth_limit = max_depth+1
+                if "berita" in full_url:
+                    next_depth_limit = depth
                 time.sleep(1)
-                crawl(full_url, depth + 1, max_depth)
+                crawl(full_url, depth + 1, next_depth_limit )
 
     except Exception as e:
         print(f"⚠️ Tidak bisa lanjut dari {url}: {e}")

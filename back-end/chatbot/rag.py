@@ -76,6 +76,7 @@ Konteks dokumen:
 Pertanyaan: {question}
 """
     # Hitung ukuran total prompt dalam byte
+    print(history_text)
     byte_size = count_bytes(prompt)
     print(f"\n=== Ukuran prompt (RAG context + history + question) ===")
     print(f"{byte_size} bytes")
