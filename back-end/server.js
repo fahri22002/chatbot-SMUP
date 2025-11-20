@@ -10,6 +10,7 @@ const axios = require('axios');
 // Import routes
 const routes = require('./routes/routes');
 
+
 const app = express();
 
 // ========================
@@ -56,6 +57,7 @@ app.use(session({
 // ROUTES
 // ========================
 app.use('/api', routes);
+app.use('/api/knowledge', require('./routes/knowledgeRoutes.js'));
 
 app.get('/', (req, res) => {
   res.send('Server running...');
