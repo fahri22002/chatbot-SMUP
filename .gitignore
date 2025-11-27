@@ -50,3 +50,4 @@ Thumbs.db
 doc/
 public/
 __pycache__/
+chroma_db/
