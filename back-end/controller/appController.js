@@ -254,6 +254,41 @@ const createChat = async (req, res) => {
   }
 };
 
+const deleteChatAndAttachments = async (chatId) => {
+  try {
+    // Ambil semua pesan untuk chat ini
+    const messages = await Message.find({ chatId });
+
+    for (const msg of messages) {
+      if (msg.attachment) {
+        // Path file di disk
+        const filePath = path.join(__dirname, "..", "public", "upload", msg.attachment);
+
+        // Jika file ada, hapus
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          console.log(`File dihapus: ${filePath}`);
+        } else {
+          console.log(`File tidak ditemukan, skip: ${filePath}`);
+        }
+      }
+    }
+
+    // Hapus semua message dari DB
+    await Message.deleteMany({ chatId });
+
+    // Hapus chat
+    await Chat.findByIdAndDelete(chatId);
+
+    console.log(`Chat ${chatId} berhasil dihapus beserta semua attachment.`);
+    return true;
+
+  } catch (err) {
+    console.error("Gagal menghapus chat:", err);
+    return false;
+  }
+};
+
 const setChatNonActive = async (chatId, consent) => {
   try {
     // Cek apakah chat dengan chatId ini masih aktif
@@ -284,13 +319,11 @@ const setChatNonActive = async (chatId, consent) => {
     console.log(consent);
     console.log(consent=='true');
     console.log(consent=='false');
-    if (consent=='false') {
-      const result = await Message.deleteMany({ chatId: chatId });
-      const result1 = await Chat.findByIdAndDelete(chatId);
+    if (consent!='true') {
+      await deleteChatAndAttachments(chatId);
     }
     
 
-    console.log(`✅ Chat ${chatId} berhasil diubah menjadi NONACTIVE dan karena consen = ${consent}, maka chat ${(consent)?'tidak dihapus':'dihapus'}`);
     return updatedChat;
   } catch (error) {
     console.error(`❌ Gagal mengubah status chat ${chatId}:`, error);
