@@ -2,6 +2,8 @@ const { Chat } = require('../models/chatModel');
 const { Message } = require('../models/messageModel');
 const { Admin } = require('../models/adminModel');
 const axios = require('axios');
+const path = require('path');
+const fs = require('fs');
 // const { admin } = require("../auth/middleware.js");
 
 console.log("🔥 appController loaded — siap jalan!");
@@ -62,19 +64,34 @@ const postMsg = async (req, res) => {
       });
     }
 
-    const { msg, attachment } = req.body;
-
+    // Ambil data text + file
+    const { msg } = req.body;
+    const file = req.file;
     
 
     // Buat pesan baru
     const newMessage = new Message({
       chatId: req.session.chatId,
       msg,
-      attachment,
+      attachment: null,
       sender: "USER"
     });
 
-    
+    await newMessage.save();  // butuh id untuk rename file
+    const messageId = newMessage._id.toString();
+
+    if (file) {
+      const ext = path.extname(file.originalname);
+      const newFilename = `${messageId}${ext}`;
+      const oldPath = file.path;
+      const newPath = path.join('public/upload/', newFilename);
+
+      fs.renameSync(oldPath, newPath);
+
+      // Update message dengan filename final
+      newMessage.attachment = newFilename;
+      await newMessage.save();
+    }
 
     
     const response = await axios.post('http://127.0.0.1:8080/reply', {
@@ -87,18 +104,20 @@ const postMsg = async (req, res) => {
       attachment: null,
       sender: "SELF"
     });
+
+    await newReply.save();
     
     
+    // 5. Response ke FE
     res.status(201).json({
       error: false,
       status: 'Pesan berhasil dikirim.',
+      messageId: messageId,
       message: msg,
+      attachment: newMessage.attachment || null,
       reply: replyText
     });
     
-    // Simpan ke database
-    await newMessage.save();
-    await newReply.save();
   } catch (error) {
     console.error('Error saat mengirim pesan:', error);
     res.status(500).json({
@@ -109,7 +128,7 @@ const postMsg = async (req, res) => {
 };
 
 
-const createChat = async (req, res) => {
+const createChatwithConsent = async (req, res) => {
   try {
     // --- (MULAI PERBAIKAN CAPTCHA & CONSENT) ---
 
@@ -184,6 +203,29 @@ const createChat = async (req, res) => {
     if (error.response) {
       console.error('Error data from Google:', error.response.data);
     }
+    res.status(500).json({ error: 'Gagal membuat chat' });
+  }
+};
+
+const createChat = async (req, res) => {
+  try {
+    if (req.session.chatId){
+      setChatNonActive(req.session.chatId);
+      delete req.session.chatId;
+    }
+    const status  = "ACTIVE";
+
+    // Buat dan simpan chat
+    const newChat = new Chat({ status });
+    await newChat.save();
+    req.session.chatId = newChat._id;
+
+    res.status(201).json({
+      message: 'Chat berhasil dibuat',
+      data: newChat
+    });
+  } catch (error) {
+    console.error('Error saat membuat chat:', error);
     res.status(500).json({ error: 'Gagal membuat chat' });
   }
 };
@@ -326,4 +368,4 @@ setInterval(async () => {
 //       message: 'berhasil consent'
 //     });
 // };
-module.exports = { getChat, createChat, nonactiveChat, postMsg, setInterval, postHeartbeat };
+module.exports = { getChat, createChat, nonactiveChat, postMsg, setInterval, postHeartbeat, createChatwithConsent };
