@@ -22,8 +22,32 @@ const getChat = async (req, res) => {
         if (messages.length === 0) {
             return res.status(404).json({ error: true, message: "Chat history tidak ditemukan" });
         }
+        // Proses lampiran (attachment)
+    const processedMessages = messages.map(msg => {
+      if (!msg.attachment) {
+        return {
+          ...msg.toObject(),
+          attachmentUrl: null
+        };
+      }
 
-        res.status(200).json({ error: false, data: messages });
+      const filePath = path.join(__dirname, "../public/upload", msg.attachment);
+
+      // Jika file benar-benar ada
+      if (fs.existsSync(filePath)) {
+        return {
+          ...msg.toObject(),
+          attachmentUrl: `http://localhost:5000/upload/${msg.attachment}`
+        };
+      } else {
+        return {
+          ...msg.toObject(),
+          attachmentUrl: null
+        };
+      }
+    });
+
+        res.status(200).json({ error: false, data: processedMessages });
     } catch (error) {
         res.status(500).json({
             error: true,

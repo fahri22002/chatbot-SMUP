@@ -6,6 +6,7 @@ const MongoStore = require('connect-mongo');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const axios = require('axios');
+const path = require("path");
 
 // Import routes
 const routes = require('./routes/routes');
@@ -54,6 +55,11 @@ app.use(session({
 }));
 
 // ========================
+// KONFIGURASI FILE
+// ========================
+app.use("/upload", express.static(path.join(__dirname, "public/upload")))
+
+// ========================
 // ROUTES
 // ========================
 app.use('/api', routes);
@@ -89,3 +95,5 @@ app.get('/get-message', async (req, res) => {
 // ========================
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+
+
