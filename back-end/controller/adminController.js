@@ -1,11 +1,12 @@
 const bcrypt = require('bcrypt');
 const { Admin } = require('../models/adminModel');
-// Impor ini diperlukan untuk getChatHistory dan deleteOldChats
 const { Chat } = require('../models/chatModel');
 const { Message } = require('../models/messageModel');
+const path = require('path'); // Tambahan: Import Path
+const fs = require('fs');     // Tambahan: Import FS
 
 /**
- * @description Membuat akun admin baru (Hanya bisa oleh admin lain yang sudah login)
+ * @description Membuat akun admin baru
  */
 const createAccount = async (req, res) => {
   const { username, password } = req.body;
@@ -51,7 +52,7 @@ const createAccount = async (req, res) => {
 
 
 /**
- * @description Login untuk admin yang sudah ada
+ * @description Login admin
  */
 const login = async (req, res) => {
   const { username, password } = req.body;
@@ -110,10 +111,9 @@ const logout = (req, res) => {
 
 const getAllChats = async (req, res) => {
   try {
-    // Cari semua chat, pilih field yang penting, dan urutkan dari yang terbaru
     const chats = await Chat.find({})
-      .select('_id status createdAt') // Ambil ID, status, dan waktu dibuat
-      .sort({ createdAt: -1 }); // Urutkan dari yang paling baru
+      .select('_id status createdAt') 
+      .sort({ createdAt: -1 }); 
 
     res.status(200).json({ error: false, data: chats });
   } catch (error) {
@@ -123,16 +123,27 @@ const getAllChats = async (req, res) => {
 
 const deleteChatById = async (req, res) => {
   try {
-    const { id } = req.params; // Mengambil ID dari parameter URL
+    const { id } = req.params; 
 
-    // 1. Hapus dokumen chat dari koleksi 'chat'
+    // 1. Ambil pesan untuk menghapus file attachment fisik jika perlu (Opsional tapi disarankan)
+    const messages = await Message.find({ chatId: id });
+    for (const msg of messages) {
+       if (msg.attachment) {
+         const filePath = path.join(__dirname, "../public/upload", msg.attachment);
+         if (fs.existsSync(filePath)) {
+           fs.unlinkSync(filePath);
+         }
+       }
+    }
+
+    // 2. Hapus dokumen chat
     const deletedChat = await Chat.findByIdAndDelete(id);
 
     if (!deletedChat) {
       return res.status(404).json({ error: true, message: 'Chat tidak ditemukan' });
     }
 
-    // 2. Hapus semua pesan yang terkait dengan chat tersebut dari koleksi 'message'
+    // 3. Hapus semua pesan di DB
     await Message.deleteMany({ chatId: id.toString() });
 
     res.status(200).json({ error: false, message: `Chat ID ${id} dan semua pesannya berhasil dihapus.` });
@@ -143,10 +154,9 @@ const deleteChatById = async (req, res) => {
 };
 
 /**
- * @description Mendapatkan riwayat chat berdasarkan chatId
+ * @description Mendapatkan riwayat chat (FIXED: Sekarang menyertakan Attachment)
  */
 const getChatHistory = async (req, res) => {
-    // Fungsi ini SUDAH SESUAI dan tidak perlu diubah.
     try {
         const { chatId } = req.query; 
 
@@ -156,7 +166,7 @@ const getChatHistory = async (req, res) => {
 
         const messages = await Message.aggregate([
           {
-            $match: { chatId: chatId } // Mencocokkan String
+            $match: { chatId: chatId } 
           },
           {
             $lookup: {
@@ -165,12 +175,12 @@ const getChatHistory = async (req, res) => {
               pipeline: [
                 {
                   $addFields: {
-                    _idStr: { $toString: "$_id" } // Mengubah ObjectId -> String
+                    _idStr: { $toString: "$_id" } 
                   }
                 },
                 {
                   $match: {
-                    $expr: { $eq: ["$_idStr", "$$chatIdString"] } // Membandingkan String vs String
+                    $expr: { $eq: ["$_idStr", "$$chatIdString"] }
                   }
                 }
               ],
@@ -178,24 +188,51 @@ const getChatHistory = async (req, res) => {
             }
           },
           { $unwind: "$chatHistory" },
-          { $sort: { createdAt: -1 } },
+          { $sort: { createdAt: 1 } }, // Ubah ke 1 (Ascending) agar chat urut dari lama ke baru
           {
             $project: {
               msg: 1,
               createdAt: 1,
               chatId: 1,
               sender: 1,
+              attachment: 1, // <--- WAJIB ADA: Agar field attachment terambil
               chatAt: "$chatHistory.createdAt"
             }
           }
         ]);
 
-
         if (messages.length === 0) {
             return res.status(404).json({ error: true, message: "Chat history tidak ditemukan" });
         }
 
-        res.status(200).json({ error: false, data: messages });
+        // --- PROSES ATTACHMENT URL ---
+        const processedMessages = messages.map(msg => {
+          if (!msg.attachment) {
+            return {
+              ...msg,
+              attachmentUrl: null
+            };
+          }
+
+          // Cek keberadaan file
+          const filePath = path.join(__dirname, "../public/upload", msg.attachment);
+          
+          if (fs.existsSync(filePath)) {
+            // Jika file ada, buat URL
+            return {
+              ...msg,
+              attachmentUrl: `http://localhost:5000/upload/${msg.attachment}`
+            };
+          } else {
+            // Jika file db ada tapi fisik tidak ada
+            return {
+              ...msg,
+              attachmentUrl: null
+            };
+          }
+        });
+
+        res.status(200).json({ error: false, data: processedMessages });
     } catch (error) {
         res.status(500).json({
             error: true,
@@ -209,7 +246,6 @@ const deleteOldChats = async (req, res) => {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    // Ambil semua chat yang memenuhi kondisi untuk dihapus
     const oldChats = await Chat.find({
       status: "NONACTIVE",
       updatedAt: { $lte: sevenDaysAgo }
@@ -221,16 +257,21 @@ const deleteOldChats = async (req, res) => {
       });
     }
 
-    // Buat array berisi ObjectId untuk menghapus dari koleksi 'chat'
     const chatObjectIds = oldChats.map(chat => chat._id);
-
-    // Buat array berisi String untuk menghapus dari koleksi 'message'
     const chatStringIds = oldChats.map(chat => chat._id.toString());
 
-    // Hapus semua message yang memiliki chatId (String)
-    await Message.deleteMany({ chatId: { $in: chatStringIds } });
+    // Hapus attachment fisik dulu
+    const messagesToDelete = await Message.find({ chatId: { $in: chatStringIds } });
+    for (const msg of messagesToDelete) {
+       if (msg.attachment) {
+         const filePath = path.join(__dirname, "../public/upload", msg.attachment);
+         if (fs.existsSync(filePath)) {
+           fs.unlinkSync(filePath);
+         }
+       }
+    }
 
-    // Hapus chat yang memenuhi kondisi (menggunakan ObjectId)
+    await Message.deleteMany({ chatId: { $in: chatStringIds } });
     await Chat.deleteMany({ _id: { $in: chatObjectIds } });
     
     res.status(200).json({
