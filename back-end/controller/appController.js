@@ -7,6 +7,7 @@ const fs = require('fs');
 // const { admin } = require("../auth/middleware.js");
 
 console.log("🔥 appController loaded — siap jalan!");
+const consentList = new Map();
 
 
 const getChat = async (req, res) => {
@@ -215,6 +216,7 @@ const createChatwithConsent = async (req, res) => {
     req.session.chatId = newChat._id;
     req.session.consent = consent || 'false'; // <-- PERUBAHAN DI SINI
 
+    consentList.set(req.session.chatId, req.session.consent);
     console.log(`Sesi chat ${newChat._id} dibuat dengan consent=${req.session.consent}`);
 
     res.status(201).json({
@@ -295,6 +297,7 @@ const setChatNonActive = async (chatId, consent) => {
     const chat = await Chat.findById(chatId);
 
     if (!chat) {
+      lastHeartbeat.delete(chatId);
       console.log('Chat tidak ditemukan.')
       return null;
     }
@@ -303,6 +306,7 @@ const setChatNonActive = async (chatId, consent) => {
       console.log('Chat sudah tidak aktif.');
       return null;
     }
+    console.log(`[LOG]: NONACTIVE : ${chatId}`);
     const updatedChat = await Chat.findByIdAndUpdate(
       chatId,
       { status: "NONACTIVE" },
@@ -313,6 +317,7 @@ const setChatNonActive = async (chatId, consent) => {
       console.log(`⚠️ Chat ${chatId} tidak ditemukan`);
       return null;
     }
+    
     // Hapus dari Map
     lastHeartbeat.delete(chatId);
     // Validasi minimal isi pesan
@@ -375,20 +380,22 @@ const postHeartbeat = async (req, res) => {
 // Interval pengecekan tiap 1 menit
 setInterval(async () => {
   const now = Date.now();
-  const TIMEOUT = 5 * 60 * 1000; // 5 menit
+  const TIMEOUT = 20 * 1000; // 5 menit
+  console.log("[LOG]: Cek heartbeat!");
+  console.log("[LOG]: online "+[...lastHeartbeat.keys()]);
 
   for (const [chatId, lastTime] of lastHeartbeat.entries()) {
     if (now - lastTime > TIMEOUT) {
-      console.log(`⚠️ Chat ${chatId} tidak aktif selama >5 menit. Menonaktifkan...`);
+      console.log(`⚠️ Chat ${chatId} tidak aktif selama >5 menit dengan consent=${consentList.get(chatId)}. Menonaktifkan...`);
 
       try {
-        setChatNonActive(chatId, 'true');//sementara
+        setChatNonActive(chatId, consentList.get(chatId));//sementara
       } catch (err) {
         console.error(`❌ Gagal menonaktifkan chat ${chatId}:`, err.message);
       }
     }
   }
-}, 2 * 60 * 1000); // periksa setiap 1 menit
+}, 20 * 1000); // periksa setiap 1 menit
 
 // const postConsent = async (req, res) => {
 //   if (!req.session.chatId) {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { startHeartbeat } from "../../utils/heartbeat";
 import ReCAPTCHA from 'react-google-recaptcha';
 import { Send, Bot, Loader2 } from 'lucide-react';
 import { useTheme } from 'next-themes';
@@ -65,6 +66,7 @@ export default function Chatbot() {
 
   useEffect(() => {
     setUserConsent(null);
+    
     setShowConsentModal(true);
   }, []);
 
@@ -143,6 +145,9 @@ export default function Chatbot() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  useEffect(() => {
+    startHeartbeat();
+  }, []);
   return (
     <section className='min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-950 p-4 font-sans relative'>
       {/* Modal Persetujuan */}
