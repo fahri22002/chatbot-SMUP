@@ -1,4 +1,4 @@
-// Admin/admin.tsx
+// app/Admin/admin.tsx
 'use client';
 import { useState, useEffect } from 'react';
 import {
@@ -12,45 +12,55 @@ import {
   UserPlus,
   DatabaseZap,
   ChevronsLeft,
+  ImageIcon, // Tambahan: Ikon untuk attachment
 } from 'lucide-react';
+import Image from 'next/image'; // Tambahan: Komponen Image Next.js
 import KnowledgeView from './knowledge-view';
 import CreateAdminView from './create-admin-view';
-
-// Impor toast (pastikan sudah ada)
 import { toast } from 'sonner';
 
-// ... (Interface Anda tetap sama) ...
+// --- INTERFACES ---
 interface ChatSession {
   _id: string;
   status: string;
   createdAt: string;
 }
+
+// Update Interface Message untuk menyertakan attachmentUrl
 interface Message {
   sender: 'user' | 'bot';
   msg: string;
   createdAt: string;
+  attachmentUrl?: string | null; // Field baru untuk URL gambar
 }
+
+// Update Interface BackendMessage (sesuai respon API)
 interface BackendMessage {
   sender: 'USER' | 'BOT';
   msg: string;
   createdAt: string;
+  attachmentUrl?: string | null; // Field baru dari backend
 }
+
 interface SelectedConversation {
   _id: string;
   status: string;
   messages: Message[];
 }
+
 interface ChatListResponse {
   data: ChatSession[];
 }
+
 interface ChatHistoryResponse {
   data: BackendMessage[];
 }
+
 interface DeleteOldChatsResponse {
   message: string;
 }
-type ActiveView = 'history' | 'knowledge' | 'createAdmin';
 
+type ActiveView = 'history' | 'knowledge' | 'createAdmin';
 
 // --- KOMPONEN Sidebar ---
 const AdminSidebar = ({
@@ -142,7 +152,6 @@ const AdminSidebar = ({
   );
 };
 
-
 // --- KOMPONEN Tampilan History Chat ---
 const ChatHistoryView = () => {
   const [chatList, setChatList] = useState<ChatSession[]>([]);
@@ -153,7 +162,7 @@ const ChatHistoryView = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // ... (fetchChatList & handleSelectConversation tetap sama) ...
+  // Fetch daftar chat
   const fetchChatList = async () => {
     try {
       setListLoading(true);
@@ -177,9 +186,12 @@ const ChatHistoryView = () => {
       setListLoading(false);
     }
   };
+
   useEffect(() => {
     fetchChatList();
   }, []);
+
+  // Handle pilih percakapan (Fetch detail chat history)
   const handleSelectConversation = async (chatId: string) => {
     if (selectedConversation?._id === chatId) return;
     try {
@@ -191,13 +203,17 @@ const ChatHistoryView = () => {
       );
       if (!res.ok) throw new Error('Gagal mengambil riwayat chat.');
       const data: ChatHistoryResponse = await res.json();
+      
+      // Transform data backend ke format frontend
       const transformedMessages: Message[] = data.data.map(
         (msg: BackendMessage): Message => ({
           msg: msg.msg,
           createdAt: msg.createdAt,
           sender: msg.sender === 'USER' ? 'user' : 'bot',
+          attachmentUrl: msg.attachmentUrl, // PENTING: Ambil URL gambar
         })
       );
+
       const currentChat = chatList.find((chat) => chat._id === chatId);
       setSelectedConversation({
         _id: chatId,
@@ -215,7 +231,7 @@ const ChatHistoryView = () => {
     }
   };
 
-  // 1. Logika untuk menghapus SATU chat dipindah ke fungsi sendiri
+  // Fungsi hapus satu chat
   const executeDeleteChat = async (id: string) => {
     try {
       const res = await fetch(`http://localhost:5000/api/admin/chats/${id}`, {
@@ -237,25 +253,22 @@ const ChatHistoryView = () => {
     }
   };
 
-  // 2. handleDeleteChat sekarang memunculkan TOAST KONFIRMASI
   const handleDeleteChat = async (id: string) => {
     toast.warning('Konfirmasi Hapus', {
       description: 'Apakah Anda yakin ingin menghapus percakapan ini secara permanen?',
       action: {
         label: 'Ya, Hapus',
-        onClick: () => executeDeleteChat(id), // Memanggil fungsi eksekusi
+        onClick: () => executeDeleteChat(id),
       },
       cancel: {
         label: 'Batal',
-        // --- PERBAIKAN DI SINI ---
         onClick: () => {},
-        // -------------------------
       },
-      duration: 10000, // Beri waktu 10 detik sebelum hilang
+      duration: 10000,
     });
   };
 
-  // 3. Logika untuk menghapus CHAT LAMA dipindah ke fungsi sendiri
+  // Fungsi hapus chat lama
   const executeDeleteOldChats = async () => {
     try {
       const res = await fetch(
@@ -270,7 +283,7 @@ const ChatHistoryView = () => {
 
       const result: DeleteOldChatsResponse = await res.json();
       toast.success(result.message);
-      fetchChatList(); // Refresh list
+      fetchChatList();
     } catch (err) {
       if (err instanceof Error) {
         toast.error(`Error: ${err.message}`);
@@ -280,21 +293,18 @@ const ChatHistoryView = () => {
     }
   };
 
-  // 4. handleDeleteOldChats sekarang memunculkan TOAST KONFIRMASI
   const handleDeleteOldChats = async () => {
     toast.warning('Konfirmasi Hapus', {
       description: 'Apakah Anda yakin ingin menghapus semua chat lama (NONACTIVE > 7 hari)? Tindakan ini tidak dapat dibatalkan.',
       action: {
         label: 'Ya, Hapus Semua',
-        onClick: () => executeDeleteOldChats(), // Memanggil fungsi eksekusi
+        onClick: () => executeDeleteOldChats(),
       },
       cancel: {
         label: 'Batal',
-        // --- PERBAIKAN DI SINI ---
         onClick: () => {},
-        // -------------------------
       },
-      duration: 10000, // Beri waktu 10 detik sebelum hilang
+      duration: 10000,
     });
   };
 
@@ -315,7 +325,7 @@ const ChatHistoryView = () => {
           </p>
         </div>
         <button
-          onClick={handleDeleteOldChats} // Tombol ini sekarang memanggil toast
+          onClick={handleDeleteOldChats}
           className='flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded-lg'
         >
           <Trash2 className='w-5 h-5' />
@@ -325,7 +335,7 @@ const ChatHistoryView = () => {
 
       {/* Chat History Section */}
       <section className='grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1'>
-        {/* List */}
+        {/* List Panel */}
         <div className='lg:col-span-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg h-[600px] flex flex-col'>
           <div className='p-4 border-b border-gray-200 dark:border-gray-700'>
             <h2 className='text-lg font-semibold flex items-center mb-4 gap-2 text-gray-900 dark:text-white'>
@@ -377,7 +387,7 @@ const ChatHistoryView = () => {
           </div>
         </div>
 
-        {/* Detail */}
+        {/* Detail Panel */}
         <div className='lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg h-[600px] flex flex-col'>
           {detailLoading ? (
             <div className='flex justify-center items-center h-full text-gray-500'>
@@ -395,7 +405,7 @@ const ChatHistoryView = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => handleDeleteChat(selectedConversation._id)} // Tombol ini juga sekarang memanggil toast
+                  onClick={() => handleDeleteChat(selectedConversation._id)}
                   className='flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-2 rounded-lg'
                 >
                   <Trash2 className='w-4 h-4' />
@@ -426,13 +436,51 @@ const ChatHistoryView = () => {
                       )}
                     </div>
                     <div
-                      className={`px-4 py-2 rounded-lg shadow-sm ${
-                        msg.sender === 'user'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200'
+                      className={`flex flex-col gap-2 ${
+                        msg.sender === 'user' ? 'items-end' : 'items-start'
                       }`}
                     >
-                      <p>{msg.msg}</p>
+                      {/* --- START FITUR TAMPIL GAMBAR --- */}
+                      {msg.attachmentUrl && (
+                        <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 mb-1">
+                          <a 
+                            href={msg.attachmentUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="block"
+                          >
+                             <Image 
+                               src={msg.attachmentUrl} 
+                               alt="Attachment Gambar" 
+                               width={0}
+                               height={0}
+                               sizes="100vw"
+                               className="w-full max-w-[200px] h-auto rounded-md hover:opacity-90 transition-opacity"
+                               unoptimized // Agar bisa load gambar dari localhost tanpa config
+                             />
+                          </a>
+                          <div className="flex items-center gap-1 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                             <ImageIcon className="w-3 h-3" /> 
+                             <span>Attachment</span>
+                          </div>
+                        </div>
+                      )}
+                      {/* --- END FITUR TAMPIL GAMBAR --- */}
+
+                      <div
+                        className={`px-4 py-2 rounded-lg shadow-sm ${
+                          msg.sender === 'user'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200'
+                        }`}
+                      >
+                        <p>{msg.msg}</p>
+                      </div>
+                      
+                      {/* Timestamp kecil */}
+                      <span className="text-[10px] text-gray-400 opacity-70">
+                         {new Date(msg.createdAt).toLocaleTimeString()}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -453,7 +501,6 @@ const ChatHistoryView = () => {
     </div>
   );
 };
-
 
 // --- KOMPONEN UTAMA: AdminDashboard ---
 export default function AdminDashboard() {
