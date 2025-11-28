@@ -380,7 +380,7 @@ const postHeartbeat = async (req, res) => {
 // Interval pengecekan tiap 1 menit
 setInterval(async () => {
   const now = Date.now();
-  const TIMEOUT = 20 * 1000; // 5 menit
+  const TIMEOUT = 5 * 60 * 1000; // 5 menit
   console.log("[LOG]: Cek heartbeat!");
   console.log("[LOG]: online "+[...lastHeartbeat.keys()]);
 
@@ -395,7 +395,7 @@ setInterval(async () => {
       }
     }
   }
-}, 20 * 1000); // periksa setiap 1 menit
+}, 2 * 60 * 1000); // periksa setiap 2 menit
 
 // const postConsent = async (req, res) => {
 //   if (!req.session.chatId) {

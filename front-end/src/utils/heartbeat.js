@@ -5,7 +5,7 @@ export function startHeartbeat() {
   // Kirim setiap 2 menit (120.000 ms)
   setInterval(() => {
     sendHeartbeat();
-  }, 1000*10);
+  }, 1000*60*4);
 }
 
 async function sendHeartbeat() {
