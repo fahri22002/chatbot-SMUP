@@ -384,7 +384,7 @@ export default function Chatbot() {
 
               <a
                 // Ganti nomor WA di sini
-                href='https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20ingin%20bertanya%20lebih%20lanjut%20mengenai...'
+                href='https://api.whatsapp.com/send/?phone=%2B6281122301410&text&type=phone_number&app_absent=0'
                 target='_blank'
                 rel='noopener noreferrer'
                 className='whitespace-nowrap px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 shadow-md'
