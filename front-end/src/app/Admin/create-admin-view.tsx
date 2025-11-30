@@ -84,7 +84,7 @@ export default function CreateAdminView({ onBack }: CreateAdminViewProps) {
 
   // ... (Bagian return <div...> dari CreateAdminView tetap sama) ...
   return (
-    <div className='bg-gray-50 dark:bg-gray-950 min-h-screen text-gray-900 dark:text-gray-200 font-sans p-4 sm:p-6 lg:p-8'>
+    <div className='bg-gray-50 dark:bg-black min-h-screen text-gray-900 dark:text-gray-200 font-sans p-4 sm:p-6 lg:p-8'>
       <div className='max-w-7xl mx-auto'>
         <header className='mb-8 flex justify-between items-start'>
           <div>

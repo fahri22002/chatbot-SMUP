@@ -540,7 +540,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className='flex h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-200 font-sans'>
+   <div className='flex h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-200 font-sans'>
       <AdminSidebar
         activeView={activeView}
         onNavClick={setActiveView}
