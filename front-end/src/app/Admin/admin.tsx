@@ -12,12 +12,13 @@ import {
   UserPlus,
   DatabaseZap,
   ChevronsLeft,
-  ImageIcon, // Tambahan: Ikon untuk attachment
+  ImageIcon,
 } from 'lucide-react';
-import Image from 'next/image'; // Tambahan: Komponen Image Next.js
+import Image from 'next/image';
 import KnowledgeView from './knowledge-view';
 import CreateAdminView from './create-admin-view';
 import { toast } from 'sonner';
+import RagView from './RAG-view'; // Pastikan file ini ada di folder yang sama
 
 // --- INTERFACES ---
 interface ChatSession {
@@ -26,20 +27,18 @@ interface ChatSession {
   createdAt: string;
 }
 
-// Update Interface Message untuk menyertakan attachmentUrl
 interface Message {
   sender: 'user' | 'bot';
   msg: string;
   createdAt: string;
-  attachmentUrl?: string | null; // Field baru untuk URL gambar
+  attachmentUrl?: string | null;
 }
 
-// Update Interface BackendMessage (sesuai respon API)
 interface BackendMessage {
   sender: 'USER' | 'BOT';
   msg: string;
   createdAt: string;
-  attachmentUrl?: string | null; // Field baru dari backend
+  attachmentUrl?: string | null;
 }
 
 interface SelectedConversation {
@@ -60,7 +59,8 @@ interface DeleteOldChatsResponse {
   message: string;
 }
 
-type ActiveView = 'history' | 'knowledge' | 'createAdmin';
+// 1. PERBAIKAN TIPE: Tambahkan 'RAG' disini
+type ActiveView = 'history' | 'knowledge' | 'RAG' | 'createAdmin';
 
 // --- KOMPONEN Sidebar ---
 const AdminSidebar = ({
@@ -76,6 +76,7 @@ const AdminSidebar = ({
 }) => {
   const [isOpen, setIsOpen] = useState(true);
 
+  // 2. PERBAIKAN NAV ITEMS: Pastikan view sesuai dengan type ActiveView
   const navItems = [
     {
       view: 'history' as ActiveView,
@@ -86,6 +87,11 @@ const AdminSidebar = ({
       view: 'knowledge' as ActiveView,
       icon: DatabaseZap,
       label: 'Knowledge Base',
+    },
+    {
+      view: 'RAG' as ActiveView, // Tombol ini akan mengaktifkan case 'RAG'
+      icon: DatabaseZap,
+      label: 'RAG Manager',
     },
     {
       view: 'createAdmin' as ActiveView,
@@ -203,14 +209,13 @@ const ChatHistoryView = () => {
       );
       if (!res.ok) throw new Error('Gagal mengambil riwayat chat.');
       const data: ChatHistoryResponse = await res.json();
-      
-      // Transform data backend ke format frontend
+
       const transformedMessages: Message[] = data.data.map(
         (msg: BackendMessage): Message => ({
           msg: msg.msg,
           createdAt: msg.createdAt,
           sender: msg.sender === 'USER' ? 'user' : 'bot',
-          attachmentUrl: msg.attachmentUrl, // PENTING: Ambil URL gambar
+          attachmentUrl: msg.attachmentUrl,
         })
       );
 
@@ -255,7 +260,8 @@ const ChatHistoryView = () => {
 
   const handleDeleteChat = async (id: string) => {
     toast.warning('Konfirmasi Hapus', {
-      description: 'Apakah Anda yakin ingin menghapus percakapan ini secara permanen?',
+      description:
+        'Apakah Anda yakin ingin menghapus percakapan ini secara permanen?',
       action: {
         label: 'Ya, Hapus',
         onClick: () => executeDeleteChat(id),
@@ -295,7 +301,8 @@ const ChatHistoryView = () => {
 
   const handleDeleteOldChats = async () => {
     toast.warning('Konfirmasi Hapus', {
-      description: 'Apakah Anda yakin ingin menghapus semua chat lama (NONACTIVE > 7 hari)? Tindakan ini tidak dapat dibatalkan.',
+      description:
+        'Apakah Anda yakin ingin menghapus semua chat lama (NONACTIVE > 7 hari)? Tindakan ini tidak dapat dibatalkan.',
       action: {
         label: 'Ya, Hapus Semua',
         onClick: () => executeDeleteOldChats(),
@@ -440,32 +447,30 @@ const ChatHistoryView = () => {
                         msg.sender === 'user' ? 'items-end' : 'items-start'
                       }`}
                     >
-                      {/* --- START FITUR TAMPIL GAMBAR --- */}
                       {msg.attachmentUrl && (
-                        <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 mb-1">
-                          <a 
-                            href={msg.attachmentUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="block"
+                        <div className='bg-gray-100 dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 mb-1'>
+                          <a
+                            href={msg.attachmentUrl}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='block'
                           >
-                             <Image 
-                               src={msg.attachmentUrl} 
-                               alt="Attachment Gambar" 
-                               width={0}
-                               height={0}
-                               sizes="100vw"
-                               className="w-full max-w-[200px] h-auto rounded-md hover:opacity-90 transition-opacity"
-                               unoptimized // Agar bisa load gambar dari localhost tanpa config
-                             />
+                            <Image
+                              src={msg.attachmentUrl}
+                              alt='Attachment Gambar'
+                              width={0}
+                              height={0}
+                              sizes='100vw'
+                              className='w-full max-w-[200px] h-auto rounded-md hover:opacity-90 transition-opacity'
+                              unoptimized
+                            />
                           </a>
-                          <div className="flex items-center gap-1 mt-2 text-xs text-gray-500 dark:text-gray-400">
-                             <ImageIcon className="w-3 h-3" /> 
-                             <span>Attachment</span>
+                          <div className='flex items-center gap-1 mt-2 text-xs text-gray-500 dark:text-gray-400'>
+                            <ImageIcon className='w-3 h-3' />
+                            <span>Attachment</span>
                           </div>
                         </div>
                       )}
-                      {/* --- END FITUR TAMPIL GAMBAR --- */}
 
                       <div
                         className={`px-4 py-2 rounded-lg shadow-sm ${
@@ -474,12 +479,31 @@ const ChatHistoryView = () => {
                             : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200'
                         }`}
                       >
-                        <p>{msg.msg}</p>
+                        <div
+                          className={`text-sm leading-relaxed 
+      [&_p]:mb-2 [&_p:last-child]:mb-0 
+      [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:mb-2
+      [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:mb-2
+      [&_li]:pl-1 [&_li]:mb-1
+      [&_strong]:font-bold
+      [&_a]:underline 
+      [&_table]:w-full [&_table]:border-collapse [&_table]:mb-2 [&_table]:mt-2
+      [&_th]:border [&_th]:p-2 [&_th]:bg-black/5 dark:[&_th]:bg-white/5 [&_th]:text-left
+      [&_td]:border [&_td]:p-2
+      
+      /* Styling dinamis tergantung pengirim (User vs Bot) agar Table Border terlihat jelas */
+      ${
+        msg.sender === 'user'
+          ? '[&_a]:text-blue-200 hover:[&_a]:text-white [&_th]:border-white/20 [&_td]:border-white/20'
+          : '[&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_th]:border-gray-300 dark:[&_th]:border-gray-600 [&_td]:border-gray-300 dark:[&_td]:border-gray-600'
+      }
+    `}
+                          dangerouslySetInnerHTML={{ __html: msg.msg }}
+                        />
                       </div>
-                      
-                      {/* Timestamp kecil */}
-                      <span className="text-[10px] text-gray-400 opacity-70">
-                         {new Date(msg.createdAt).toLocaleTimeString()}
+
+                      <span className='text-[10px] text-gray-400 opacity-70'>
+                        {new Date(msg.createdAt).toLocaleTimeString()}
                       </span>
                     </div>
                   </div>
@@ -526,21 +550,25 @@ export default function AdminDashboard() {
     }
   };
 
+  // 3. PERBAIKAN SWITCH CASE: Menambahkan case 'RAG' dan menghapus duplikasi
   const renderView = () => {
     switch (activeView) {
       case 'history':
         return <ChatHistoryView />;
       case 'knowledge':
         return <KnowledgeView onBack={() => setActiveView('history')} />;
+      case 'RAG':
+        return <RagView onBack={() => setActiveView('history')} />;
       case 'createAdmin':
         return <CreateAdminView onBack={() => setActiveView('history')} />;
       default:
+        // Jika tidak ada case yang cocok (fallback), tampilkan history
         return <ChatHistoryView />;
     }
   };
 
   return (
-   <div className='flex h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-200 font-sans'>
+    <div className='flex h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-200 font-sans'>
       <AdminSidebar
         activeView={activeView}
         onNavClick={setActiveView}
