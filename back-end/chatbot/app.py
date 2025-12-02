@@ -59,14 +59,28 @@ async def reply(req: Request):
 async def do_scrapping():
     try:
         # 1. Jalankan Scrapping (download file .txt)
+        sc.delete_folder()
         sc.mainscrapping()
         
-        # 2. Reload Index RAG agar file baru terbaca di memori
-        rag.reload_rag()
         
         return {
             "Status": "Succeed", 
-            "Message": "Scrapping selesai & Database diperbarui.",
+            "Message": "Scrapping selesai.",
+            "Temp": temp
+        }
+    except Exception as e:
+        return {"Status": "Error", "Message": str(e)}
+    
+@app.get("/do-rag")
+async def do_scrapping():
+    try:
+        # 2. Reload Index RAG agar file baru terbaca di memori
+        rag.reload_rag()
+        
+        
+        return {
+            "Status": "Succeed", 
+            "Message": "Index diperbarui.",
             "Temp": temp
         }
     except Exception as e:

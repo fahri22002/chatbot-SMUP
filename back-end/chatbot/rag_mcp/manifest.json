@@ -1,0 +1,25 @@
+{
+  "name": "rag-mcp",
+  "version": "1.0.0",
+  "tools": [
+    {
+      "name": "rag_answer",
+      "description": "Menjawab pertanyaan menggunakan sistem RAG SMUP.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "question": { "type": "string" }
+        },
+        "required": ["question"]
+      }
+    },
+    {
+      "name": "reload_rag",
+      "description": "Memuat ulang index RAG setelah ada update dokumen.",
+      "input_schema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ]
+}

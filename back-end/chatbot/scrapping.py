@@ -12,9 +12,30 @@ output_dir = "doc/pages"
 os.makedirs(output_dir, exist_ok=True)
 
 # daftar path yang ingin dikecualikan
-exclude_paths = ["/profil", "/login", "/admin", "/register", "/user"]
+exclude_paths = ["/profil", "/login", "/admin", "/register", "/user", "/peraturan", "/uploads", "/pengumuman"]
+
+import os
+
+def setup_document_structure():
+
+    # Buat folder doc jika belum ada
+    os.makedirs("doc", exist_ok=True)
+
+    # Buat folder doc/pages jika belum ada
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Buat file urlHistory.txt jika belum ada
+    if not os.path.exists(history_file):
+        with open(history_file, "w", encoding="utf-8") as f:
+            f.write("")  # file kosong
+        print(f"File '{history_file}' dibuat.")
+    else:
+        print(f"File '{history_file}' sudah ada.")
+
+    print("Struktur folder dan file selesai dibuat.")
 
 def load_history():
+    setup_document_structure()
     if os.path.exists(history_file):
         with open(history_file, "r", encoding="utf-8") as f:
             for line in f:
@@ -29,6 +50,8 @@ def is_valid_url(url):
     if domain not in parsed.netloc or parsed.scheme not in ["http", "https"]:
         return False
     if url.endswith((".pdf", ".jpg", ".png", ".zip", ".docx", ".xls", ".ppt")):
+        return False
+    if is_date_path(url):
         return False
     for path in exclude_paths:
         if path in parsed.path:
@@ -92,7 +115,7 @@ def scrape_page(url, page_number):
         print(f"⏭️ Lewati {url} (tidak ada .tabcontent, .content, .elementor-container, .PAGES_CONTAINER, atau .container)")
         return
 
-    valid_tags = ["div", "p", "h1", "h2", "h3", "h4", "h5", "h6", "li", "b", "article", "section", "blockquote", "main"]
+    valid_tags = ["div", "p", "h1", "h2", "h3", "h4", "h5", "h6", "li", "b", "article", "section", "blockquote", "main", "table", "th", "td"]
     exclude_tags = ["footer", "nav"]
     deepest_texts = []
 
@@ -110,44 +133,106 @@ def scrape_page(url, page_number):
     save_texts_with_limit(deepest_texts, url, output_dir, page_number)
 
 
-def crawl(url, depth=0, max_depth=2):
-    if url in visited or depth > max_depth:
-        return
-    visited.add(url)
-    save_history(url)
+from collections import deque
+from urllib.parse import urljoin
+import time
+import requests
+from bs4 import BeautifulSoup
+import re
 
-    scrape_page(url, len(visited))
+from urllib.parse import urlparse, urlunparse
 
-    try:
-        headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(url, headers=headers, timeout=10)
-        soup = BeautifulSoup(response.text, "html.parser")
+def normalize_url(url):
+    parsed = urlparse(url)
 
-        links = soup.find_all("a", href=True)
-        for link in links:
-            full_url = urljoin(url, link["href"])
-            if is_valid_url(full_url) and full_url not in visited:
-                if "fakultas" in full_url or "program-studi" in full_url:
-                # if full_url.rstrip("/").endswith(("fakultas", "program-studi")):
-                    max_depth = depth+1
-                time.sleep(1)
-                crawl(full_url, depth + 1, max_depth)
+    # Hapus fragment (#...)
+    parsed = parsed._replace(fragment="")
 
-    except Exception as e:
-        print(f"⚠️ Tidak bisa lanjut dari {url}: {e}")
+    # Hapus trailing slash kecuali root
+    cleaned = urlunparse(parsed)
+    if cleaned.endswith("/") and len(cleaned) > len("https://x"):
+        cleaned = cleaned.rstrip("/")
+
+    return cleaned
+
+def is_date_path(url):
+    # Cocokkan pola /YYYY/MM/ atau /YYYY/M/
+    pattern = r"/\d{4}/\d{1,2}/"
+    return re.search(pattern, url) is not None
+
+def crawl_bfs(start_url, depth, max_depth=2):
+    queue = deque()
+    queue.append((start_url, 0))  # (url, depth)
+    visited = set()
+
+    while queue:
+        raw_url, depth = queue.popleft()
+        url = normalize_url(raw_url)  # normalisasi dulu
+
+        if url in visited or depth > max_depth:
+            continue
+
+        visited.add(url)
+        save_history(url)
+        scrape_page(url, len(visited))
+
+        print(f"\n[Depth {depth}] Sedang memproses: {url}")
+
+        try:
+            headers = {"User-Agent": "Mozilla/5.0"}
+            response = requests.get(url, headers=headers, timeout=10)
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            links = soup.find_all("a", href=True)
+
+            # Tampilkan semua link dari halaman
+            print("Daftar link yang ditemukan:")
+            for a in links:
+                print(" -", urljoin(url, a["href"]))
+
+            for link in links:
+                full_url = urljoin(url, link["href"])
+
+                if is_valid_url(full_url) and full_url not in visited:
+                    next_depth = depth
+
+                    # Aturan peningkatan depth
+                    if "program-studi" in full_url:
+                        next_depth = depth + 1
+
+                    # Masukkan ke queue BFS
+                    queue.append((full_url, next_depth))
+
+            time.sleep(1)  # Delay agar tidak terlalu cepat
+
+        except Exception as e:
+            print(f"⚠️ Tidak bisa lanjut dari {url}: {e}")
+
+
+import shutil
+import os
+
+def delete_folder(folder_path="doc/"):
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path)   # hapus folder dan seluruh isinya
+        print(f"Folder '{folder_path}' berhasil dihapus.")
+    else:
+        print(f"Folder '{folder_path}' tidak ditemukan.")
 
 
 if __name__ == "__main__":
     start_url = "https://smup.unpad.ac.id/"
     load_history()
     print(f"Mulai crawling dari: {start_url}")
-    crawl(start_url, depth=0, max_depth=2)
+    crawl_bfs(start_url, depth=0, max_depth=2)
     print("Selesai crawling.")
 
 
-def mainscrapping():
-    start_url = "https://smup.unpad.ac.id/"
+def mainscrapping(start_url = "https://smup.unpad.ac.id/"):
     load_history()
     print(f"Mulai crawling dari: {start_url}")
-    crawl(start_url, depth=0, max_depth=2)
+    crawl_bfs(start_url, depth=0, max_depth=2)
     print("Selesai crawling.")
+
+
+#NOTE: Duplikat bisa pakai agent dan cek dahulu outputnya
