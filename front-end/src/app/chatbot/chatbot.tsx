@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { startHeartbeat } from "../../utils/heartbeat";
+import { startHeartbeat } from '../../utils/heartbeat';
 import ReCAPTCHA from 'react-google-recaptcha';
 import {
   Send,
@@ -11,13 +11,10 @@ import {
   FileImage,
   X,
   MessageCircle,
+  RotateCcw,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
-
-// Import Library Markdown
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
 type Message = {
   sender: 'bot' | 'user';
@@ -98,7 +95,7 @@ export default function Chatbot() {
 
   useEffect(() => {
     setUserConsent(null);
-    
+
     setShowConsentModal(true);
   }, []);
 
@@ -114,6 +111,41 @@ export default function Chatbot() {
           text: 'Baik, history chat untuk sesi ini tidak akan disimpan.',
         },
       ]);
+    }
+  };
+
+  const handleRetry = async () => {
+    const lastUserMessage = [...messages]
+      .reverse()
+      .find((m) => m.sender === 'user');
+
+    if (!lastUserMessage || loading) return;
+
+    // 2. Set loading
+    setLoading(true);
+
+    try {
+      const canSaveHistory = userConsent === 'true';
+
+      const botResponse = await sendMessageToServer(
+        lastUserMessage.text,
+        null,
+        canSaveHistory
+      );
+
+      // 4. Tambahkan jawaban baru bot ke chat
+      setMessages((prev) => [...prev, { sender: 'bot', text: botResponse }]);
+
+      // Update counter pesan (untuk trigger WA prompt)
+      setUserMessageCount((prev) => prev + 1);
+    } catch (error) {
+      console.error('Retry error:', error);
+      setMessages((prev) => [
+        ...prev,
+        { sender: 'bot', text: '⚠️ Gagal melakukan regenerate response.' },
+      ]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -291,40 +323,36 @@ export default function Chatbot() {
                 </div>
               )}
 
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  p: (props) => (
-                    <p className='mb-2 last:mb-0 leading-relaxed' {...props} />
-                  ),
-                  ul: (props) => (
-                    <ul
-                      className='list-disc list-outside ml-4 mb-2'
-                      {...props}
-                    />
-                  ),
-                  ol: (props) => (
-                    <ol
-                      className='list-decimal list-outside ml-4 mb-2'
-                      {...props}
-                    />
-                  ),
-                  li: (props) => <li className='pl-1' {...props} />,
-                  strong: (props) => (
-                    <strong className='font-bold' {...props} />
-                  ),
-                  a: (props) => (
-                    <a
-                      className='text-blue-200 hover:text-white underline'
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      {...props}
-                    />
-                  ),
-                }}
-              >
-                {msg.text}
-              </ReactMarkdown>
+              <div
+                className={`text-sm leading-relaxed 
+                /* Styling untuk elemen HTML di dalam chat bubble */
+                [&_p]:mb-2 [&_p:last-child]:mb-0 
+                [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:mb-2
+                [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:mb-2
+                [&_li]:pl-1 [&_li]:mb-1
+                [&_strong]:font-bold
+                [&_a]:underline [&_a]:text-blue-200 hover:[&_a]:text-white
+                [&_table]:w-full [&_table]:border-collapse [&_table]:mb-2
+                [&_th]:border [&_th]:border-white/20 [&_th]:p-2 [&_th]:bg-black/10
+                [&_td]:border [&_td]:border-white/20 [&_td]:p-2
+              `}
+                dangerouslySetInnerHTML={{ __html: msg.text }}
+              />
+
+              {msg.sender === 'bot' &&
+                i === messages.length - 1 &&
+                !loading && (
+                  <div className='mt-2 pt-2 border-t border-gray-300 dark:border-gray-600 flex justify-end'>
+                    <button
+                      onClick={handleRetry}
+                      className='flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600'
+                      title='Buat ulang jawaban'
+                    >
+                      <RotateCcw className='w-3.5 h-3.5' />
+                      <span>Regenerate</span>
+                    </button>
+                  </div>
+                )}
             </div>
           ))}
 

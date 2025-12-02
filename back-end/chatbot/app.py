@@ -5,6 +5,10 @@ from contextlib import asynccontextmanager
 import uvicorn
 import scrapping as sc
 import rag
+from fastapi import FastAPI, Request, UploadFile, File, Form # Tambahkan UploadFile, File, Form
+import shutil
+from pypdf import PdfReader
+import io
 
 # --- LIFESPAN: Dijalankan otomatis saat server Start ---
 @asynccontextmanager
@@ -125,6 +129,61 @@ async def get_documents():
                 
     return {"data": docs}
 
+@app.post("/upload-doc")
+async def upload_document(file: UploadFile = File(...)):
+    """Endpoint upload support .txt DAN .pdf (auto-convert ke txt)"""
+    try:
+        folder_path = "doc/pages"
+        os.makedirs(folder_path, exist_ok=True)
+        
+        # Bersihkan nama file
+        safe_filename = file.filename.replace(" ", "_")
+        
+        # Tentukan path simpan
+        # Jika PDF, kita akan simpan versi .txt-nya
+        final_filename = safe_filename
+        if safe_filename.endswith('.pdf'):
+            final_filename = safe_filename.replace('.pdf', '.txt')
+            
+        file_location = os.path.join(folder_path, final_filename)
+
+        # LOGIKA PENYIMPANAN
+        if safe_filename.endswith('.txt'):
+            # Simpan langsung jika TXT
+            with open(file_location, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+
+        elif safe_filename.endswith('.pdf'):
+            # Jika PDF, ekstrak teksnya dulu
+            content = await file.read() # Baca file ke memori
+            pdf_file = io.BytesIO(content)
+            reader = PdfReader(pdf_file)
+            
+            text_content = f"URL page ini: Upload Manual ({safe_filename})\n\n"
+            
+            # Loop setiap halaman dan ambil teks
+            for page in reader.pages:
+                text_content += page.extract_text() + "\n"
+            
+            # Simpan hasil ekstraksi ke file .txt
+            with open(file_location, "w", encoding="utf-8") as f:
+                f.write(text_content)
+                
+        else:
+             return {"Status": "Error", "Message": "Hanya file .txt dan .pdf yang diizinkan."}
+
+        # Reload RAG
+        rag.reload_rag()
+        
+        return {
+            "Status": "Success", 
+            "Message": f"File {safe_filename} berhasil diproses dan disimpan sebagai {final_filename}.",
+            "Temp": temp
+        }
+    except Exception as e:
+        print(f"Upload Error: {e}")
+        return {"Status": "Error", "Message": f"Gagal memproses file: {str(e)}"}
+    
 if __name__ == "__main__":
     # Pastikan port sama dengan yang dipanggil di frontend (8080)
     uvicorn.run(app, host="127.0.0.1", port=8080)
