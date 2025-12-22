@@ -13,9 +13,6 @@ const consentList = new Map();
 
 
 const getChat = async (req, res) => {
-  // if(!req.session._id){
-  //   return res.status(404).json({ error: true, message: "login required" });
-  // }
     try {
         const chatId = req.session.chatId;
 
@@ -36,7 +33,6 @@ const getChat = async (req, res) => {
 
       const filePath = path.join(__dirname, "../public/upload", msg.attachment);
 
-      // Jika file benar-benar ada
       if (fs.existsSync(filePath)) {
         return {
           ...msg.toObject(),
@@ -162,33 +158,23 @@ const postMsg = async (req, res) => {
 
 const createChatwithConsent = async (req, res) => {
   try {
-    // --- (MULAI PERBAIKAN CAPTCHA & CONSENT) ---
-
-    // 1. Ambil token CAPTCHA dan CONSENT dari body
-    const { captchaToken, consent } = req.body; // <-- PERUBAHAN DI SINI
+    const { captchaToken, consent } = req.body; 
 
     if (!captchaToken) {
       return res.status(400).json({ error: true, message: 'Verifikasi CAPTCHA diperlukan.' });
     }
 
-    // 2. Ambil Kunci Rahasia Anda dari file .env
     const secretKey = process.env.RECAPTCHA_SECRET_KEY;
     if (!secretKey) {
         console.error("RECAPTCHA_SECRET_KEY tidak ditemukan di file .env");
         return res.status(500).json({ error: true, message: 'Konfigurasi server error.' });
     }
 
-    // 3. Siapkan data untuk dikirim di BODY permintaan POST
     const verificationUrl = 'https://www.google.com/recaptcha/api/siteverify';
     
-    // Gunakan URLSearchParams untuk memformat data sebagai x-www-form-urlencoded
     const params = new URLSearchParams();
     params.append('secret', secretKey);
     params.append('response', captchaToken);
-    // Anda juga bisa menambahkan IP pengguna jika perlu:
-    // params.append('remoteip', req.ip);
-
-    // 4. Kirim permintaan verifikasi ke Google
     const verificationResponse = await axios.post(verificationUrl, params, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -197,21 +183,14 @@ const createChatwithConsent = async (req, res) => {
 
     const { success, 'error-codes': errorCodes } = verificationResponse.data;
 
-    // 5. Periksa apakah verifikasi gagal
     if (!success) {
-      // Log error-codes untuk debugging
       console.warn('Verifikasi CAPTCHA gagal:', errorCodes);
       return res.status(401).json({ error: true, message: 'Verifikasi CAPTCHA gagal. Silakan coba lagi.' });
     }
-
-    // --- (SELESAI VERIFIKASI CAPTCHA) ---
-
-
-    // 6. (Logika Asli Anda) - Hanya berjalan jika CAPTCHA berhasil
     if (req.session.chatId){
       setChatNonActive(req.session.chatId, req.session.consent);
       delete req.session.chatId;
-      delete req.session.consent; // Hapus juga session consent lama
+      delete req.session.consent;
     }
     const status  = "ACTIVE";
 
@@ -219,9 +198,8 @@ const createChatwithConsent = async (req, res) => {
     const newChat = new Chat({ status });
     await newChat.save();
     
-    // --- (PERBAIKAN: Simpan chatID DAN consent ke session) ---
     req.session.chatId = newChat._id;
-    req.session.consent = consent || 'false'; // <-- PERUBAHAN DI SINI
+    req.session.consent = consent || 'false';
 
     consentList.set(req.session.chatId, req.session.consent);
     console.log(`Sesi chat ${newChat._id} dibuat dengan consent=${req.session.consent}`);
@@ -232,7 +210,6 @@ const createChatwithConsent = async (req, res) => {
     });
   } catch (error) {
     console.error('Error saat membuat chat:', error);
-    // (BARU) Berikan detail error jika dari axios
     if (error.response) {
       console.error('Error data from Google:', error.response.data);
     }

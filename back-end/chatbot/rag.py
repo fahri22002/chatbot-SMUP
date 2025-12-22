@@ -178,7 +178,6 @@ def load_and_index_documents(folder_path="doc/pages", cache_path="doc/embeddings
                 emb = get_embedding(text)
                 cache[key] = emb.tolist()
 
-            # Pre-tokenize text untuk WordNet search agar cepat
             tokens = set(word_tokenize(text.lower()))
 
             new_docs.append({
@@ -191,7 +190,6 @@ def load_and_index_documents(folder_path="doc/pages", cache_path="doc/embeddings
         except Exception as e:
             print(f"Skip {file.name}: {e}")
 
-    # Simpan cache
     try:
         with open(cache_path, "w", encoding="utf-8") as f:
             json.dump(cache, f)
