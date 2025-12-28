@@ -18,6 +18,7 @@
     --foreground: #f8fafc;
     --card: #0f172a;
     --primary: #3b82f6;
+
     --muted: #9ca3af;
     --chat-bg: #071026;
   }
@@ -30,7 +31,10 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Chat Layout Helpers */
+/* ============================= */
+/* Chat Layout */
+/* ============================= */
+
 .chat-container {
   border-radius: 14px;
 }
@@ -58,12 +62,13 @@ body {
   height: 36px;
 }
 
-/* Bubbles */
+/* Message bubbles */
 .message-bubble {
   padding: 12px 14px;
   border-radius: 12px;
   box-shadow: 0 4px 14px rgba(2,6,23,0.06);
   word-wrap: break-word;
+  animation: fadeInUp 180ms ease-out;
 }
 
 /* Bot bubble */
@@ -77,7 +82,7 @@ body {
   box-shadow: 0 8px 20px rgba(37,99,235,0.14);
 }
 
-/* Make images inside bubbles responsive */
+/* Images inside bubbles */
 .message-bubble img {
   max-width: 100%;
   height: auto;
@@ -96,12 +101,19 @@ body {
 /* Footer / input */
 .chat-footer {
   padding: 1.05rem;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.02),
+    rgba(255,255,255,0)
+  );
 }
 
-/* Scrollbar inside chat */
+/* ============================= */
+/* Custom Scrollbar */
+/* ============================= */
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
@@ -114,7 +126,25 @@ body {
   background: rgba(148,163,184,0.14);
 }
 
-/* Small responsive tweaks */
+/* ============================= */
+/* Animations */
+/* ============================= */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================= */
+/* Responsive */
+/* ============================= */
+
 @media (max-width: 640px) {
   .chat-container {
     border-radius: 12px;
@@ -129,16 +159,7 @@ body {
   }
 }
 
-/* Message enter animation (subtle) */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.message-bubble {
-  animation: fadeInUp 180ms ease-out;
-}
-
-/* Make input & buttons visually aligned */
+/* Input & buttons alignment */
 .chat-footer .rounded-full {
   min-width: 44px;
   min-height: 44px;
