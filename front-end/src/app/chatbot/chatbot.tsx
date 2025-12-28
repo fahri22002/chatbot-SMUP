@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
+import { startHeartbeat } from '../../utils/heartbeat';
 import {
   Send,
   Bot,
@@ -11,11 +11,13 @@ import {
   X,
   MessageCircle,
   RotateCcw,
-  Circle,
-  Sparkles
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
+
+// --- IMPORT WAJIB UNTUK TABEL & FORMATTING ---
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 type Message = {
   sender: 'bot' | 'user';
@@ -23,261 +25,452 @@ type Message = {
   attachmentUrl?: string;
 };
 
+const initialMessages: Message[] = [
+  {
+    sender: 'bot',
+    text: 'Selamat datang! Ada yang bisa saya bantu terkait informasi kampus? (Saya bisa menampilkan tabel, list, dan format rapi lainnya).',
+  },
+];
+
 export default function Chatbot() {
   const { theme } = useTheme();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      sender: 'bot',
-      text: 'Halo! Saya asisten virtual Anda. Ada yang bisa saya bantu hari ini?',
-    },
-  ]);
+
+  // --- STATE UTAMA ---
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // --- STATE PENDUKUNG ---
+  const [isWsConnected, setIsWsConnected] = useState(false);
   const [userMessageCount, setUserMessageCount] = useState(0);
   const [showWAPrompt, setShowWAPrompt] = useState(false);
-  const [showConsentModal, setShowConsentModal] = useState(true);
-  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
 
-  const socketRef = useRef<WebSocket | null>(null);
-  const chatIdRef = useRef<string | null>(null);
+  // --- REFS ---
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const ws = useRef<WebSocket | null>(null);
 
-  const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+  // --- KONFIGURASI URL ---
+  const HTTP_API_URL = 'http://127.0.0.1:8080'; // Jalur RAG/Reranking (Otak)
+  const WS_URL = 'ws://localhost:8765'; // Jalur Stream Activity (Sinyal)
 
+  // ----------------------------------------------------------------------
+  // 1. WEBSOCKET SETUP (HANYA UNTUK STREAM ACTIVITY)
+  // ----------------------------------------------------------------------
   useEffect(() => {
-    if (!isCaptchaVerified) return;
-    const socket = new WebSocket("ws://localhost:8765");
-    socketRef.current = socket;
+    if (ws.current?.readyState === WebSocket.OPEN) return;
+
+    const socket = new WebSocket(WS_URL);
 
     socket.onopen = () => {
-      setIsConnected(true);
-      const token = localStorage.getItem('deviceToken');
-      if (!token) {
-        socket.send(JSON.stringify({ action: "register_device" }));
-      } else {
-        socket.send(JSON.stringify({ action: "create_chat", deviceToken: token }));
-      }
+      console.log('✅ WS Connected (Stream Only)');
+      setIsWsConnected(true);
+      socket.send(
+        JSON.stringify({ type: 'stream_event', status: 'user_connected' })
+      );
     };
 
-    socket.onmessage = async (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.action === "register_device" && data.deviceToken) {
-          localStorage.setItem('deviceToken', data.deviceToken);
-          socket.send(JSON.stringify({ action: "create_chat", deviceToken: data.deviceToken }));
-        }
-        if (data.action === "create_chat" && data.chatId) {
-          chatIdRef.current = data.chatId;
-        }
-        if (data.reply) {
-          setMessages(prev => [...prev, { sender: 'bot', text: data.reply }]);
-          setLoading(false);
-          setUserMessageCount(prev => prev + 1);
-        }
-        if (data.action === "ready_for_binary" && selectedFile) {
-          const arrayBuffer = await selectedFile.arrayBuffer();
-          socket.send(arrayBuffer);
-        }
-      } catch (err) {
-        console.error("Error:", err);
-      }
+    socket.onclose = () => {
+      console.log('❌ WS Disconnected');
+      setIsWsConnected(false);
     };
 
-    socket.onclose = () => setIsConnected(false);
-    return () => socket.close();
-  }, [isCaptchaVerified]);
+    ws.current = socket;
 
-  useEffect(() => {
-    if (userMessageCount === 5) setShowWAPrompt(true);
-  }, [userMessageCount]);
+    return () => {
+      socket.close();
+    };
+  }, []);
 
-  const handleSend = () => {
-    if (!isConnected || !chatIdRef.current || (!input.trim() && !selectedFile)) return;
-    const deviceToken = localStorage.getItem('deviceToken');
-    setLoading(true);
-
-    if (selectedFile) {
-      socketRef.current?.send(JSON.stringify({
-        action: "send_message_with_attachment",
-        chatId: chatIdRef.current,
-        deviceToken,
-        msg: input,
-        filename: selectedFile.name,
-        filesize: selectedFile.size,
-        mimetype: selectedFile.type
-      }));
-      setMessages(prev => [...prev, { 
-        sender: 'user', 
-        text: input || "Mengirim lampiran...", 
-        attachmentUrl: URL.createObjectURL(selectedFile) 
-      }]);
-    } else {
-      socketRef.current?.send(JSON.stringify({
-        action: "send_message",
-        chatId: chatIdRef.current,
-        deviceToken,
-        msg: input
-      }));
-      setMessages(prev => [...prev, { sender: 'user', text: input }]);
+  const streamActivity = (activityType: string, payload: any = {}) => {
+    if (ws.current?.readyState === WebSocket.OPEN) {
+      ws.current.send(
+        JSON.stringify({
+          type: 'stream_activity',
+          action: activityType,
+          timestamp: new Date().toISOString(),
+          ...payload,
+        })
+      );
     }
+  };
+
+  // ----------------------------------------------------------------------
+  // 2. HTTP LOGIC (CORE RAG & RERANKING)
+  // ----------------------------------------------------------------------
+
+  const uploadDocumentHttp = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch(`${HTTP_API_URL}/upload-doc`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error('Gagal upload file ke RAG Engine');
+    return await res.json();
+  };
+
+  const getRagAnswerHttp = async (userMsg: string) => {
+    const res = await fetch(`${HTTP_API_URL}/reply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: userMsg }),
+    });
+
+    if (!res.ok) throw new Error('Gagal mengambil jawaban dari RAG');
+    const data = await res.json();
+    return data.Reply;
+  };
+
+  // ----------------------------------------------------------------------
+  // 3. UI HANDLERS
+  // ----------------------------------------------------------------------
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+    streamActivity('user_typing', { length: e.target.value.length });
+  };
+
+  const handleSend = async () => {
+    if ((!input.trim() && !selectedFile) || loading) return;
+
+    const userMsg = input;
+    const currentFile = selectedFile;
+
+    const newMessage: Message = { sender: 'user', text: userMsg };
+    if (currentFile) {
+      newMessage.attachmentUrl = URL.createObjectURL(currentFile);
+      if (!userMsg) newMessage.text = `Mengirim file: ${currentFile.name}`;
+    }
+    setMessages((prev) => [...prev, newMessage]);
+
     setInput('');
     setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    setLoading(true);
+
+    try {
+      streamActivity('user_sent_message', {
+        text: userMsg,
+        hasAttachment: !!currentFile,
+      });
+
+      if (currentFile) {
+        await uploadDocumentHttp(currentFile);
+      }
+
+      // Tips: Tambahkan instruksi implisit agar Bot menggunakan Markdown Table
+      let queryText = userMsg;
+      if (!queryText && currentFile) {
+        queryText = `Saya mengunggah dokumen ${currentFile.name}, tolong jelaskan ringkasannya.`;
+      }
+
+      const botResponseText = await getRagAnswerHttp(queryText);
+
+      setMessages((prev) => [
+        ...prev,
+        { sender: 'bot', text: botResponseText },
+      ]);
+
+      setUserMessageCount((prev) => prev + 1);
+    } catch (error) {
+      console.error('Error flow:', error);
+      setMessages((prev) => [
+        ...prev,
+        { sender: 'bot', text: '⚠️ Maaf, terjadi gangguan koneksi ke server.' },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
   };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  return (
-    <section className='min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-0 sm:p-4 font-sans transition-colors duration-500'>
-      
-      {/* Modal Consent - Glassmorphism style */}
-      {showConsentModal && (
-        <div className='fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[100] p-4'>
-          <div className='bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center transform transition-all scale-100'>
-            <div className='w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4'>
-              <Sparkles className='w-8 h-8 text-blue-600' />
-            </div>
-            <h3 className='text-xl font-bold mb-2 text-slate-900 dark:text-white'>Data & Privasi</h3>
-            <p className='text-sm text-slate-500 dark:text-slate-400 mb-8'>Izinkan kami menyimpan riwayat chat untuk meningkatkan kualitas layanan asisten kami.</p>
-            <div className='flex flex-col gap-3'>
-              <button onClick={() => setShowConsentModal(false)} className='w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all active:scale-95'>Setuju & Lanjutkan</button>
-              <button onClick={() => setShowConsentModal(false)} className='w-full py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all'>Lain kali</button>
-            </div>
-          </div>
-        </div>
-      )}
+  useEffect(() => {
+    if (userMessageCount === 5) setShowWAPrompt(true);
+  }, [userMessageCount]);
 
-      <div className='w-full max-w-5xl h-[100vh] sm:h-[850px] bg-white dark:bg-slate-900 sm:border border-slate-200 dark:border-slate-800 sm:rounded-[2rem] shadow-2xl flex flex-col overflow-hidden relative'>
-        
-        {/* Header - Glassmorphism */}
-        <header className='flex items-center justify-between bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800 px-6 py-5 z-20'>
+  useEffect(() => {
+    startHeartbeat();
+  }, []);
+
+  // --- RENDER UI ---
+  return (
+    <div className='min-h-[75vh] flex items-start justify-center px-6 py-8'>
+      <div className='chat-container w-full max-w-6xl mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-800'>
+        {/* HEADER */}
+        <div className='chat-header flex items-center justify-between px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700'>
           <div className='flex items-center gap-4'>
-            <div className='relative'>
-              <div className='p-2.5 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-none'>
-                <Bot className='w-6 h-6 text-white' />
-              </div>
-              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-4 border-white dark:border-slate-900 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+            <div className='logo w-11 h-11 bg-white/95 rounded-full flex items-center justify-center shadow-sm'>
+              <Bot className='w-5 h-5 text-blue-600' />
             </div>
             <div>
-              <h1 className='text-md font-bold text-slate-900 dark:text-white'>AI Akademik</h1>
-              <p className='text-[10px] uppercase tracking-wider font-semibold text-slate-400'>{isConnected ? 'System Online' : 'Connecting...'}</p>
+              <h1 className='text-white font-semibold text-lg tracking-wide'>
+                Layanan Unpad
+              </h1>
+              <div className='flex items-center gap-2 mt-0.5'>
+                <span
+                  className={`status-dot w-2 h-2 rounded-full ${
+                    isWsConnected ? 'bg-green-400' : 'bg-red-400'
+                  }`}
+                />
+                <p className='text-blue-100 text-xs font-medium'>
+                  {isWsConnected
+                    ? 'Live Stream Active'
+                    : 'Connecting Stream...'}
+                </p>
+              </div>
             </div>
           </div>
-        </header>
 
-        {/* Chat Area */}
-        <div className='flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-6 px-4 sm:px-8 py-8 bg-[#fdfdfd] dark:bg-slate-900/50'>
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-message`}>
-              <div className={`max-w-[85%] sm:max-w-[70%] group relative ${msg.sender === 'user' ? 'order-1' : 'order-2'}`}>
-                <div className={`px-5 py-3.5 rounded-[1.5rem] shadow-sm text-sm leading-relaxed ${
-                  msg.sender === 'user' 
-                  ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-tr-none' 
-                  : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-tl-none'
-                }`}>
-                  {msg.attachmentUrl && (
-                    <div className='mb-3 rounded-xl overflow-hidden border border-black/5'>
-                      <Image src={msg.attachmentUrl} alt='attachment' width={400} height={300} className='w-full object-cover' unoptimized />
-                    </div>
-                  )}
-                  <div dangerouslySetInnerHTML={{ __html: msg.text }} />
-                  
-                  {msg.sender === 'bot' && (
-                    <div className='mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity'>
-                      <button onClick={() => {}} className='p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md text-slate-400 transition-colors'>
-                        <RotateCcw className='w-3.5 h-3.5' />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-          {loading && (
-            <div className='flex justify-start animate-message'>
-              <div className='bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 px-5 py-4 rounded-[1.5rem] rounded-tl-none'>
-                <div className='flex gap-1.5'>
-                  <span className='w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce'></span>
-                  <span className='w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]'></span>
-                  <span className='w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.4s]'></span>
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
+          <div className='flex items-center gap-3'>
+            <button
+              onClick={() => window.location.reload()}
+              className='p-2 rounded-md bg-white/10 hover:bg-white/20 transition'
+              title='Reset Chat'
+            >
+              <RotateCcw className='w-5 h-5 text-white/90' />
+            </button>
+          </div>
         </div>
 
-        {/* Captcha & Footer Area */}
-        <div className='px-4 sm:px-8 pb-6 bg-gradient-to-t from-white dark:from-slate-900 via-white dark:via-slate-900 to-transparent pt-4'>
-          
-          {!isCaptchaVerified && !showConsentModal && (
-            <div className='flex flex-col items-center gap-4 py-4 mb-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl'>
-              <p className='text-xs font-medium text-slate-500'>Verifikasi bahwa Anda manusia</p>
-              {recaptchaSiteKey && (
-                <ReCAPTCHA sitekey={recaptchaSiteKey} onChange={(token) => setIsCaptchaVerified(!!token)} theme={theme === 'dark' ? 'dark' : 'light'} />
-              )}
-            </div>
-          )}
-
-          {/* WA Prompt - Floating Style */}
-          {showWAPrompt && (
-            <div className='mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500 p-4 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30 rounded-2xl flex items-center gap-4'>
-              <div className='p-2.5 bg-green-500 rounded-xl'><MessageCircle className='w-5 h-5 text-white' /></div>
-              <div className='flex-1'>
-                <h4 className='font-bold text-sm text-green-900 dark:text-green-100'>Butuh bantuan manusia?</h4>
-                <p className='text-xs text-green-700 dark:text-green-300'>Hubungi Admin WhatsApp kami sekarang.</p>
-              </div>
-              <a href='https://wa.me/6281122301410' target='_blank' className='px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition-colors'>Chat WA</a>
-              <button onClick={() => setShowWAPrompt(false)} className='text-green-400 hover:text-green-600'><X className='w-4 h-4' /></button>
-            </div>
-          )}
-
-          {/* Input Interface */}
-          <div className={`relative group transition-all duration-300 ${!isCaptchaVerified ? 'opacity-20 pointer-events-none grayscale' : ''}`}>
-            {selectedFile && (
-              <div className='absolute -top-14 left-0 right-0 flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-t-xl text-xs font-medium animate-in slide-in-from-bottom-2'>
-                <FileImage className='w-4 h-4' />
-                <span className='truncate flex-1'>{selectedFile.name}</span>
-                <button onClick={() => setSelectedFile(null)}><X className='w-4 h-4 hover:scale-125 transition-transform' /></button>
-              </div>
-            )}
-            
-            <div className='flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-2 rounded-[1.8rem] border border-transparent focus-within:border-blue-500/50 focus-within:bg-white dark:focus-within:bg-slate-800 focus-within:shadow-xl transition-all'>
-              <input type='file' ref={fileInputRef} hidden onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} accept="image/*,application/pdf" />
-              <button 
-                onClick={() => fileInputRef.current?.click()} 
-                disabled={loading || !isConnected} 
-                className='p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-all'
+        {/* CHAT BODY */}
+        <div className='chat-body h-[72vh] overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900/60 custom-scrollbar'>
+          <div className='space-y-5'>
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`message-row flex items-start gap-4 ${
+                  msg.sender === 'user' ? 'justify-end' : 'justify-start'
+                }`}
               >
-                <Paperclip className='w-5 h-5' />
-              </button>
-              
-              <input 
-                type='text' 
-                value={input} 
-                onChange={(e) => setInput(e.target.value)} 
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()} 
-                placeholder={isConnected ? 'Tanyakan sesuatu...' : 'Menghubungkan...'} 
-                disabled={loading || !isConnected} 
-                className='flex-1 bg-transparent px-2 py-3 text-sm focus:outline-none text-slate-700 dark:text-slate-200' 
-              />
-              
-              <button 
-                onClick={handleSend} 
-                disabled={loading || !isConnected || (!input.trim() && !selectedFile)} 
-                className='p-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-full transition-all shadow-lg shadow-blue-200 dark:shadow-none active:scale-90'
-              >
-                {loading ? <Loader2 className='w-5 h-5 animate-spin' /> : <Send className='w-5 h-5' />}
-              </button>
-            </div>
+                {msg.sender === 'bot' && (
+                  <div className='avatar shrink-0'>
+                    <div className='w-9 h-9 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm'>
+                      <Bot className='w-4 h-4 text-blue-600' />
+                    </div>
+                  </div>
+                )}
+
+                <div
+                  className={`message-bubble max-w-[90%] md:max-w-[85%] ${
+                    msg.sender === 'user'
+                      ? 'user-bubble text-white bg-blue-600 rounded-br-none p-3 rounded-2xl'
+                      : 'bot-bubble bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-100 dark:border-gray-700 rounded-bl-none p-5 rounded-2xl shadow-sm w-full'
+                  }`}
+                >
+                  {msg.attachmentUrl && (
+                    <div className='mb-3'>
+                      <Image
+                        src={msg.attachmentUrl}
+                        alt='Attachment'
+                        width={400}
+                        height={260}
+                        className='rounded-lg border border-white/10 object-contain'
+                      />
+                    </div>
+                  )}
+
+                  {/* === LOGIC RENDERING TABEL & TEXT === 
+                      Kita gunakan custom components yang MEMAKSA style tabel keluar
+                  */}
+                  {msg.sender === 'bot' ? (
+                    <div className='prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed overflow-x-auto'>
+                      <ReactMarkdown
+                        // 1. Pastikan remarkGfm dipasang di sini agar tabel terdeteksi
+                        remarkPlugins={[remarkGfm]}
+                        // 2. Ini kuncinya: Styling manual untuk setiap elemen markdown
+                        components={{
+                          // Styling untuk Tabel
+                          table: ({ node, ...props }) => (
+                            <div className='overflow-x-auto my-4 rounded-lg border border-gray-200 dark:border-gray-700'>
+                              <table
+                                className='min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm'
+                                {...props}
+                              />
+                            </div>
+                          ),
+                          thead: ({ node, ...props }) => (
+                            <thead
+                              className='bg-gray-50 dark:bg-gray-800'
+                              {...props}
+                            />
+                          ),
+                          tbody: ({ node, ...props }) => (
+                            <tbody
+                              className='divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900'
+                              {...props}
+                            />
+                          ),
+                          tr: ({ node, ...props }) => (
+                            <tr
+                              className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
+                              {...props}
+                            />
+                          ),
+                          th: ({ node, ...props }) => (
+                            <th
+                              className='px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700'
+                              {...props}
+                            />
+                          ),
+                          td: ({ node, ...props }) => (
+                            <td
+                              className='px-4 py-3 whitespace-normal text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 leading-relaxed'
+                              {...props}
+                            />
+                          ),
+
+                          // Styling untuk List & Numbering
+                          ul: ({ node, ...props }) => (
+                            <ul
+                              className='list-disc list-outside ml-6 my-3 space-y-1 text-gray-700 dark:text-gray-300'
+                              {...props}
+                            />
+                          ),
+                          ol: ({ node, ...props }) => (
+                            <ol
+                              className='list-decimal list-outside ml-6 my-3 space-y-1 text-gray-700 dark:text-gray-300'
+                              {...props}
+                            />
+                          ),
+                          li: ({ node, ...props }) => (
+                            <li className='pl-1' {...props} />
+                          ),
+
+                          // Styling untuk Bold & Paragraf
+                          strong: ({ node, ...props }) => (
+                            <strong
+                              className='font-bold text-gray-900 dark:text-white'
+                              {...props}
+                            />
+                          ),
+                          p: ({ node, ...props }) => (
+                            <p
+                              className='my-2 leading-7 text-gray-800 dark:text-gray-200'
+                              {...props}
+                            />
+                          ),
+
+                          // Styling untuk Link
+                          a: ({ node, ...props }) => (
+                            <a
+                              className='text-blue-600 dark:text-blue-400 hover:underline cursor-pointer font-medium'
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              {...props}
+                            />
+                          ),
+                        }}
+                      >
+                        {/* Pastikan ini variabel text dari message kamu */}
+                        {msg.text}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className='whitespace-pre-wrap text-sm'>{msg.text}</p>
+                  )}
+                </div>
+
+                {msg.sender === 'user' && (
+                  <div className='avatar shrink-0'>
+                    <div className='w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-xs font-semibold text-white shadow-sm'>
+                      You
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
           </div>
-          <p className='text-center text-[10px] text-slate-400 mt-4 font-medium'>AI can make mistakes. Check important info.</p>
+
+          {loading && (
+            <div className='flex items-center gap-3 mt-3'>
+              <div className='bg-white dark:bg-gray-800 p-3 rounded-2xl rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-2'>
+                <Loader2 className='w-4 h-4 animate-spin text-blue-600' />
+                <span className='text-xs text-gray-500 font-medium'>
+                  Sedang memproses...
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* INPUT AREA */}
+        <div className='chat-footer p-6 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800'>
+          {selectedFile && (
+            <div className='flex items-center space-x-2 mb-3 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-800'>
+              <FileImage className='w-4 h-4 text-blue-600' />
+              <span className='text-xs text-blue-700 dark:text-blue-300 truncate max-w-[240px]'>
+                {selectedFile.name}
+              </span>
+              <button
+                onClick={() => {
+                  setSelectedFile(null);
+                  if (fileInputRef.current) fileInputRef.current.value = '';
+                }}
+                className='ml-auto text-blue-400 hover:text-blue-600'
+              >
+                <X className='w-4 h-4' />
+              </button>
+            </div>
+          )}
+
+          <div className='flex items-center gap-3'>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className='p-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all'
+            >
+              <Paperclip className='w-5 h-5' />
+            </button>
+            <input
+              type='file'
+              ref={fileInputRef}
+              onChange={handleFileSelect}
+              className='hidden'
+              accept='.pdf,.jpg,.jpeg,.png,.txt'
+            />
+
+            <input
+              type='text'
+              placeholder={
+                selectedFile ? 'Tambahkan keterangan...' : 'Ketik pertanyaan...'
+              }
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={(e) => e.key === 'Enter' && !loading && handleSend()}
+              disabled={loading}
+              className='flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-full border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none px-4 py-3 text-sm'
+            />
+
+            <button
+              onClick={handleSend}
+              disabled={loading || (!input.trim() && !selectedFile)}
+              className='p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full disabled:bg-gray-300 shadow-md'
+            >
+              {loading ? (
+                <Loader2 className='w-5 h-5 animate-spin' />
+              ) : (
+                <Send className='w-5 h-5' />
+              )}
+            </button>
+          </div>
+          <p className='text-center text-[11px] text-gray-400 mt-2'>
+            Bot AI dapat melakukan kesalahan.
+          </p>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

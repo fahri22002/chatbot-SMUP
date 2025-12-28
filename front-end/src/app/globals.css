@@ -5,14 +5,21 @@
   --foreground: #0f172a;
   --card: #ffffff;
   --primary: #2563eb;
+
+  --muted: #6b7280;
+  --glass: rgba(255,255,255,0.06);
+  --chat-bg: #f1f5f9;
 }
 
+/* Dark mode overrides */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #020617;
     --foreground: #f8fafc;
     --card: #0f172a;
     --primary: #3b82f6;
+    --muted: #9ca3af;
+    --chat-bg: #071026;
   }
 }
 
@@ -23,27 +30,116 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Scrollbar */
+/* Custom Chat Layout Helpers */
+.chat-container {
+  border-radius: 14px;
+}
+
+/* Header */
+.chat-header {
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+}
+
+/* Chat body / messages */
+.chat-body {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  padding-bottom: 0.5rem;
+}
+
+/* Message row */
+.message-row {
+  align-items: flex-end;
+}
+
+/* Avatars */
+.avatar .w-9 {
+  width: 36px;
+  height: 36px;
+}
+
+/* Bubbles */
+.message-bubble {
+  padding: 12px 14px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(2,6,23,0.06);
+  word-wrap: break-word;
+}
+
+/* Bot bubble */
+.bot-bubble {
+  border-radius: 12px;
+}
+
+/* User bubble */
+.user-bubble {
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(37,99,235,0.14);
+}
+
+/* Make images inside bubbles responsive */
+.message-bubble img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+}
+
+/* Small status dot */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 4px rgba(0,0,0,0.02);
+}
+
+/* Footer / input */
+.chat-footer {
+  padding: 1.05rem;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+}
+
+/* Scrollbar inside chat */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
+  width: 8px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgba(148,163,184,0.25);
   border-radius: 10px;
 }
 .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: rgba(148,163,184,0.14);
 }
 
-/* Animations */
-@keyframes messageSlide {
-  from { opacity: 0; transform: translateY(10px); }
+/* Small responsive tweaks */
+@media (max-width: 640px) {
+  .chat-container {
+    border-radius: 12px;
+  }
+
+  .message-bubble {
+    padding: 10px 12px;
+  }
+
+  .chat-body {
+    padding: 1rem;
+  }
+}
+
+/* Message enter animation (subtle) */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
+.message-bubble {
+  animation: fadeInUp 180ms ease-out;
+}
 
-.animate-message {
-  animation: messageSlide 0.3s ease-out forwards;
+/* Make input & buttons visually aligned */
+.chat-footer .rounded-full {
+  min-width: 44px;
+  min-height: 44px;
 }
