@@ -10,7 +10,8 @@ load_dotenv()
 
 import websockets
 from websockets.server import WebSocketServerProtocol
-from bson import ObjectId
+from bson.objectid import ObjectId
+
 
 from db import chats_col, messages_col, device_tokens_col
 from model import make_chat_doc, make_message_doc, str_to_oid

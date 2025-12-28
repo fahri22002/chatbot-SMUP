@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { startHeartbeat } from '../../utils/heartbeat';
 import ReCAPTCHA from 'react-google-recaptcha';
 import {
   Send,
@@ -12,6 +11,8 @@ import {
   X,
   MessageCircle,
   RotateCcw,
+  Circle,
+  Sparkles
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
@@ -22,476 +23,259 @@ type Message = {
   attachmentUrl?: string;
 };
 
-const initialMessages: Message[] = [
-  {
-    sender: 'bot',
-    text: 'Selamat datang! Ada yang bisa saya bantu terkait informasi kampus?',
-  },
-];
-
 export default function Chatbot() {
   const { theme } = useTheme();
-
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      sender: 'bot',
+      text: 'Halo! Saya asisten virtual Anda. Ada yang bisa saya bantu hari ini?',
+    },
+  ]);
   const [input, setInput] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // --- STATE UNTUK FITUR WHATSAPP ---
   const [userMessageCount, setUserMessageCount] = useState(0);
   const [showWAPrompt, setShowWAPrompt] = useState(false);
-  // ---------------------------------------
+  const [showConsentModal, setShowConsentModal] = useState(true);
+  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
+  const socketRef = useRef<WebSocket | null>(null);
+  const chatIdRef = useRef<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-  const [showConsentModal, setShowConsentModal] = useState(false);
-  const [userConsent, setUserConsent] = useState<string | null>(null);
-  const [isCaptchaVerified, setIsCaptchaVerified] = useState(false);
 
-  // --- 1. NEW: useEffect untuk memantau userMessageCount ---
-  // Ini menyelesaikan error eslint karena 'userMessageCount' sekarang digunakan di sini
   useEffect(() => {
-    if (userMessageCount === 5) {
-      setShowWAPrompt(true);
-    }
+    if (!isCaptchaVerified) return;
+    const socket = new WebSocket("ws://localhost:8765");
+    socketRef.current = socket;
+
+    socket.onopen = () => {
+      setIsConnected(true);
+      const token = localStorage.getItem('deviceToken');
+      if (!token) {
+        socket.send(JSON.stringify({ action: "register_device" }));
+      } else {
+        socket.send(JSON.stringify({ action: "create_chat", deviceToken: token }));
+      }
+    };
+
+    socket.onmessage = async (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.action === "register_device" && data.deviceToken) {
+          localStorage.setItem('deviceToken', data.deviceToken);
+          socket.send(JSON.stringify({ action: "create_chat", deviceToken: data.deviceToken }));
+        }
+        if (data.action === "create_chat" && data.chatId) {
+          chatIdRef.current = data.chatId;
+        }
+        if (data.reply) {
+          setMessages(prev => [...prev, { sender: 'bot', text: data.reply }]);
+          setLoading(false);
+          setUserMessageCount(prev => prev + 1);
+        }
+        if (data.action === "ready_for_binary" && selectedFile) {
+          const arrayBuffer = await selectedFile.arrayBuffer();
+          socket.send(arrayBuffer);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    };
+
+    socket.onclose = () => setIsConnected(false);
+    return () => socket.close();
+  }, [isCaptchaVerified]);
+
+  useEffect(() => {
+    if (userMessageCount === 5) setShowWAPrompt(true);
   }, [userMessageCount]);
 
-  // --- LOGIKA SESI DAN CAPTCHA ---
-  const createNewChatSession = async (captchaToken: string) => {
-    const consentValue = userConsent || 'false';
-    try {
-      const res = await fetch('http://localhost:5000/api/create-chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          captchaToken: captchaToken,
-          consent: consentValue,
-        }),
-      });
-      if (res.ok) {
-        console.log('Sesi chat berhasil dibuat.');
-        setIsCaptchaVerified(true);
-      } else {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Gagal membuat sesi chat');
-      }
-    } catch (error: unknown) {
-      console.error('Error saat membuat sesi chat:', error);
-      let errorMessage = 'Gagal membuat sesi chat';
-      if (error instanceof Error) errorMessage = error.message;
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: 'bot',
-          text: `⚠️ Gagal verifikasi: ${errorMessage}. Silakan muat ulang halaman.`,
-        },
-      ]);
-      setIsCaptchaVerified(false);
-    }
-  };
-
-  useEffect(() => {
-    setUserConsent(null);
-
-    setShowConsentModal(true);
-  }, []);
-
-  const handleConsent = (hasAgreed: boolean) => {
-    const consentValue = hasAgreed ? 'true' : 'false';
-    setUserConsent(consentValue);
-    setShowConsentModal(false);
-    if (!hasAgreed) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: 'bot',
-          text: 'Baik, history chat untuk sesi ini tidak akan disimpan.',
-        },
-      ]);
-    }
-  };
-
-  const handleRetry = async () => {
-    const lastUserMessage = [...messages]
-      .reverse()
-      .find((m) => m.sender === 'user');
-
-    if (!lastUserMessage || loading) return;
-
-    // 2. Set loading
+  const handleSend = () => {
+    if (!isConnected || !chatIdRef.current || (!input.trim() && !selectedFile)) return;
+    const deviceToken = localStorage.getItem('deviceToken');
     setLoading(true);
 
-    try {
-      const canSaveHistory = userConsent === 'true';
-
-      const botResponse = await sendMessageToServer(
-        lastUserMessage.text,
-        null,
-        canSaveHistory
-      );
-
-      // 4. Tambahkan jawaban baru bot ke chat
-      setMessages((prev) => [...prev, { sender: 'bot', text: botResponse }]);
-
-      // Update counter pesan (untuk trigger WA prompt)
-      setUserMessageCount((prev) => prev + 1);
-    } catch (error) {
-      console.error('Retry error:', error);
-      setMessages((prev) => [
-        ...prev,
-        { sender: 'bot', text: '⚠️ Gagal melakukan regenerate response.' },
-      ]);
-    } finally {
-      setLoading(false);
+    if (selectedFile) {
+      socketRef.current?.send(JSON.stringify({
+        action: "send_message_with_attachment",
+        chatId: chatIdRef.current,
+        deviceToken,
+        msg: input,
+        filename: selectedFile.name,
+        filesize: selectedFile.size,
+        mimetype: selectedFile.type
+      }));
+      setMessages(prev => [...prev, { 
+        sender: 'user', 
+        text: input || "Mengirim lampiran...", 
+        attachmentUrl: URL.createObjectURL(selectedFile) 
+      }]);
+    } else {
+      socketRef.current?.send(JSON.stringify({
+        action: "send_message",
+        chatId: chatIdRef.current,
+        deviceToken,
+        msg: input
+      }));
+      setMessages(prev => [...prev, { sender: 'user', text: input }]);
     }
-  };
-
-  const handleCaptchaChange = (token: string | null) => {
-    if (token) createNewChatSession(token);
-    else setIsCaptchaVerified(false);
-  };
-
-  // --- LOGIKA FILE ---
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
-    }
-  };
-
-  const clearFile = () => {
-    setSelectedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  // --- LOGIKA PENGIRIMAN PESAN ---
-  const sendMessageToServer = async (
-    userMsg: string,
-    file: File | null,
-    canSaveHistory: boolean
-  ) => {
-    try {
-      setLoading(true);
-
-      const formData = new FormData();
-      formData.append('msg', userMsg);
-      formData.append('saveHistory', String(canSaveHistory));
-
-      if (file) {
-        formData.append('attachment', file);
-      }
-
-      const res = await fetch('http://localhost:5000/api/send-msg', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        if (errorData.refresh) window.location.reload();
-        throw new Error(errorData.message || 'Server error');
-      }
-      const data = await res.json();
-      return data.reply || 'Maaf, saya tidak dapat menemukan jawaban.';
-    } catch (error) {
-      console.error('Error fetching from Node.js backend:', error);
-      if (error instanceof Error) return `⚠️ Gagal terhubung: ${error.message}`;
-      return '⚠️ Gagal terhubung ke server.';
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSend = async () => {
-    if (
-      (!input.trim() && !selectedFile) ||
-      showConsentModal ||
-      !isCaptchaVerified
-    )
-      return;
-
-    const userMsg = input;
-    const currentFile = selectedFile;
-
-    const newMessage: Message = { sender: 'user', text: userMsg };
-
-    if (currentFile) {
-      newMessage.attachmentUrl = URL.createObjectURL(currentFile);
-    }
-
-    setMessages((prev) => [...prev, newMessage]);
-
-    // Reset Input
     setInput('');
-    clearFile();
-
-    const canSaveHistory = userConsent === 'true';
-    const botResponse = await sendMessageToServer(
-      userMsg,
-      currentFile,
-      canSaveHistory
-    );
-
-    setMessages((prev) => [...prev, { sender: 'bot', text: botResponse }]);
-
-    // --- 2. UPDATE LOGIC: Cukup increment, pengecekan pindah ke useEffect ---
-    setUserMessageCount((prev) => prev + 1);
-    // ------------------------------------------------------------------------
+    setSelectedFile(null);
   };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  useEffect(() => {
-    startHeartbeat();
-  }, []);
   return (
-    <section className='min-h-screen flex items-center justify-center bg-gray-100 dark:bg-black p-4 font-sans relative'>
-      {/* Modal Persetujuan */}
+    <section className='min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-0 sm:p-4 font-sans transition-colors duration-500'>
+      
+      {/* Modal Consent - Glassmorphism style */}
       {showConsentModal && (
-        <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
-          <div className='bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-sm w-full text-center border border-gray-200 dark:border-gray-700'>
-            <h3 className='text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4'>
-              Persetujuan History Chat
-            </h3>
-            <p className='text-sm text-gray-600 dark:text-gray-400 mb-6'>
-              Apakah Anda mengizinkan kami menyimpan history chat?
-            </p>
-            <div className='flex justify-center gap-4'>
-              <button
-                onClick={() => handleConsent(false)}
-                className='px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium transition-colors'
-              >
-                Tidak Setuju
-              </button>
-              <button
-                onClick={() => handleConsent(true)}
-                className='px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors'
-              >
-                Setuju
-              </button>
+        <div className='fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-[100] p-4'>
+          <div className='bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center transform transition-all scale-100'>
+            <div className='w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4'>
+              <Sparkles className='w-8 h-8 text-blue-600' />
+            </div>
+            <h3 className='text-xl font-bold mb-2 text-slate-900 dark:text-white'>Data & Privasi</h3>
+            <p className='text-sm text-slate-500 dark:text-slate-400 mb-8'>Izinkan kami menyimpan riwayat chat untuk meningkatkan kualitas layanan asisten kami.</p>
+            <div className='flex flex-col gap-3'>
+              <button onClick={() => setShowConsentModal(false)} className='w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all active:scale-95'>Setuju & Lanjutkan</button>
+              <button onClick={() => setShowConsentModal(false)} className='w-full py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all'>Lain kali</button>
             </div>
           </div>
         </div>
       )}
 
-      <div className='w-full max-w-4xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl flex flex-col min-h-[700px] relative'>
-        {/* Header */}
-        <header className='flex items-center gap-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 px-6 py-4 rounded-t-2xl'>
-          <div className='p-2 bg-blue-100 rounded-full'>
-            <Bot className='w-6 h-6 text-blue-600' />
-          </div>
-          <div>
-            <h1 className='text-lg font-bold text-gray-900 dark:text-gray-100 tracking-wide'>
-              Asisten Akademik
-            </h1>
-            <div className='flex items-center gap-2'>
-              <div className='w-2 h-2 rounded-full bg-green-500'></div>
-              <p className='text-xs text-gray-600 dark:text-gray-400'>Online</p>
+      <div className='w-full max-w-5xl h-[100vh] sm:h-[850px] bg-white dark:bg-slate-900 sm:border border-slate-200 dark:border-slate-800 sm:rounded-[2rem] shadow-2xl flex flex-col overflow-hidden relative'>
+        
+        {/* Header - Glassmorphism */}
+        <header className='flex items-center justify-between bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800 px-6 py-5 z-20'>
+          <div className='flex items-center gap-4'>
+            <div className='relative'>
+              <div className='p-2.5 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-2xl shadow-lg shadow-blue-200 dark:shadow-none'>
+                <Bot className='w-6 h-6 text-white' />
+              </div>
+              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-4 border-white dark:border-slate-900 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+            </div>
+            <div>
+              <h1 className='text-md font-bold text-slate-900 dark:text-white'>AI Akademik</h1>
+              <p className='text-[10px] uppercase tracking-wider font-semibold text-slate-400'>{isConnected ? 'System Online' : 'Connecting...'}</p>
             </div>
           </div>
         </header>
 
-        {/* Area Pesan */}
-        <div className='flex-1 overflow-y-auto flex flex-col gap-5 px-6 py-4 bg-gray-50 dark:bg-gray-800 relative'>
+        {/* Chat Area */}
+        <div className='flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-6 px-4 sm:px-8 py-8 bg-[#fdfdfd] dark:bg-slate-900/50'>
           {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`max-w-[85%] px-5 py-3 rounded-2xl text-base shadow-sm flex flex-col ${
-                msg.sender === 'user'
-                  ? 'self-end bg-blue-500 text-white rounded-br-lg'
-                  : 'self-start bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-bl-lg'
-              }`}
-            >
-              {msg.attachmentUrl && (
-                <div className='mb-2 mt-1 relative w-full h-auto'>
-                  <Image
-                    src={msg.attachmentUrl}
-                    alt='attachment'
-                    width={0}
-                    height={0}
-                    sizes='100vw'
-                    className='w-full h-auto rounded-lg border border-white/20'
-                    unoptimized
-                  />
+            <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-message`}>
+              <div className={`max-w-[85%] sm:max-w-[70%] group relative ${msg.sender === 'user' ? 'order-1' : 'order-2'}`}>
+                <div className={`px-5 py-3.5 rounded-[1.5rem] shadow-sm text-sm leading-relaxed ${
+                  msg.sender === 'user' 
+                  ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-tr-none' 
+                  : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-tl-none'
+                }`}>
+                  {msg.attachmentUrl && (
+                    <div className='mb-3 rounded-xl overflow-hidden border border-black/5'>
+                      <Image src={msg.attachmentUrl} alt='attachment' width={400} height={300} className='w-full object-cover' unoptimized />
+                    </div>
+                  )}
+                  <div dangerouslySetInnerHTML={{ __html: msg.text }} />
+                  
+                  {msg.sender === 'bot' && (
+                    <div className='mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity'>
+                      <button onClick={() => {}} className='p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md text-slate-400 transition-colors'>
+                        <RotateCcw className='w-3.5 h-3.5' />
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
-
-              <div
-                className={`text-sm leading-relaxed 
-                /* Styling untuk elemen HTML di dalam chat bubble */
-                [&_p]:mb-2 [&_p:last-child]:mb-0 
-                [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:mb-2
-                [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:mb-2
-                [&_li]:pl-1 [&_li]:mb-1
-                [&_strong]:font-bold
-                [&_a]:underline [&_a]:text-blue-200 hover:[&_a]:text-white
-                [&_table]:w-full [&_table]:border-collapse [&_table]:mb-2
-                [&_th]:border [&_th]:border-white/20 [&_th]:p-2 [&_th]:bg-black/10
-                [&_td]:border [&_td]:border-white/20 [&_td]:p-2
-              `}
-                dangerouslySetInnerHTML={{ __html: msg.text }}
-              />
-
-              {msg.sender === 'bot' &&
-                i === messages.length - 1 &&
-                !loading && (
-                  <div className='mt-2 pt-2 border-t border-gray-300 dark:border-gray-600 flex justify-end'>
-                    <button
-                      onClick={handleRetry}
-                      className='flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600'
-                      title='Buat ulang jawaban'
-                    >
-                      <RotateCcw className='w-3.5 h-3.5' />
-                      <span>Regenerate</span>
-                    </button>
-                  </div>
-                )}
+              </div>
             </div>
           ))}
-
           {loading && (
-            <div className='self-start flex items-center gap-2'>
-              <div className='p-2 bg-gray-200 dark:bg-gray-700 rounded-full'>
-                <Bot className='w-5 h-5 text-gray-700 dark:text-gray-100' />
-              </div>
-              <div className='bg-gray-200 dark:bg-gray-700 px-5 py-3 rounded-2xl flex items-center gap-1.5'>
-                <span className='w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce delay-75'></span>
-                <span className='w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce delay-200'></span>
-                <span className='w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full animate-bounce delay-300'></span>
+            <div className='flex justify-start animate-message'>
+              <div className='bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 px-5 py-4 rounded-[1.5rem] rounded-tl-none'>
+                <div className='flex gap-1.5'>
+                  <span className='w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce'></span>
+                  <span className='w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]'></span>
+                  <span className='w-1.5 h-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.4s]'></span>
+                </div>
               </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Captcha Area */}
-        {!showConsentModal && !isCaptchaVerified && (
-          <div className='flex flex-col items-center justify-center px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800'>
-            {recaptchaSiteKey && (
-              <ReCAPTCHA
-                sitekey={recaptchaSiteKey}
-                onChange={handleCaptchaChange}
-                theme={theme === 'dark' ? 'dark' : 'light'}
-              />
-            )}
-          </div>
-        )}
-
-        {/* --- FITUR NOTIFIKASI WHATSAPP (Floating Bubble) --- */}
-        {showWAPrompt && (
-          <div className='absolute bottom-[90px] left-4 right-4 z-20 animate-in slide-in-from-bottom-5 fade-in duration-500'>
-            <div className='bg-white dark:bg-gray-800 border border-blue-100 dark:border-gray-600 rounded-xl shadow-xl p-4 flex flex-col sm:flex-row items-center gap-4 relative'>
-              {/* Tombol Close Kecil */}
-              <button
-                onClick={() => setShowWAPrompt(false)}
-                className='absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200'
-              >
-                <X className='w-4 h-4' />
-              </button>
-
-              <div className='p-3 bg-green-100 dark:bg-green-900/30 rounded-full'>
-                <MessageCircle className='w-6 h-6 text-green-600 dark:text-green-400' />
-              </div>
-
-              <div className='flex-1 text-center sm:text-left'>
-                <h4 className='font-semibold text-gray-900 dark:text-white text-sm mb-1'>
-                  Apakah jawaban chatbot membantu?
-                </h4>
-                <p className='text-xs text-gray-600 dark:text-gray-300'>
-                  Jika Anda masih memiliki pertanyaan spesifik atau kendala
-                  lain, Anda dapat menghubungi Admin langsung.
-                </p>
-              </div>
-
-              <a
-                // Ganti nomor WA di sini
-                href='https://api.whatsapp.com/send/?phone=%2B6281122301410&text&type=phone_number&app_absent=0'
-                target='_blank'
-                rel='noopener noreferrer'
-                className='whitespace-nowrap px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2 shadow-md'
-              >
-                <MessageCircle className='w-4 h-4' />
-                Chat Admin via WA
-              </a>
-            </div>
-          </div>
-        )}
-        {/* ---------------------------------------------------- */}
-
-        {/* Area Input & File Upload */}
-        <div className='flex flex-col border-t border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-b-2xl relative z-30'>
-          {selectedFile && (
-            <div className='px-4 pt-3 flex items-center gap-2'>
-              <div className='bg-blue-50 dark:bg-blue-900/20 px-3 py-2 rounded-lg flex items-center gap-2 border border-blue-100 dark:border-blue-800'>
-                <FileImage className='w-4 h-4 text-blue-600 dark:text-blue-400' />
-                <span className='text-xs text-blue-700 dark:text-blue-300 max-w-[200px] truncate'>
-                  {selectedFile.name}
-                </span>
-                <button
-                  onClick={clearFile}
-                  className='ml-2 text-gray-500 hover:text-red-500'
-                >
-                  <X className='w-4 h-4' />
-                </button>
-              </div>
+        {/* Captcha & Footer Area */}
+        <div className='px-4 sm:px-8 pb-6 bg-gradient-to-t from-white dark:from-slate-900 via-white dark:via-slate-900 to-transparent pt-4'>
+          
+          {!isCaptchaVerified && !showConsentModal && (
+            <div className='flex flex-col items-center gap-4 py-4 mb-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl'>
+              <p className='text-xs font-medium text-slate-500'>Verifikasi bahwa Anda manusia</p>
+              {recaptchaSiteKey && (
+                <ReCAPTCHA sitekey={recaptchaSiteKey} onChange={(token) => setIsCaptchaVerified(!!token)} theme={theme === 'dark' ? 'dark' : 'light'} />
+              )}
             </div>
           )}
 
-          <div className='flex items-center gap-3 px-4 py-3'>
-            <input
-              type='file'
-              ref={fileInputRef}
-              onChange={handleFileSelect}
-              className='hidden'
-              accept='image/*'
-            />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={loading || showConsentModal || !isCaptchaVerified}
-              className='p-3 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors disabled:opacity-50'
-              title='Upload Gambar'
-            >
-              <Paperclip className='w-5 h-5' />
-            </button>
+          {/* WA Prompt - Floating Style */}
+          {showWAPrompt && (
+            <div className='mb-4 animate-in fade-in slide-in-from-bottom-4 duration-500 p-4 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30 rounded-2xl flex items-center gap-4'>
+              <div className='p-2.5 bg-green-500 rounded-xl'><MessageCircle className='w-5 h-5 text-white' /></div>
+              <div className='flex-1'>
+                <h4 className='font-bold text-sm text-green-900 dark:text-green-100'>Butuh bantuan manusia?</h4>
+                <p className='text-xs text-green-700 dark:text-green-300'>Hubungi Admin WhatsApp kami sekarang.</p>
+              </div>
+              <a href='https://wa.me/6281122301410' target='_blank' className='px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition-colors'>Chat WA</a>
+              <button onClick={() => setShowWAPrompt(false)} className='text-green-400 hover:text-green-600'><X className='w-4 h-4' /></button>
+            </div>
+          )}
 
-            <input
-              type='text'
-              placeholder={
-                selectedFile
-                  ? 'Tambahkan keterangan...'
-                  : 'Ketik pertanyaan Anda...'
-              }
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !loading && handleSend()}
-              disabled={loading || showConsentModal || !isCaptchaVerified}
-              className='flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-xl border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none px-4 py-3 transition-all duration-300 disabled:opacity-50'
-            />
-
-            <button
-              onClick={handleSend}
-              disabled={
-                loading ||
-                (!input.trim() && !selectedFile) ||
-                showConsentModal ||
-                !isCaptchaVerified
-              }
-              className='p-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500'
-            >
-              {loading ? (
-                <Loader2 className='w-5 h-5 animate-spin' />
-              ) : (
-                <Send className='w-5 h-5' />
-              )}
-            </button>
+          {/* Input Interface */}
+          <div className={`relative group transition-all duration-300 ${!isCaptchaVerified ? 'opacity-20 pointer-events-none grayscale' : ''}`}>
+            {selectedFile && (
+              <div className='absolute -top-14 left-0 right-0 flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-t-xl text-xs font-medium animate-in slide-in-from-bottom-2'>
+                <FileImage className='w-4 h-4' />
+                <span className='truncate flex-1'>{selectedFile.name}</span>
+                <button onClick={() => setSelectedFile(null)}><X className='w-4 h-4 hover:scale-125 transition-transform' /></button>
+              </div>
+            )}
+            
+            <div className='flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-2 rounded-[1.8rem] border border-transparent focus-within:border-blue-500/50 focus-within:bg-white dark:focus-within:bg-slate-800 focus-within:shadow-xl transition-all'>
+              <input type='file' ref={fileInputRef} hidden onChange={(e) => setSelectedFile(e.target.files?.[0] || null)} accept="image/*,application/pdf" />
+              <button 
+                onClick={() => fileInputRef.current?.click()} 
+                disabled={loading || !isConnected} 
+                className='p-3 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-all'
+              >
+                <Paperclip className='w-5 h-5' />
+              </button>
+              
+              <input 
+                type='text' 
+                value={input} 
+                onChange={(e) => setInput(e.target.value)} 
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()} 
+                placeholder={isConnected ? 'Tanyakan sesuatu...' : 'Menghubungkan...'} 
+                disabled={loading || !isConnected} 
+                className='flex-1 bg-transparent px-2 py-3 text-sm focus:outline-none text-slate-700 dark:text-slate-200' 
+              />
+              
+              <button 
+                onClick={handleSend} 
+                disabled={loading || !isConnected || (!input.trim() && !selectedFile)} 
+                className='p-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-full transition-all shadow-lg shadow-blue-200 dark:shadow-none active:scale-90'
+              >
+                {loading ? <Loader2 className='w-5 h-5 animate-spin' /> : <Send className='w-5 h-5' />}
+              </button>
+            </div>
           </div>
+          <p className='text-center text-[10px] text-slate-400 mt-4 font-medium'>AI can make mistakes. Check important info.</p>
         </div>
       </div>
     </section>

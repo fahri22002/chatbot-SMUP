@@ -4,7 +4,7 @@ const { Admin } = require('../models/adminModel');
 const axios = require('axios');
 const path = require('path');
 const fs = require('fs');
-const { initMCP } = require("./mcp/mcpClient");
+
 
 // const { admin } = require("../auth/middleware.js");
 
@@ -60,7 +60,6 @@ const getChat = async (req, res) => {
  */
 const postMsg = async (req, res) => {
   try {
-    const mcp = await initMCP();
     // Pastikan chat sudah dibuat
     if (!req.session.chatId) {
       return res.status(400).json({ 
@@ -122,10 +121,7 @@ const postMsg = async (req, res) => {
       message: msg
     });
     const replyText = response.data.Reply;
-    // const reply = await mcp.callTool("rag_answer", {
-    //   question: msg
-    // });
-    // const replyText = reply.result;
+
     const newReply = new Message({
       chatId: req.session.chatId,
       msg: replyText,
