@@ -129,4 +129,4 @@ start_scheduler()
 app = web.Application()
 app.router.add_get('/public/{path:.*}', handle_static)
 
-web.run_app(app, port=3067)
+web.run_app(app, port=3000)
