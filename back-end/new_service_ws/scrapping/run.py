@@ -14,7 +14,7 @@ if platform.system() == "Windows":
     command = [
         "start", 
         "cmd", 
-        "/k",  # /k agar terminal tetap terbuka setelah program selesai
+        "/c",  # /k agar terminal tetap terbuka setelah program selesai, /c untuk menutupnya
         f"python \"{os.path.join(current_dir, worker_filename)}\""
     ]
     # CREATE_NEW_CONSOLE memastikan jendela baru

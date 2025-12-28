@@ -28,7 +28,7 @@ def start_scheduler():
             schedule.run_pending()
             time.sleep(1)
 
-    # Atur jadwal
+    # Atur jadwal - jam 1 malam saja
     schedule.every().day.at("01:00").do(job)
 
     # Thread daemon
@@ -125,7 +125,8 @@ async def get_messages(
         "messages": results
     })
 
+start_scheduler()
 app = web.Application()
 app.router.add_get('/public/{path:.*}', handle_static)
 
-web.run_app(app, port=3000)
+web.run_app(app, port=3067)
