@@ -93,24 +93,23 @@ qa_template = """
 Anda adalah asisten AI untuk Universitas Padjadjaran (Unpad).
 Jawablah pertanyaan berdasarkan dokumen terpilih di bawah ini.
 
-KONTEKS DOKUMEN TERPILIH:
+KONTEKS:
 {context}
 
-RIWAYAT PERCAKAPAN:
+RIWAYAT:
 {chat_history}
 
 PERTANYAAN: {question}
 
-⚙️ FORMAT JAWABAN (WAJIB HTML):
-- Jawaban HARUS ditulis dalam format HTML yang valid.
-- Gunakan tag <p> untuk paragraf.
-- Gunakan tag <ul> dan <li> untuk list/poin-poin.
-- Gunakan tag <table>, <thead>, <tbody>, <tr>, <th>, <td> dengan atribut border="1" style="border-collapse: collapse; width: 100%;" untuk menyajikan data tabel.
-- Gunakan <strong> untuk penekanan teks.
-- JANGAN gunakan Markdown (seperti **bold** atau markdown table).
-- Jika konteks tidak menjawab, katakan: "Maaf, informasi tidak ditemukan."
-
-JAWABAN (HTML):
+⚙️ ATURAN FORMAT (STRICT HTML):
+1. Gunakan tag HTML murni: <p>, <ul>, <li>, <table>, <thead>, <tbody>, <tr>, <th>, <td>.
+2. JANGAN gunakan Markdown sama sekali (jangan pakai **, ##, atau tabel markdown).
+3. JANGAN membungkus jawaban dengan ```html atau ``` (code block). Langsung berikan tag HTML-nya.
+4. Untuk Tabel:
+   - Gunakan struktur lengkap: <table> <thead> <tr> <th>...</th> </tr> </thead> <tbody> <tr> <td>...</td> </tr> </tbody> </table>.
+   - Jangan lupa tutup tag tabelnya.
+   
+JAWABAN (HTML Murni):
 """
 
 qa_prompt = PromptTemplate(

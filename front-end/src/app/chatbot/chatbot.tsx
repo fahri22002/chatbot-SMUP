@@ -9,15 +9,16 @@ import {
   Paperclip,
   FileImage,
   X,
-  MessageCircle,
+  // MessageCircle, // Dihapus karena tidak terpakai
   RotateCcw,
 } from 'lucide-react';
-import { useTheme } from 'next-themes';
+// import { useTheme } from 'next-themes'; // Dihapus karena 'theme' tidak terpakai
 import Image from 'next/image';
 
 // --- IMPORT WAJIB UNTUK TABEL & FORMATTING ---
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
 type Message = {
   sender: 'bot' | 'user';
@@ -33,7 +34,7 @@ const initialMessages: Message[] = [
 ];
 
 export default function Chatbot() {
-  const { theme } = useTheme();
+  // const { theme } = useTheme(); // Dihapus karena tidak digunakan
 
   // --- STATE UTAMA ---
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -43,8 +44,6 @@ export default function Chatbot() {
 
   // --- STATE PENDUKUNG ---
   const [isWsConnected, setIsWsConnected] = useState(false);
-  const [userMessageCount, setUserMessageCount] = useState(0);
-  const [showWAPrompt, setShowWAPrompt] = useState(false);
 
   // --- REFS ---
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -52,11 +51,11 @@ export default function Chatbot() {
   const ws = useRef<WebSocket | null>(null);
 
   // --- KONFIGURASI URL ---
-  const HTTP_API_URL = 'http://127.0.0.1:8080'; // Jalur RAG/Reranking (Otak)
-  const WS_URL = 'ws://localhost:8765'; // Jalur Stream Activity (Sinyal)
+  const HTTP_API_URL = 'http://127.0.0.1:8080';
+  const WS_URL = 'ws://localhost:8765';
 
   // ----------------------------------------------------------------------
-  // 1. WEBSOCKET SETUP (HANYA UNTUK STREAM ACTIVITY)
+  // 1. WEBSOCKET SETUP
   // ----------------------------------------------------------------------
   useEffect(() => {
     if (ws.current?.readyState === WebSocket.OPEN) return;
@@ -83,7 +82,11 @@ export default function Chatbot() {
     };
   }, []);
 
-  const streamActivity = (activityType: string, payload: any = {}) => {
+  // PERBAIKAN: Mengganti 'any' dengan 'Record<string, unknown>'
+  const streamActivity = (
+    activityType: string,
+    payload: Record<string, unknown> = {}
+  ) => {
     if (ws.current?.readyState === WebSocket.OPEN) {
       ws.current.send(
         JSON.stringify({
@@ -97,7 +100,7 @@ export default function Chatbot() {
   };
 
   // ----------------------------------------------------------------------
-  // 2. HTTP LOGIC (CORE RAG & RERANKING)
+  // 2. HTTP LOGIC
   // ----------------------------------------------------------------------
 
   const uploadDocumentHttp = async (file: File) => {
@@ -162,7 +165,6 @@ export default function Chatbot() {
         await uploadDocumentHttp(currentFile);
       }
 
-      // Tips: Tambahkan instruksi implisit agar Bot menggunakan Markdown Table
       let queryText = userMsg;
       if (!queryText && currentFile) {
         queryText = `Saya mengunggah dokumen ${currentFile.name}, tolong jelaskan ringkasannya.`;
@@ -174,8 +176,6 @@ export default function Chatbot() {
         ...prev,
         { sender: 'bot', text: botResponseText },
       ]);
-
-      setUserMessageCount((prev) => prev + 1);
     } catch (error) {
       console.error('Error flow:', error);
       setMessages((prev) => [
@@ -197,9 +197,11 @@ export default function Chatbot() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  useEffect(() => {
+  // Logic ini dikomentari karena 'setShowWAPrompt' tidak didefinisikan (diatas sudah dikomentari)
+  /* useEffect(() => {
     if (userMessageCount === 5) setShowWAPrompt(true);
   }, [userMessageCount]);
+  */
 
   useEffect(() => {
     startHeartbeat();
@@ -282,18 +284,14 @@ export default function Chatbot() {
                     </div>
                   )}
 
-                  {/* === LOGIC RENDERING TABEL & TEXT === 
-                      Kita gunakan custom components yang MEMAKSA style tabel keluar
-                  */}
                   {msg.sender === 'bot' ? (
                     <div className='prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed overflow-x-auto'>
                       <ReactMarkdown
-                        // 1. Pastikan remarkGfm dipasang di sini agar tabel terdeteksi
                         remarkPlugins={[remarkGfm]}
-                        // 2. Ini kuncinya: Styling manual untuk setiap elemen markdown
+                        rehypePlugins={[rehypeRaw]}
                         components={{
-                          // Styling untuk Tabel
-                          table: ({ node, ...props }) => (
+                          // PERBAIKAN: Hapus 'node' dari parameter karena tidak dipakai
+                          table: (props) => (
                             <div className='overflow-x-auto my-4 rounded-lg border border-gray-200 dark:border-gray-700'>
                               <table
                                 className='min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm'
@@ -301,70 +299,62 @@ export default function Chatbot() {
                               />
                             </div>
                           ),
-                          thead: ({ node, ...props }) => (
+                          thead: (props) => (
                             <thead
                               className='bg-gray-50 dark:bg-gray-800'
                               {...props}
                             />
                           ),
-                          tbody: ({ node, ...props }) => (
+                          tbody: (props) => (
                             <tbody
                               className='divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900'
                               {...props}
                             />
                           ),
-                          tr: ({ node, ...props }) => (
+                          tr: (props) => (
                             <tr
                               className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
                               {...props}
                             />
                           ),
-                          th: ({ node, ...props }) => (
+                          th: (props) => (
                             <th
                               className='px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700'
                               {...props}
                             />
                           ),
-                          td: ({ node, ...props }) => (
+                          td: (props) => (
                             <td
                               className='px-4 py-3 whitespace-normal text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 leading-relaxed'
                               {...props}
                             />
                           ),
-
-                          // Styling untuk List & Numbering
-                          ul: ({ node, ...props }) => (
+                          ul: (props) => (
                             <ul
                               className='list-disc list-outside ml-6 my-3 space-y-1 text-gray-700 dark:text-gray-300'
                               {...props}
                             />
                           ),
-                          ol: ({ node, ...props }) => (
+                          ol: (props) => (
                             <ol
                               className='list-decimal list-outside ml-6 my-3 space-y-1 text-gray-700 dark:text-gray-300'
                               {...props}
                             />
                           ),
-                          li: ({ node, ...props }) => (
-                            <li className='pl-1' {...props} />
-                          ),
-
-                          // Styling untuk Bold & Paragraf
-                          strong: ({ node, ...props }) => (
+                          li: (props) => <li className='pl-1' {...props} />,
+                          strong: (props) => (
                             <strong
                               className='font-bold text-gray-900 dark:text-white'
                               {...props}
                             />
                           ),
-                          p: ({ node, ...props }) => (
+                          p: (props) => (
                             <p
                               className='my-2 leading-7 text-gray-800 dark:text-gray-200'
                               {...props}
                             />
                           ),
-
-                          // Styling untuk Link
-                          a: ({ node, ...props }) => (
+                          a: (props) => (
                             <a
                               className='text-blue-600 dark:text-blue-400 hover:underline cursor-pointer font-medium'
                               target='_blank'
@@ -374,7 +364,6 @@ export default function Chatbot() {
                           ),
                         }}
                       >
-                        {/* Pastikan ini variabel text dari message kamu */}
                         {msg.text}
                       </ReactMarkdown>
                     </div>
