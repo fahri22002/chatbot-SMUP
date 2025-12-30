@@ -60,6 +60,21 @@ function log(msg){
   logArea.textContent += `[${time}] ${msg}\n`;
   logArea.scrollTop = logArea.scrollHeight;
 }
+function renderReply(htmlContent) {
+  if (typeof htmlContent !== "string") return;
+
+  const box = document.getElementById("replyBox");
+
+  // clear isi lama (force refresh)
+  box.innerHTML = "";
+
+  // render reply baru
+  box.innerHTML = htmlContent;
+
+  // optional: scroll ke bawah jika konten panjang
+  box.scrollTop = box.scrollHeight;
+}
+
 
 document.getElementById("connectBtn").onclick = () => {
   const url = document.getElementById("wsUrl").value;
@@ -81,6 +96,16 @@ document.getElementById("connectBtn").onclick = () => {
       try {
         const d = JSON.parse(ev.data);
         log("RECV: " + JSON.stringify(d));
+
+        // HANDLE HTML REPLY FROM BOT
+        if ((d.action === "send_message" ||
+      // false )&&
+        d.action === "send_message_with_attachment") && 
+        Object.prototype.hasOwnProperty.call(d, "reply") &&
+        typeof d.reply === "string") {
+          renderReply(d.reply);
+        }
+
                 // REGISTER DEVICE HANDLER
         if (d.action === "register_device") {
             localStorage.deviceToken = d.deviceToken;
@@ -195,5 +220,15 @@ document.getElementById("sendWithFileBtn").onclick = async () => {
   }
 };
 </script>
+<hr/>
+
+<div>
+  <h4>Bot Reply (HTML Render)</h4>
+  <div id="replyBox"
+       style="min-height:150px; border:1px solid #ccc; padding:10px; background:#fff;">
+    <em>Belum ada balasan</em>
+  </div>
+</div>
+
 </body>
 </html>
