@@ -1,0 +1,337 @@
+URL page ini: https://smup.unpad.ac.id/spesialis-dan-subspesialis
+
+<li><a>SMUP at glance</a></li>
+<li><a>Misi dan Prinsip</a></li>
+<li><a>Tujuan</a></li>
+<li><a>Tugas dan Fungsi</a></li>
+<li><a>Landasan Hukum</a></li>
+<li><a>Prosedur Sanggah</a></li>
+<li><a>Seleksi Nasional Berdasarkan Prestasi (SNBP)</a></li>
+<li><a>Seleksi Nasional Berdasarkan Tes (SNBT)</a></li>
+<li><a>Skema Ujian SMUP</a></li>
+<li><a>Skema UTBK dan Rapor</a></li>
+<li><a>Minat dan Bakat / Prestasi Non Akademik</a></li>
+<li><a>Seleksi Kelas International / IUP</a></li>
+<li><a>Seleksi Disabilitas</a></li>
+<li><a>Mekanisme Pengumuman</a></li>
+<li><a>Beasiswa Program Doktoral Padjadjaran (BPDP)</a></li>
+<li><a>Beasiswa Unggulan Pascasarjana Padjadjaran (BUPP)</a></li>
+<li><a>Beasiswa PMDSU</a></li>
+<li><a>Beasiswa LPDP</a></li>
+<li><a>Beasiswa Pendidikan Indonesia</a></li>
+<li><a>Beasiswa JFLS</a></li>
+<li><a>Beasiswa BRIN</a></li>
+<li><a>Magister</a></li>
+<li><a>Magister Berbasis Project</a></li>
+<li><a>Magister Double Degree</a></li>
+<li><a>Magister Rekognisi Pembelajaran Lampau (RPL)</a></li>
+<li><a>Profesi</a></li>
+<li><a>Spesialis dan Subspesialis</a></li>
+<li><a>Doktor</a></li>
+<li><a>Kepakaran Dosen</a></li>
+<li><a>International Program</a></li>
+<li><a>International Student Admission</a></li>
+<li><a>Fakultas</a></li>
+<li><a>Blog</a></li>
+<div>
+					Quick Menu				</div>
+<li><a>Pendaftaran</a></li>
+<li><a>Metode Pembayaran</a></li>
+<li><a>FAQ</a></li>
+<div>
+									Pascasarjana								</div>
+<h1>
+									Spesialis dan Subspesialis								</h1>
+<div></div>
+<div>Persyaratan</div>
+<div>Persyaratan Khusus FK (Spesialis)</div>
+<div>Persyaratan Khusus FK (Subspesialis)</div>
+<div>Persyaratan Khusus FKG (Spesialis)</div>
+<div>Persyaratan Khusus Farmasi (Spesialis)</div>
+<div>Persyaratan Khusus Keperawatan (Spesialis)</div>
+<div>Program Studi</div>
+<div>Prosedur Pendaftaran</div>
+<div>Tanggal Penting</div>
+<div>Kriteria Penilaian</div>
+<div>BPP Spesialis</div>
+<div>BPP Subspesialis</div>
+<div>Jadwal Ujian / Wawancara</div>
+<div>Permohonan Letter of Acceptance (LoA)</div>
+<h2>Persyaratan</h2>
+<p><!-- wp:heading --></p>
+<p>1. Warga Negara Indonesia atau Warga Negara Asing.</p>
+<p>2. Lulusan program profesi dokter yang terakreditasi oleh BAN PT/LAM-PTKes bagi calon mahasiswa program spesialis atau lulusan program spesialis yang terakreditasi oleh BAN PT/LAM-PTKes bagi calon mahasiswa program subspesialis).</p>
+<p>3. Sertifikat <strong>Tes Kemampuan Akademik (TKA) </strong>dari <a>Pusat Inovasi Psikologi Universitas Padjadajaran (PIP Unpad)</a> atau Tes Potensi Akademik (TPA) institusi penyelenggara resmi lainnya yang diakui UNPAD, yaitu <strong>PLTI Himpsi; UGM; UNAIR; UI; BAPPENAS </strong>dengan <strong>minimal skor 450 (kecuali PPDS  minimal skor 475)</strong>.</p>
+<p>4. Sertifikat Kemampuan Bahasa Inggris dengan <strong>minimal skor 450 (kecuali PPDS  minimal skor 475)</strong> dari <a><strong><em>English Language Test</em> (ELT) / Tes Kemampuan Bahasa Inggris (TKBI) UNPAD</strong></a> yang masih berlaku (maksimal 2 tahun) atau tes kemampuan Bahasa Inggris dari institusi penyelenggara resmi yang diakui UNPAD yaitu:</p>
+<p><!-- /wp:heading --></p>
+<p><!-- /wp:list --></p>
+<p><!-- /wp:list-item --></p>
+<p><!-- wp:list {"ordered":true} --></p>
+<li>
+<ol><!-- wp:list-item --></ol>
+</li>
+<p><!-- /wp:list --> <!-- wp:table --></p>
+<th>No.</th>
+<th>Jenis Tes</th>
+<th>Institusi Penerbit Sertifikat</th>
+<td>1</td>
+<td>English Language Test (ELT) / Tes Kemampuan Bahasa Inggris (TKBI) / English Language Proficiency Test / Test of English Proficiency (TOEP)</td>
+<td><a>Universitas Padjadjaran (Unpad)</a><br/>
+<a>Pusat Layanan Tes Indonesia (PLTI)</a><br/>
+<a>Duolingo</a></td>
+<td>2</td>
+<td>International English Language Testing System (IELTS)</td>
+<td><a>British Council</a><br/>
+<a>IALF</a><br/>
+<a>IDP</a></td>
+<td>3</td>
+<td>Test of English as a Foreign Language (TOEFL) IBT</td>
+<td>International TOEFL</td>
+<li>Catatan: Pendaftar yang menggunakan <strong>sertifikat Bahasa Inggris atau test TOEFL di luar lembaga resmi yang tertulis di atas</strong>, akan membutuhkan waktu lama (&gt; 1 bulan) untuk proses verifikasi ke lembaga resmi penyelenggara, sehingga kemungkinan bagi pendaftar yang eligible <strong>tidak akan terpanggil wawancara sesuai sesi seleksi/ gelombang dimana peserta mendaftar</strong>.</li>
+<li>Bagi pendaftar yang tidak eligible untuk wawancara dalam satu sesi seleksi, akan diikutkan ke sesi seleksi berikutnya jika telah memperbaiki/ melengkapi dokumen yang kurang <strong>tanpa harus membayar biaya pendaftaran kembali kalau masih dalam gelombang yang sama</strong>.</li>
+<li>Bagi peserta yang mempunyai <strong>publikasi ilmiah di jurnal internasional bereputasi (Q3)</strong> menurut <a><u>SJR : Scientific Journal Rankings – SCImago </u></a>sebagai penulis pertama, tidak diwajibkan memiliki dan mengupload nilai TKA/TPA dan TKBI ketika mendaftar.</li>
+<p>5. <strong>Memiliki nilai Tes MMPI bagi Peserta Program Pendidikan Dokter Spesialis dan Subspesialis di RS Unpad Jatinangor atau RSUP Dr. Hasan Sadikin Bandung</strong>. Tes MMPI (Minnesota Multiphasic Personality Inventory) bagi peserta Program Pendidikan Dokter Spesialis dan Subspesialis Fakultas Kedokteran Unpad dapat dilaksanakan Di RS Unpad, Gedung Pamitran dan Gedung Magister Manajemen.<br/>
+Hari : Senin – Jumat<br/>
+Pukul : 08.00 – 16.00 WIB</p>
+<th>Alamat</th>
+<th>Contact Person</th>
+<td>RS Unpad (Jatinangor)<br/>
+Jl. Ir Soekarno Km. 21 ( Klinik MCU lantai 4)</td>
+<td><a>CP Hesti (087718536799)</a></td>
+<td>Gedung Pamitran<br/>
+Jl. Prof Eyckman No. 38, Sukajadi, Bandung</td>
+<td><a>CP Muti (083128381205)</a></td>
+<td>Gedung Magister Manjemen (Dipatiukur)<br/>
+Jl. gedung MM DU 46 (lantai 1)</td>
+<td><a>CP Ardhi 081461164051</a></td>
+<li>Ket : Harga 475.000 + admin 30.000<br/>
+Pembayaran dapat dilakukan melalui rekening BJB an Rumah Sakit Unpad (0025032024000)</li>
+<p>6. Statement of Purpose (Pernyataan Tujuan) dalam Bahasa Indonesia atau Bahasa Inggris yang memuat hal sebagai berikut:</p>
+<li>Perkenalkan diri, minat dan motivasi Anda (Introduce yourself, your interests and motivations.)</li>
+<li>Jelaskan dengan singkat perjalanan studi sarjana dan pascasarjana Anda(Summarize your undergraduate and previous graduate career)</li>
+<li>Diskusikan relevansi dari aktivitas dan kegiatan Anda belakangan ini (Discuss the relevance of your recent and current activities)</li>
+<li>Jelaskan minat akademis Anda (Elaborate on your academic interests)</li>
+<li></li>
+<p>7. Membayar biaya pendaftaran ke Bank yang ditunjuk Unpad dengan sebelumnya mencetak nomor tagihan yang diperoleh pada saat pendaftaran online sebesar Rp. 1.250.000 untuk Program Spesialis dan Rp. 1.750.000 untuk Program Subspesialis.</p>
+<p>8. Mencetak atau menyimpan kartu peserta ujian yang diperoleh setelah melakukan pembayaran di laman <a>https://admission.unpad.ac.id/en</a></p>
+<p><strong>9. Hanya peserta yang lolos administrasi akan dipanggil untuk tahapan seleksi berikutnya berupa ujian/ wawancara selanjutnya</strong></p>
+<h2>Persyaratan Khusus FK (Spesialis)</h2>
+<p><!-- wp:paragraph --></p>
+<p><strong>PERSYARATAN KHUSUS PENERIMAAN PESERTA PROGRAM PENDIDIKAN DOKTER SPESIALIS (PPDS)</strong></p>
+<p><!-- /wp:paragraph --> <!-- wp:paragraph --></p>
+<p><strong>FAKULTAS KEDOKTERAN UNIVERSITAS PADJADJARAN</strong></p>
+<p>Update: 15 Oktober 2025</p>
+<p>Persyaratan Khusus Fakultas (diverifikasi oleh Prodi Spesialis) <strong>WAJIB</strong></p>
+<li>Ijazah dan transkrip Asli Sarjana Kedokteran</li>
+<li>Ijazah dan transkrip Asli Profesi</li>
+<li>Surat Tanda Registrasi (STR) Dokter dari Konsil Kedokteran Indonesia yang masih berlaku</li>
+<li>Surat Ijin Praktek (SIP) Dokter Umum terakhir (yang masih berlaku)</li>
+<li>Surat Keterangan dari pimpinan institusi bahwa pelamar telah melaksanakan Internship dan telah bekerja di Institusi Pelayanan Kesehatan (Rumah Sakit Pemerintah atau Swasta, maupun Klinik) selama 1 (satu) tahun sejak diterbitkannya Surat Ijin Praktek (SIP) Dokter Umum.</li>
+<li>Surat rekomendasi dari Ikatan Dokter Indonesia (IDI) setempat yang menyatakan aktif keanggotaan dan tidak pernah melakukan malpraktek atau melakukan pelanggaran kode etik kedokteran.</li>
+<li>Mengikuti Tes Psikologi Offline yang diselenggarakan di Pusat Inovasi Psikologi Universitas Padjadjaran (PIP Unpad) sesuai dengan jadwal yang telah ditentukan. Pendaftaran dapat dilakukan melalui <a>https://bit.ly/pendaftaranPPDSUnpad</a></li>
+<p><!-- /wp:paragraph --></p>
+<p><!-- /wp:list --> <!-- wp:paragraph --></p>
+<p><strong>TAMBAHAN:</strong></p>
+<li>Bagi calon pendaftar yang berasal dari TNI/Polri</li>
+<li>Fotocopy SK Pengangkatan KORPS Militer dan SK.Kenaikan Pangkat/Jabatan terakhir (Opsional)</li>
+<li>Surat Perintah (Sprin) untuk mengikuti seluruh tahapan seleksi dan proses kegiatan pendidikan di Program Studi terkait FK.UNPAD (Opsional)</li>
+<li>Surat Rekomendasi Pimpinan untuk mengikuti seluruh tahapan seleksi dan proses kegiatan pendidikan di Program Studi terkait FK.UNPAD (Opsional)</li>
+<li>Fotocopy SK.Calon PNS (80%) dan SK.Pengangkatan PNS (100%) (Opsional)</li>
+<li>Dokter Spesialis lulusan luar negeri (untuk Program Adaptasi) yang mendapat persetujuan Direktorat Jenderal Pendidikan Tinggi dan telah memenuhi ketentuan Konsil Kedokteran Indonesia (Opsional)</li>
+<li>Surat rekomendasi pimpinan daerah jika dikirim sebagai utusan daerah (Opsional)</li>
+<li>Sertifikat prestasi, Penugasan daerah bencana, Penghargaan lainnya (Opsional)</li>
+<li>Sertifikat mengikuti kongres/seminar/pertemuan ilmiah/kursus/penelitian bidang ilmu spesialis yang diminati dalam 1 tahun terakhir (Wajib Upload)</li>
+<li>Surat keterangan dari pimpinan institusi bahwa Calon Peserta baru pertama mendaftar atau sebelumnya <strong>pernah</strong> mendaftar maksimal 1 (satu) kali di Prodi yang sama; kecuali atas pertimbangan khusus untuk Prodi Jantung dan Pembuluh Darah FK Unpad dan 2x untuk Prodi DV, Psikiatri, IKFR (Wajib Upload)</li>
+<li>
+<ul><!-- wp:list-item --></ul>
+</li>
+<p><strong>SYARAT LAIN</strong></p>
+<li>Ketentuan Batas Usia calon peserta Maksimal: 35,0 tahun pada saat memulai pendidikan, kecuali dinyatakan lain dalam syarat khusus Prodi</li>
+<li>Indeks Prestasi Kumulatif (IPK) Gabungan untuk Sarjana Kedokteran dan Profesi minimal 2,75 kecuali dinyatakan lain dalam syarat khusus Prodi</li>
+<li>Toefl minimal 475, kecuali dinyatakan lain dalam syarat khusus Prodi</li>
+<p><strong>PERSYARATAN KHUSUS PRODI(WAJIB UPLOAD)</strong></p>
+<li>Anestesiologi dan Terapi Intensif</li>
+<li>Sertifikat telah mengikuti dan lulus kursus ATLS, ACLS</li>
+<li>Pernyataan peserta wanita “Sanggup tidak hamil pada tahun pertama pendidikan”</li>
+<li>Sertifikat mengikuti kongres/seminar/pertemuan ilmiah/kursus/penelitian bidang ilmu spesialis</li>
+<li>Surat keterangan ‘tidak sedang hamil ‘dari Dokter Sp.OG pada saat mendaftar</li>
+<li>Hasil tes Stereoskopi dari Pusat Mata Nasional Rumah Sakit Mata Cicendo Bandung</li>
+<li>Hasil tes Minnesota Multiphasic Personality Inventory (MMPI) yang dilakukan di RS Unpad Jatinangor atau RSUP Dr.Hasan Sadikin Bandung</li>
+<li>Hasil pemeriksaan laboratorium lengkap (asli) dan bebas penyakit Hepatitis B dan C serta bebas HIV dari Rumah Sakit Unpad Jatinangor atau Rumah Sakit Umum Pusat Dr. Hasan Sadikin Bandung;</li>
+<li>Surat Tes Lulus Narkoba dari Rumah Sakit Unpad Jatinangor atau Rumah Sakit Umum Pusat Dr. Hasan Sadikin Bandung.</li>
+<li>Bedah</li>
+<li>Indeks Prestasi Kumulatif (IPK) Rata – Rata ≥ 3,00</li>
+<li>Sertifikat telah mengikuti dan lulus kursus ATLS</li>
+<li>Sertifikat “Basic Surgical Course-Key Skills” dari Kolegium Ilmu Bedah Indonesia</li>
+<li>Hasil pemeriksaan laboratorium (asli) bebas penyakit Hepatitis B dan C serta bebas HIV dari RS Unpad Jatinangor atau Rumah Sakit Pemerintah</li>
+<li>Bedah Saraf</li>
+<li>Hasil tes Minnesota Multiphasic Personality Inventory (MMPI) yang dilakukan di RSUP Dr. Hasan Sadikin Bandung dan RS Unpad Jatinangor</li>
+<li>Hasil pemeriksaan laboratorium (fotocopy legalisir) bebas penyakit Hepatitis B dan C, serta bebas HIV dan penyakit menular serta penyakit kronik lainnya dari RS Unpad Jatinangor atau Rumah Sakit Pemerintah</li>
+<li>Sertifikat pelatihan Primary Neuro Emergency &amp; Neuro Surgical Life Support (PNNLS)</li>
+<li>Obstetri dan Ginekologi</li>
+<li>Sertifikat telah mengikuti dan lulus kursus, ATLS, ACLS, Asuhan Persalinan Normal (APN) dan PONED</li>
+<li>Surat Keterangan memiliki pengalaman dalam mengikuti praktek/mendapat bimbingan dalam mengelola kasus Obstetri dan Ginekologi minimal selama 6 (enam) bulan, dengan menyertakan buku log yang sudah disahkan oleh dokter spesialis Obstetri dan Ginekologi di Rumah Sakit di mana pendaftar bekerja</li>
+<li>Psikiatri Kedokteran Jiwa</li>
+<li>Batas usia: 40,0 tahun</li>
+<li>Hasil tes Minnesota Multiphasic Personality Inventory (MMPI) yang dilakukan di RS Unpad Jatinangor atau RSUP.Dr.Hasan Sadikin Bandung</li>
+<li>Score TOEFL 500</li>
+<li>Kedokteran Forensik dan Studi Medikolegal</li>
+<li>Batas usia: 42 tahun</li>
+<li>Indeks Prestasi Kumulatif (IPK) Gabungan untuk Sarjana Kedokteran dan Profesi minimal 2.5</li>
+<li>Hasil Minnesota Multiphasic Personality Inventory (MMPI) yang dilakukan di RS Unpad Jatinangor atau RSUP.Dr.Hasan Sadikin Bandung</li>
+<li>Persyaratan khusus kesehatan mata (Buta Warna)</li>
+<li>Patologi Anatomi</li>
+<li>Batas usia: 35 tahun</li>
+<li>Surat Keterangan tidak menderita glaukoma</li>
+<li>Hasil tes Minnesota Multiphasic Personality Inventory (MMPI) yang dilakukan di RS Unpad Jatinangor atau RSUP.Dr.Hasan Sadikin Bandung dan Hasil Psikotes</li>
+<li>Patologi Klinik</li>
+<li>Hasil lab bebas penyakit Hepatitis B, Hepatitis C, Anti HIV, narkoba dan tidak buta warna dari RS Unpad Jatinangor atau Rumah Sakit Pemerintah</li>
+<li>Penyakit Dalam</li>
+<li>Indeks Prestasi Kumulatif (IPK) Gabungan untuk Sarjana Kedokteran dan Profesi minimal 3,00</li>
+<li>Sertifikat telah mengikuti ACLS dan COMET dalam 2 (dua) tahun terakhir</li>
+<li>Score TOEFL minimal 475</li>
+<li>Surat Keterangan Tidak Buta Warna</li>
+<li>Surat Penyataan bermaterai tidak memiliki riwayat penyakit yang membahayakan pelaksanaan pendidikan</li>
+<li>Surat Tes Lulus Narkoba dan surat keterangan Catatan Kepolisian (SKCK)</li>
+<li>Dermatologi dan Venereologi</li>
+<li>Surat keterangan dari pimpinan…. 3x untuk Prodi DV</li>
+<li>Hasil Tes Minnesota Multiphasic Personality Inventory (MMPI) dari RS Unpad Jatinangor atau RSUP Dr. Hasan Sadikin Bandung</li>
+<li>Dapat mengikuti Ujian maksimal 3 kali</li>
+<li>Ilmu Kesehatan Mata</li>
+<li>Score TOEFL minimal 500</li>
+<li>tajam penglihatan terbaik dengan koreksi minimal 0.8 (binokular)</li>
+<li>kemampuan penglihatan stereopsis yang baik dibuktikan dengan satuan Sec of Arc</li>
+<li>tidak menderita buta warna.</li>
+<li>(Apabila diperlukan pemeriksaan dapat diulang kembali oleh dokter spesialis mata yang ditunjuk oleh Program Pendidikan Dokter Spesialis-1 Ilmu Kesehatan Mata FK UNPAD)</li>
+<li>Bukti Kelulusan Sertifikat ATLS, ACLS</li>
+<li>Hasil Minnesota Multiphasic Personality Inventory (MMPI) yang dilakukan di RS Unpad Jatinangor atau RSUP.Dr.Hasan Sadikin  Bandung, dengan proses wawancara yang dilakukan oleh Departemen Psikiatri FK UNPAD/RSHS Bandung</li>
+<li>Surat keterangan/Buku Log (ditanda tangan oleh pembimbing): mengikuti praktek/bimbingan/pelatihan dibidang Ilmu Kesehatan Mata.</li>
+<li>Neurologi</li>
+<li>Sertifikat telah mengikuti dan lulus kursus ECG dan ACLS</li>
+<li>Hasil pemeriksaan laboratorium (asli) bebas penyakit Hepatitis B dan C, serta bebas HIV dan penyakit menular serta penyakit kronik lainnya dari RS Unpad Jatinangor atau Rumah Sakit Pemerintah</li>
+<li>Surat keterangan dari RS bahwa telah bekerja di RS secara mandiri (bukan sebagai dokter magang) dan mengambil keputusan klinis selama 1 tahun</li>
+<li>Kesehatan Telinga Hidung Tenggorokan Bedah Kepala dan Leher</li>
+<li>Hasil pemeriksaan laboratorium bebas penyakit Hepatitis B dan C, serta bebas HIV dari RS Unpad Jatinangor atau Rumah Sakit Pemerintah</li>
+<li>Nilai TOEFL tidak kurang dari 500, Nilai TKBI minimal 481</li>
+<li>Radiologi</li>
+<li>Orthopaedi dan Traumatologi</li>
+<li>Indeks Prestasi Kumulatif (IPK) Gabungan untuk Sarjana Kedokteran dan Profesi minimal IPK &gt;= 2,75</li>
+<li>Score TOEFL 475</li>
+<li>Surat keterangan mengikuti praktek/bimbingan/pelatihan bidang spesialis dengan bukti buku log verifikasi spesialis pembimbingan(6 BULAN)</li>
+<li>Kedokteran Nuklir</li>
+<li>Batas usia: 35,0 tahun bagi peserta Reguler dan 40,0 tahun bagi peserta tugas belajar Instansi Pemerintah/Swasta (tubel).</li>
+<li>Pemeriksaan laboratorium Hepatitis B</li>
+<li>Sertifikat telah mengikuti dan lulus kursus ATLS dan ACLS</li>
+<li>Telah Mengikuti kegiatan symposium / kongres Kedokteran Nuklir berskala Nasional</li>
+<li>Urologi</li>
+<li>Indeks Prestasi Kumulatif (IPK) S.Ked ≥ 3,00 Profesi ≥ 3,00</li>
+<li>Sertifikat telah mengikuti dan lulus kursus ATLS.</li>
+<li>Bedah Anak</li>
+<li>Batas usia: 35,0 tahun bagi pendaftar berasal dari Dokter Umum, dan 37,0 bagi pendaftar berasal dari Spesialis Bedah Umum</li>
+<li>Kedokteran Fisik dan Rehabilitasi</li>
+<li>Pemeriksaan panel autoimun sederhana (ANA tes), spirometri, X-ray, EKG, fungsi ginjal dan profil lipid dari RS Unpad Jatinangor atau Rumah Sakit Pemerintah</li>
+<li>Surat keterangan mengikuti praktek/mendapat bimbingan dalam mengelola kasus KFR minimal selama 3 (tiga) bulan</li>
+<li>Penyakit Jantung dan Pembuluh Darah</li>
+<li>Batas usia: 35,0 tahun bagi pendaftar berasal dari Dokter Umum, dan 45,0 bagi pendaftar berasal dari Dokter Spesialis Penyakit Dalam.</li>
+<li>Sertifikat telah mengikuti dan lulus kursus ACLS dan EKG.</li>
+<li>Surat keterangan mengikuti praktek/mendapat bimbingan dalam mengelola kasus Kardio minimal selama 12 (dua belas) bulan, dengan menyertakan buku log yang sudah disahkan oleh dokter spesialis Kardiologi dan Kedokteran Vaskuler di rumah sakit dimana pendaftar bekerja</li>
+<li>Hasil pemeriksaan laboratorium bebas penyakit Hepatitis B dan C, serta bebas HIV dan penyakit menular serta penyakit kronik lainnya dari RS Unpad Jatinangor atau Rumah Sakit Pemerintah</li>
+<li>Pernyataan peserta wanita “Sanggup tidak hamil pada tahun pertama pendidikan “</li>
+<li>Kedokteran layanan Primer</li>
+<li>Ketentuan Batas Usia calon peserta Maksimal: Reguler Usia maksimal 40 Tahun, RPL Tidak ada batas usia</li>
+<li>Bukti telah melakukan pengalaman pemberdayaan masyarakat (misal: melakukan asesmen populasi di wilayah cakupan kerja, melakukan asesmen epidemiologi penyakit berdasarkan populasi di wilayah cakupan kerja, dll.)</li>
+<li>Bukti telah melakukan pengalaman manajemen fasilitas pelayanan kesehatan primer (misal : menerapkan prinsip patient safety, melakukan evaluasi program berbasis kendali mutu, dll.)</li>
+<li>Bukti pengalaman menjadi pimpinan (misal: pimpinan program pemberdayaan masyarakat, pimpinan organisasi profesi, dll.)</li>
+<li>Bukti pengalaman menangani kasus klinik (misal : kelainan alergik, anestesi dan penanganan nyeri, kelainan yang mengancam jiwa dan kegawat daruratan, kelainan kardiovaskular, dll.)</li>
+<li>Tidak ada batas usia</li>
+<li>Surat pernyataan bermeterai yang menyatakan telah berpraktek di layanan primer lebih dari 5 tahun dan ditandatangani oleh yang bersangkutan</li>
+<li>SIP pertama kali berpraktek di layanan primer</li>
+<li>Bagi ASN, surat persetujuan Atasan untuk mengikuti pendidikan dokter Spesialis Kedokteran Keluarga Layanan Primer kelas RPL</li>
+<li>Mengisi form assessment kelas RPL sesuai dengan form yang ditetapkan oleh Prodi Spesialis Kedokteran Keluarga Layanan Primer</li>
+<li>Mengikuti ujian tulis dan wawancara yang diselenggarakan oleh Prodi Spesialis Kedokteran Keluarga Layanan Primer</li>
+<li>Ilmu Bedah Plastik</li>
+<li>Sertifikat telah mengikuti dan lulus kursus ATLS yang masih berlaku</li>
+<li>Surat pernyataan tidak pernah berhenti dari program studi lain karena alasan afektif (perilaku)</li>
+<li>Surat keterangan pernah membuat tulisan ilmiah setelah lulus dokter, dan pernah sebagai peneliti atau membantu penelitian (bila ada)</li>
+<li>Skor TOEFL minimal 500.</li>
+<li>Hasil tes Minnesota Multiphasic Personality Inventory (MMPI) yang dilakukan di RS Unpad Jatinangor atau RSUP Dr.Hasan Sadikin Bandung.</li>
+<li>Kesehatan Anak</li>
+<li>Sertifikat mengikuti Kursus Resusitasi Neonatus</li>
+<li>Sertifikat mengikuti Pediatric Emergency Life Support (PELS) dan atau Advanced Pediatric Resuscitation Course (APRC)</li>
+<li>Hasil pemeriksaan laboratorium (fotocopy legalisir) bebas penyakit Hepatitis B dan C, serta bebas HIV dari RS Unpad Jatinangor atau Rumah Sakit Pemerintah</li>
+<li>Pernyataan pendaftar wanita, jika diterima, bersedia untuk tidak hamil pada enam bulan pertama pendidikan</li>
+<li>IPK Sarjana Kedokteran &gt;= 2.75 dan IPK Profesi &gt;= 2,75</li>
+<li>Maksimal 2 (dua) kali mendaftar di Prodi Ilmu Kesehatan Anak FK Unpad</li>
+<li>Tidak sedang mendafar di institusi Ilmu Kesehatan Anak Lainnya</li>
+<li>Kardiologi dan kedokteran Vaskuler</li>
+<li>Piagam/Surat Keterangan penghargaan pemerintah seperti sebagai dokter teladan atau pernah bertugas dengan baik di daerah bencana alam.</li>
+<li>Sertifikat mengikuti kongres/seminar/pertemuan ilmiah/kursus dan penelitian dalam bidang keilmuan terkait, untuk menunjukkan minat pada program studi.</li>
+<li>Surat pengantar dari Bupati/Wakil, Walikota/Wakil, bila peserta diutus oleh Pemerintah Kabupaten/Kota di Jawa Barat. (Menjadi Calon prioritas).<!-- /wp:list-item --><!-- /wp:list --></li>
+<h2>Persyaratan Khusus FK (Subspesialis)</h2>
+<p><strong>PERSYARATAN KHUSUS PENERIMAAN PESERTA PROGRAM PENDIDIKAN DOKTER SUBSPESIALIS</strong></p>
+<p><!-- /wp:heading --> <!-- wp:paragraph --></p>
+<p><strong>SYARAT UMUM</strong></p>
+<p><strong>SYARAT TAMBAHAN:</strong></p>
+<li>Surat Keterangan Hasil Penelitian (SKHP) untuk seleksi Pendidikan Kedokteran Spesialis dikeluarkan dari kesatuan masing-masing yang telah dilegalisasi (Opsional)</li>
+<li>Bagi calon pendaftar yang berstatus Aparatur/Pegawai Negeri Sipil</li>
+<li>Surat keterangan dari pimpinan institusi bahwa Calon Peserta baru pertama mendaftar atau sebelumnya pernah mendaftar maksimal 1 (satu) kali di Prodi yang sama; kecuali atas pertimbangan khusus untuk Prodi Jantung dan Pembuluh Darah FK Unpad dan 3x untuk Prodi DV, Psikiatri, IKFR (Wajib Upload)</li>
+<p>1. Anestesiologi dan Terapi Intensif</p>
+<li>IPK gabungan minimal 3,00</li>
+<li>Referensi dari 1 orang dokter subspesialis anestesi sesuai dengan peminatan yang dipilih (Konsultan Intensive Care, Konsultan Neuroanestesi, Konsultan Kardiovaskular dan Torasik).</li>
+<li>Hasil Tes MMPI yang dilakukan di RS Unpad Jatinangor atau RSUP.Dr.Hasan Sadikin Bandung</li>
+<li>Tidak ada batas Usia</li>
+<p>2. Obstetri dan Ginekologi</p>
+<li>Transkrip Pendidikan Spesialis Obstetri Ginekologi dengan Indeks prestasi kumulatif (IPK) sekurang-kurangnya 3,0</li>
+<li>Rekomendasi yang diberikan Himpunan masing-masing peminatan di Kolegium Obstetri dan Ginekologi Indonesia di FK UNPAD</li>
+<li>Foto kartu anggota/surat keterangan keanggotaan pada Perkumpulan Dokter Spesialis Obstetri dan Ginekologi Indonesia</li>
+<li>Surat Pengantar dari institusi resmi terkait dengan proyeksi kebutuhan dan fasilitas yang tersedia di RS/Fakultas/Institusi non pendidikan yang mengirim calon tersebut.</li>
+<li>Surat Keterangan sebagai dokter Spesialis Obstetri dan Ginekologi Staf pengajar dari Fakultas Kedokteran Universitas Negeri / staf pengajar di RS Pendidikan Tipe A dan B atau staf RS Tipe A Rujukan Regional/Nasional atau staf RS Tipe A dan B Kesatuan TNI/POLRI (prioritas)</li>
+<li>Surat keterangan telah bekerja minimal 2 tahun di Departemen Obstetri dan Ginekologi (Surat Penempatan/SK Rektor/Keterangan Kepala Departemen)</li>
+<li>Surat rekomendasi dari minimal 1 (satu) orang dokter subspesialis Obstetri dan Ginekologi sesuai dengan bidang peminatan yang mempunyai tempat kerja terdekat/setempat dan 2 (dua) orang dokter subspesialis terkait yang mempunyai tempat kerja terdekat/setempat, serta Atasan langsung Direktur RS &amp; Dekan; untuk RS Non Pendidikan: dari Direktur RS)</li>
+<li>Surat keterangan belum pernah mengikuti program pendidikan subspesialis di bidang peminatan lainnya dari Ketua Departemen; bagi yang sudah pernah mendaftar sebelumnya dan belum diterima, agar melampirkan surat Peserta yang gagal pada seleksi penerimaan, diberi kesempatan untuk mengulang hanya satu kali seleksi ulang.</li>
+<li>Rekomendasi dari Kepala Departemen Obstetri dan Ginekologi Fakultas Kedokteran UNPAD.</li>
+<li>Dua buah sertifikat pendidikan kedokteran berkelanjutan di bidang peminatan yang diinginkan.</li>
+<li>Surat Perjanjian Kerja dengan institusi pengirim yang diperkuat oleh Notaris yang menyatakan bahwa setelah selesai pendidikan akan kembali dan bekerja di Institusi pengirim</li>
+<li>Sertifikat telah menjalani WKDS/PDGS dari Kementerian Kesehatan, untuk lulusan SpOG mulai tahun 2017.</li>
+<li>Surat Keterangan telah bekerja tetap di institusi (tidak berpindah-pindah) selama 3 tahun, bagi yang bekerja di luar institusi pendidikan</li>
+<li>Rumah Sakit Pemerintah Tipe A atau Tipe B</li>
+<li>Rumah Sakit Swasta tipe A atau tipe B yang melaksanakan Pendidikan Kedokteran S1/Sp1/Sp2/Ilmu Kedokteran lainnya</li>
+<li>Rumah Sakit Pemerintah Tipe C dengan syarat terdapat sarana dan infrastruktur pendukung untuk pelayanan terapi pada kasus onkologi ginekologi, dengan ketentuan:<br/>
+– Dimana apabila di Provinsi tersebut tidak terdapat Rumah Sakit tipe A atau tipe B<br/>
+– Rumah Sakit tipe C tersebut terletak di Ibu Kota Provinsi<br/>
+– Rumah Sakit tipe C dari Daerah Kepulauan</li>
+<li>Telah bekerja sebagai Dokter Obstetri Ginekologi lebih dari 2 tahun di Rumah Sakit yang mengirim yang dibuktikan dengan surat dari Direktur Rumah Sakit dan akan kembali bekerja di Rumah Sakit tersebut minimal 5 (lima) tahun setelah lulus dibuktikan dengan Surat Perjanjian/Akte Notaris</li>
+<li>KSM Obstetri dan Ginekologi Rumah Sakit tempat bekerja</li>
+<li>Direktur Rumah Sakit tempat bekerja</li>
+<li>Dekan, bila berasal dari institusi pendidikan</li>
+<li>Ketua POGI cabang asal bekerja</li>
+<li>Anggota HOGI (minimal 1 orang anggota HOGI)</li>
+<li>Workshop Deteksi Dini Lesi Pra Kanker</li>
+<li>Sepuluh (10) Sertifikat peserta Seminar Onkologi Ginekologi</li>
+<li>Surat lamaran tertulis ditujukan ke Koordinator Pendidikan Konsultan HOGI, dilengkapi dengan CV tertulis</li>
+<li>Tidak pernah terkait dengan kasus kriminal dan pelanggaran etika, dibuktikan dengan Surat Keterangan Catatan Kepolisian dan Surat Keterangan IDI setempat (masa berlaku kurang dari 6 Bulan)</li>
+<li>TOEFL 500 yang dikeluarkan oleh Lembaga Universitas</li>
+<li>Sertifikat telah menjalani WKDS/PDGS dari Kementerian Kesehatan atau penugasan ke daerah berupa pengabdian masyarakat setara PDGS minimal 6 bulan yang dibuktikan dengan surat keterangan yang berasal dari institusi yang bersangkutan</li>
+<li>Maksimal mengikuti 2 kali ujian untuk 3 Pusat Pendidikan (berkas belum lengkap tidak diperbolehkan mengikuti ujian)</li>
+<li>Usia maksimal 40 tahun pada saat mendaftar</li>
+<li>Surat lamaran tertulis ditujukan ke Universitas yang dituju dengan tembusan kepada ketua Program Studi Pendidikan Dokter Subspesialis Obstteri dan Ginekologi, dan Ketua Koordinator Pendidikan Subspesialis Obstetri dan Ginekologi Peminatan Uroginekologi Rekonstruksi, dilengkapi dengan Curiculum Vitae.</li>
+<li>Toefl 500 yang masih berlaku dari lembaga yang trakreditasi.</li>
+<li>Masa Kerja Sebagai Sp.OG minimal 1 Tahun untuk calon peserta yang berasal dari institusi Pendidikan, sedangkan untuk calon peserta yang diluar institusi Pendidikan minimal 2 Tahun.</li>
+<li>Calon Peserta diberikan kesempatan untuk mendaftar sebanyak 2 kali di pusat Pendidikan yang berbeda, apabila calon peserta yang sudah mendaftar sebelumnya dan belum diterima supaya melampirkan bukti penolakan/tidak diterima.</li>
+<li>Surat Perjanjian / Akta Notaris Kembali ke daerah asal yang di tanda tangani di depan notaris</li>
+<li>KSM Obstetri dan Ginekologi dari Rumah Sakit Tempat Bekerja</li>
+<li>Direktur Rumah Sakit Tempat Bekerja</li>
+<li>Dekan, apabila dari institusi pendidikan</li>
+<li>2 Anggota HUGI dari wilayah setempat</li>
+<li>Mempunyai minimal 2 Sertifikat sebagai Peserta dari kegiatan ilmiah Uroginekologi yang pernah diikuti</li>
+<li>Usia maksimal 45 tahun pada saat memulai pendidikan.</li>
+<li>Kandidat seorang spesialis obstetri dan ginekologi dibuktikan dengan ijazah yang disahkan oleh Rektor dan memiliki sertifikat kompetensi yang masih berlaku dari Kolegium Obstetri &amp; Ginekologi Indonesia, atau dokter spesialis obstetri dan ginekologi lulusan luar negeri yang sudah menyelesaikan adaptasi yang dibuktikan dengan surat tanda selesai mengikuti adaptasi dari institusi pendidikan dokter spesialis Obstetri dan Ginekologi yang diakui oleh Kolegium Obstetri dan Ginekologi Indonesia.</li>
+<li>Mempunyai surat tanda registrasi (STR) dari Konsil Kedokteran Indonesia dan memiliki surat ijin praktik kedokteran.</li>
+<li>Telah bekerja sebagai Dokter Spesialis Obstetri Ginekologi lebih dari satu tahun yang dibuktikan dengan surat dari Direktur/Dekan FK.</li>
+<li>Direktur Rumah Sakit dan KSM Obstetri dan Ginekologi Rumah Sakit tempat bekerja</li>
+<li>Dekan FK, bila berasal dari institusi pendidikan</li>
+<li>Ketua POGI cabang tempat bekerja.</li>
+<li>Surat pernyataan bersedia kembali ke institusi pengirim yang dilegalisir oleh notaris.</li>
+<li>Mempunyai sertifikat pertemuan ilmiah/kursus/Iokakarya, atau publikasi di jurnal terakreditasi dengan topik ilmu endokrinologi reproduksi &amp; fertilitas setelah Iulus sebagai SpOG dalam 2 tahun terakhir.</li>
+<li>Membuat surat lamaran ke universitas yang dituju dengan tembusan kepada Ketua Program Studi Pendidikan Dokter Subspesialis Obstetri &amp; Ginekologi.</li>
+<li>Melampirkan hasil tes potensi akademik (TPA).</li>

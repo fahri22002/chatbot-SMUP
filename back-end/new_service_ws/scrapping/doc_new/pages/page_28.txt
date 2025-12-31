@@ -1,0 +1,265 @@
+URL page ini: https://smup.unpad.ac.id/magister-rekognisi-pembelajaran-lampau-rpl
+
+<li><a>SMUP at glance</a></li>
+<li><a>Misi dan Prinsip</a></li>
+<li><a>Tujuan</a></li>
+<li><a>Tugas dan Fungsi</a></li>
+<li><a>Landasan Hukum</a></li>
+<li><a>Prosedur Sanggah</a></li>
+<li><a>Seleksi Nasional Berdasarkan Prestasi (SNBP)</a></li>
+<li><a>Seleksi Nasional Berdasarkan Tes (SNBT)</a></li>
+<li><a>Skema Ujian SMUP</a></li>
+<li><a>Skema UTBK dan Rapor</a></li>
+<li><a>Minat dan Bakat / Prestasi Non Akademik</a></li>
+<li><a>Seleksi Kelas International / IUP</a></li>
+<li><a>Seleksi Disabilitas</a></li>
+<li><a>Mekanisme Pengumuman</a></li>
+<li><a>Beasiswa Program Doktoral Padjadjaran (BPDP)</a></li>
+<li><a>Beasiswa Unggulan Pascasarjana Padjadjaran (BUPP)</a></li>
+<li><a>Beasiswa PMDSU</a></li>
+<li><a>Beasiswa LPDP</a></li>
+<li><a>Beasiswa Pendidikan Indonesia</a></li>
+<li><a>Beasiswa JFLS</a></li>
+<li><a>Beasiswa BRIN</a></li>
+<li><a>Magister</a></li>
+<li><a>Magister Berbasis Project</a></li>
+<li><a>Magister Double Degree</a></li>
+<li><a>Magister Rekognisi Pembelajaran Lampau (RPL)</a></li>
+<li><a>Profesi</a></li>
+<li><a>Spesialis dan Subspesialis</a></li>
+<li><a>Doktor</a></li>
+<li><a>Kepakaran Dosen</a></li>
+<li><a>International Program</a></li>
+<li><a>International Student Admission</a></li>
+<li><a>Fakultas</a></li>
+<li><a>Blog</a></li>
+<div>
+					Quick Menu				</div>
+<li><a>Pendaftaran</a></li>
+<li><a>Metode Pembayaran</a></li>
+<li><a>FAQ</a></li>
+<div>
+									Pascasarjana								</div>
+<h1>
+									Magister Rekognisi Pembelajaran Lampau (RPL)								</h1>
+<div></div>
+<div>Deskripsi Program</div>
+<div>Persyaratan</div>
+<div>Program Studi</div>
+<div>Prosedur Pendaftaran</div>
+<div>Tanggal Penting</div>
+<div>BPP Magister</div>
+<div>Help Desk &amp; QnA</div>
+<div>Permohonan Letter of Acceptance (LoA)</div>
+<h2>Deskripsi Program</h2>
+<p><!-- wp:paragraph --></p>
+<p><strong>Pengertian dan Ruang Lingkup RPL</strong></p>
+<p><!-- /wp:paragraph --> <!-- wp:list --></p>
+<li>Rekognisi Pembelajaran Lampau yang selanjutnya disingkat RPL adalah pengakuan atas Capaian Pembelajaran (CP) seseorang yang diperoleh dari pendidikan formal, nonformal, informal, dan/atau pengalaman kerja sebagai dasar untuk melanjutkan pendidikan formal dan untuk melakukan penyetaraan dengan kualifikasi tertentu.</li>
+<p><!-- /wp:list-item --> <!-- wp:list-item --></p>
+<li>Apabila seseorang, selepas lulus Program Sarjana (S1) kemudian bekerja, dan memperoleh pengalaman dari pekerjaannya itu, maka hasil belajar dari pengalamannya tersebut dapat diajukan untuk disetarakan (direkognisi) dengan hasil belajar formal beberapa Mata Kuliah yang ada di Program Studi di lingkungan Universitas/Sekolah Tinggi melalui asesmen. Pengakuan hasil asesmen dari pengalaman, belajar nonformal, dan atau nonformal tersebut adalah perolehan sks.</li>
+<li>Demikian pula apabila seseorang pernah/telah menempuh kuliah Magister di Perguruan Tinggi namun belum selesai kemudian pindah, maka hasil belajar formal pada Perguruan Tinggi sebelumnya tersebut dapat diajukan untuk disetarakan dengan Mata Kuliah pada Perguruan Tinggi yang dituju melalui asesmen untuk transfer kredit. Dengan demikian, individu tersebut, apabila akan melanjutkan kuliah di Universitas Padjadjaran tidak perlu harus mengikuti seluruh Mata Kuliah pada Program Studi yang dituju. Hasil belajar dari pengalamannya, belajar non formal, informal, dan formal dapat disetarakan dengan hasil belajar dari beberapa Mata Kuliah yang relevan pada Perguruan Tinggi yang dituju. Mata Kuliah yang harus ditempuh adalah Mata Kuliah-Mata Kuliah sisanya.</li>
+<p><!-- /wp:list-item --></p>
+<p><!-- /wp:list --> <!-- wp:paragraph --></p>
+<p>Penyelenggaraan RPL di Universitas Padjadjaran ini merupakan bagian dari usaha pemerintah dalam memperluas akses kepada masyarakat untuk menempuh pendidikan di 2 Perguruan Tinggi dalam rangka pembelajaran sepanjang hayat. Program studi yang menyelenggaraan adalah sebagai berikut:</p>
+<p><!-- /wp:paragraph --> <!-- wp:table --></p>
+<th>No.</th>
+<th>Kode</th>
+<th>Program Studi</th>
+<th>Jenjang</th>
+<th>Akreditasi</th>
+<td>1</td>
+<td>13101</td>
+<td>Magister Ilmu Kesehatan Masyarakat</td>
+<td>S2</td>
+<td>Unggul</td>
+<td>2</td>
+<td>65101</td>
+<td>Magister Ilmu Pemerintahan</td>
+<td>3</td>
+<td>72101</td>
+<td>Magister Ilmu Kesejahteraan Sosial</td>
+<td>A</td>
+<td>4</td>
+<td>14101</td>
+<td>Magister Ilmu Keperawatan</td>
+<td>5</td>
+<td>62101</td>
+<td>Magister Akuntansi</td>
+<td>6</td>
+<td>48101</td>
+<td>Magister Farmasi</td>
+<td>7</td>
+<td>48102</td>
+<td>Magister Farmasi Klinik</td>
+<td>8</td>
+<td>93103</td>
+<td>Magister Pariwisata Berkelanjutan</td>
+<td>B</td>
+<p><!-- /wp:table --> <!-- wp:paragraph --></p>
+<p><strong>Landasan Hukum</strong></p>
+<li>Peraturan Presiden Republik Indonesia nomor 8 Tahun 2012 tentang Kerangka Kualifikasi Nasional Indonesia. Lembaran Negara Republik Indonesia Nomor 24,Tahun 2012;</li>
+<li>Peraturan Menteri Pendidikan, Kebudayaan, Riset, dan Teknologi Nomor 41 Tahun 2021 tentang Rekognisi Pembelajaran Lampau</li>
+<li>Peraturan Menteri Pendidikan dan Kebudayaan Nomor 3 Tahun 2020 tentang Standar Nasional Pendidikan Tinggi.</li>
+<li>Peraturan Direktur Jenderal Pendidikan Tinggi, Riset dan Teknologi nomor 162/E/KPT/2022, Tahun 2022, tentang Petunjuk Teknis Penyelenggaraan Lampau pada Perguruan Tinggi yang Menyelenggarakan Pendidikan Akademis.</li>
+<li>Keputusan Rektor Universitas Padjadjaran Nomor: 791/UN6.RKT/Kep/HK/2023 Tentang Biaya Assessment Calon Mahasiswa Baru Jenjang Magister Jalur Rekognisi Pembelajaran Lampau Universitas Padjadjaran</li>
+<li>Keputusan Rektor Universitas Padjadjaran Nomor: 521/UN6.RKT/Kep/HK/2023 Tentang Penetapan Uang Kuliah Tunggal (UKT), Biaya Penyelenggaraan Pendidikan (BPP), Iuran Pengembangan Institusi (IPI) Universitas Padjadjaran Tahun Akademik 2023/2024</li>
+<li>Keputusan Rektor Universitas Padjadjaran Nomor: 84/UN6.RKT/Kep/HK/2023 Tentang Biaya Pendaftaran Seleksi Masuk Universitas Padjadjaran Program Sarjana/Sarjana Terapan dan Program Pascasarjana Universitas Padjadjaran Tahun Akademik 2023/2024</li>
+<p><!-- /wp:paragraph --></p>
+<p><!-- /wp:list --></p>
+<h2>Persyaratan</h2>
+<p><strong>Persyaratan Umum:</strong></p>
+<li>Warga Negara Indonesia (WNI)</li>
+<li>Lulusan Program Sarjana (S1) atau Sarjana Terapan (D4) atau pernah menempuh pendidikan magister yang terakreditasi oleh BAN PT/LAM dengan IPK minimal 2.75</li>
+<li>Memiliki masa kerja minimal (masing-masing program studi berbeda)</li>
+<li>Peserta harus memiliki sertifikat <strong>Tes Kemampuan Akademik (TKA) </strong>dan <strong>Tes Kemampuan Bahasa Inggris (TKBI)</strong> dari lembaga yang diakui Unpad, tidak ada ketentuan <em>score </em>minimal untuk TKBI dan TKA.</li>
+<li>Sertifikat <strong>Tes Kemampuan Akademik (TKA) </strong>dari <a>Pusat Inovasi Psikologi Universitas Padjadajaran (PIP Unpad)</a> atau Tes Potensi Akademik (TPA) institusi penyelenggara resmi lainnya yang diakui UNPAD, yaitu <strong>PLTI Himpsi; UGM; UNAIR; UI; BAPPENAS</strong>.</li>
+<li>Sertifikat Kemampuan Bahasa Inggris dari <a><strong><em>English Language Test</em> (ELT) / Tes Kemampuan Bahasa Inggris (TKBI) UNPAD</strong></a> yang masih berlaku (maksimal 2 tahun) atau tes kemampuan Bahasa Inggris dari institusi penyelenggara resmi yang diakui UNPAD yaitu:</li>
+<p><!-- /wp:list --> <!-- wp:table --></p>
+<th>Jenis Tes</th>
+<th>Institusi Penerbit Sertifikat</th>
+<td>English Language Test (ELT) / Tes Kemampuan Bahasa Inggris (TKBI) / English Language Proficiency Test / Test of English Proficiency (TOEP)</td>
+<td><a>Universitas Padjadjaran (Unpad)</a><br/>
+<a>Pusat Layanan Tes Indonesia (PLTI)</a><br/>
+<a>Duolingo</a></td>
+<td>International English Language Testing System (IELTS)</td>
+<td><a>British Council</a><a>I</a><br/>
+<a>ALF</a><br/>
+<a>IDP</a></td>
+<td>Test of English as a Foreign Language (TOEFL) IBT</td>
+<td>International TOEFL<br/>
+<a>The British Institute (TBI)</a><br/>
+<a>English First (EF)</a></td>
+<li>Pendaftar yang menggunakan <strong>sertifikat Bahasa Inggris atau test TOEFL di luar lembaga resmi yang tertulis di atas,</strong> akan membutuhkan waktu lama (&gt; 1 bulan) untuk proses verifikasi ke lembaga resmi penyelenggara, sehingga kemungkinan bagi pendaftar yang eligible <strong>tidak akan terpanggil wawancara sesuai sesi seleksi/gelombang dimana peserta mendaftar</strong>.</li>
+<li>Bagi pendaftar yang tidak eligible untuk wawancara dalam satu sesi seleksi, akan diikutkan ke sesi seleksi berikutnya jika telah memperbaiki/ melengkapi dokumen yang kurang <strong>tanpa harus membayar biaya pendaftaran kembali kalau masih dalam gelombang yang sama</strong>.</li>
+<li>Bagi peserta yang mempunyai <strong>publikasi ilmiah di jurnal internasional bereputasi (Q3)</strong> menurut <a><u>SJR : Scientific Journal Rankings – SCImago </u></a>sebagai penulis pertama, tidak diwajibkan memiliki dan mengupload nilai TKA/TPA dan TKBI ketika mendaftar.</li>
+<li>Semua berkas di lampirkan atau diunggah di laman <a>https://admission.unpad.ac.id/en</a> ketika melakukan pendaftaran.</li>
+<p><strong>Persyaratan Khusus di Program Studi Penyelenggara RPL</strong></p>
+<li>Memiliki pengalaman kerja pada bidang yang relevan dengan Program Studi yang dituju paling singkat 4 (empat) tahun</li>
+<li>Memiliki pengalaman kerja pada bidang yang relevan dengan Program Studi yang dituju paling singkat 2 (dua) tahun</li>
+<li>Memiliki pengalaman kerja pada bidang penyelenggaraan layanan sosial atau yang relevan dengan Program Studi yang dituju paling singkat 5 (lima) tahun</li>
+<li>Memiliki Nilai Tes Kemampuan Akademik (TKA) dan Tes Kemampuan Bahasa Inggris (TKBI) masing-masing 450</li>
+<li>Pendidikan minimal S1 atau D4 Akuntansi</li>
+<li>Memiliki pengalaman kerja di bidang akuntansi atau keuangan selama 5 (lima) tahun atau lebih dengan kinerja baik</li>
+<li>Pendidikan minimal Sarjana Keperawatan (S1) Ners, dan / atau yang pernah menempuh pendidikan magister keperawatan dan Kesehatan Masyarakat</li>
+<li>Memiliki pengalaman kerja pada bidang yang relevan dengan Program Studi yang dituju paling singkat 5 (lima) tahun</li>
+<li>Untuk konsentrasi Farmasi Industri, Kontrol Kualitas, dan Kosmetika: Praktisi yg bekerja dalam bidang produksi, kontrol kualitas, dan penjaminan kualitas di industri farmasi, alat kesehatan, makanan dan kosmetik minimal 5 tahun, pendidikan minimal s1 farmasi/kimia/biologi/program studi saintek lain yang relevan.</li>
+<li>Untuk konsentrasi Farmakoepidemiologi dan Farmakoekonomi: praktisi yg bekerja dalam bidang epidemiologi, farmakoepidemiologi, farmakovigilans, ekonomi kesehatan, dan farmakoekonomi di industri farmasi, rumah sakit, lembaga pemerintah, dan lembaga riset minimal 5 tahun, pendidikan minimal s1 farmasi/kedokteran/program studi saintek lain yang relevan.</li>
+<li>Untuk konsentrasi Farmakologi: praktisi yg bekerja dalam bidang riset dan pengembangan produk farmasi di lembaga pemerintah, industri dan lembaga riset minimal 5 tahun, pendidikan minimal s1 farmasi/kimia/biologi/program studi saintek lain yang relevan.</li>
+<li>Praktisi yg bekerja di rumah sakit, puskesmas dan sarana kesehatan dgn layanan farmasi klinik minimal 5 tahun, pendidikan minimal apoteker</li>
+<h2>Program Studi</h2>
+<p><!-- wp:heading --></p>
+<p><strong>Program Studi Rekognisi Pembelajaran Lampau (RPL) Gelombang II Tahun Akademik 2025/2026 Universitas Padjadjaran</strong></p>
+<p>Update: 4 Desember 2025</p>
+<th>Fakultas</th>
+<th>Pedoman RPL</th>
+<th>Sertifikat</th>
+<th>Daya Tampung</th>
+<td>Kedokteran</td>
+<td>Ilmu Kesehatan Masyarakat</td>
+<td><a>Klik di sini</a></td>
+<td>30</td>
+<td>Ilmu Sosial dan Ilmu Politik</td>
+<td>Ilmu Pemerintahan</td>
+<td>25</td>
+<td>Ilmu Kesejahteraan Sosial</td>
+<td>Ekonomi dan Bisnis</td>
+<td>Akuntansi</td>
+<td>10</td>
+<td>Keperawatan</td>
+<td>Ilmu Keperawatan</td>
+<td>Tidak Membuka Pendaftaran</td>
+<td>Farmasi</td>
+<td>Farmasi Klinik</td>
+<td>Sekolah Pascasarjana</td>
+<td>Pariwisata Berkelanjutan</td>
+<td>20</td>
+<p><!-- /wp:heading --> <!-- wp:paragraph --></p>
+<p>Untuk melihat Program Studi yang membuka pendaftaran pada Gelombang ini, dapat dilihat di laman <a>https://pendaftaran.unpad.ac.id/</a></p>
+<h2>Prosedur Pendaftaran</h2>
+<p>Dokumen yang harus disiapkan</p>
+<li>Foto harus berformat JPG, tidak diperkenankan dalam format PDF dan format lainnya, serta harus sudah siap untuk dipasang di Kartu Peserta Ujian, yaitu berukuran rasio 3×4 (portrait), misalnya berukuran 300 pixel x 400 pixel, wajah terlihat jelas, berpakaian rapih dan berpose formal untuk keperluan akademik, dengan latar belakang putih.</li>
+<li>Kartu Tanda Penduduk</li>
+<li>Kartu Keluarga</li>
+<li>Ijazah S1/D4</li>
+<li>Transkrip Nilai S1/D4</li>
+<li>Sertifikat Tes Kemampuan Bahasa Inggris</li>
+<li>Sertifikat Tes Kemampuan Akademik</li>
+<li>Dokumen Bukti Pengalaman/Masa Kerja (tidak ada format khusus)</li>
+<li>Memeriksa persyaratan umum dan khusus untuk mendaftar ke program studi yang dituju.</li>
+<li>Mendaftar/Membuat Akun di laman <a>https://admission.unpad.ac.id/en</a> dengan mengisikan:</li>
+<li>Nama Lengkap</li>
+<li>Nomor Induk Kependudukan (NIK) / No. Passport</li>
+<li>Alamat E-mail</li>
+<li>Nomor Handphone Aktif</li>
+<li>Kewarganegaraan</li>
+<li>Mengisikan password yang diinginkan untuk login ke portal peserta SMUP</li>
+<li>Mengisi data secara online di portal <a>https://admission.unpad.ac.id/en</a> dengan cara mengisi informasi sebagai berikut:</li>
+<li>Identitas diri &amp; Alamat</li>
+<li>Memilih Program yang diinginkan</li>
+<li>Mengisi Asal Perguruan Tinggi S1, Publikasi Ilmiah, Tes Kemampuan Akademik, dan Tes Kemampuan Bahasa Inggris</li>
+<li>Mengisi Data Pekerjaan</li>
+<li>Mengunggah Dokumen Persyaratan SMUP</li>
+<li>Membayar biaya pendaftaran ke Bank yang ditunjuk Unpad dengan sebelumnya mencetak nomor tagihan yang diperoleh pada saat pendaftaran online sebesar Rp1.200.000,-</li>
+<li>Melakukan Finalisasi di laman <a>https://admission.unpad.ac.id/en</a> setelah melakukan pembayaran</li>
+<li>Bagi peserta yang dinyatakan lolos seleksi administratif, membayar biaya Assessment sebesar Rp2.500.000,- per peserta</li>
+<p><strong>Tahapan Pengajuan Rekognisi Pembelajaran Lampau</strong></p>
+<p><!-- /wp:paragraph --> <!-- wp:image {"id":1513,"sizeSlug":"full","linkDestination":"none"} --></p>
+<p><!-- /wp:image --></p>
+<h2>Tanggal Penting</h2>
+<p><strong>Seleksi Masuk Universitas Padjadjaran (SMUP) Pascasarjana Gelombang II Tahun Akademik 2025/2026</strong></p>
+<p>Update: 29 September 2025</p>
+<th>Tanggal Penting</th>
+<td>Masa pendaftaran</td>
+<td>24 September 2025 – 2 Januari 2026</td>
+<td>Masa Unggah Portofolio (sekaligus pembayaran asesmen)</td>
+<td>2 – 8 Januari 2026</td>
+<td>Asesmen Portofolio</td>
+<td>12 – 15 Januari 2026</td>
+<td><strong>Pengumuman Kelulusan</strong></td>
+<td>30 Januari 2026</td>
+<p><!-- /wp:heading --></p>
+<h2>BPP Magister</h2>
+<p><strong>BIAYA PENYELENGGARAAN PENDIDIKAN (BPP) DAN IURAN PENGEMBANGAN INSTITUSI (IPI) PROGRAM PASCASARJANA UNIVERSITAS PADJADJARAN TAHUN AKADEMIK 2025/2026</strong></p>
+<p><!-- /wp:paragraph --> <!-- wp:paragraph --></p>
+<p>Biaya Penyelenggaraan Pendidikan (BPP) Mahasiswa Program Magister Rekognisi Pembelajaran Lampau (RPL) Sesuai Dengan Keputusan Rektor Universitas Padjadjaran Nomor: 112/UN6.RKT/Kep/HK/2025</p>
+<th><strong>Biaya Penyelenggaraan Pendidikan (BPP)</strong></th>
+<th>Iuran Pengembangan Institusi (IPI)</th>
+<td>Rp15,500,000,-</td>
+<td>–</td>
+<td>Rp15,000,000,-</td>
+<td>Sosiologi</td>
+<td>Rp10,500,000,-</td>
+<td>Kebijakan Publik</td>
+<td>Ilmu Administrasi Bisnis</td>
+<td>Administrasi Publik</td>
+<td>Ilmu Politik</td>
+<td>9</td>
+<td>Antropologi</td>
+<td>Kesejahteraan Sosial</td>
+<td>11</td>
+<td>12</td>
+<td>Peternakan</td>
+<td>Rp9,000,000,-</td>
+<td>13</td>
+<td>14</td>
+<p>Update: 14 April 2025</p>
+<h2>Help Desk &amp; QnA</h2>
+<p>Contact Person:</p>
+<p><!-- /wp:paragraph --> <!-- wp:list {"ordered":true} --></p>
+<li>Noviaty Ningsih: noviaty.ningsih@unpad.ac.id / 081999111977</li>
+<li>Agus Taryana: agus.taryana@unpad.ac.id / 08121497266</li>
+<li>Muhammad Fedryansyah: m.fedryansyah@unpad.ac.id / 0818713818</li>
+<li>Nanny Dewi: nanny.dewi@unpad.ac.id / 08122330108</li>
+<li>Diana Daniawaty, S.Sos: kaprodi.keperawatan.s2@unpad.ac.id / 081312286609</li>
+<h2>Permohonan Letter of Acceptance (LoA)</h2>
+<li>Letter of Acceptance (LoA) hanya diterbitkan bagi Peserta yang sudah dinyatakan Lolos SMUP</li>
+<li>Bagi peserta yang memerlukan penetapan kelulusan lebih awal karena kebutuhan LoA atau lainnya, silahkan <strong>untuk segera melengkapi data pendaftaran dengan dokumen yang valid</strong> supaya termasuk peserta eligible di penetapan kelulusan sesi-sesi awal.</li>
+<li>Bagi peserta yang telah dinyatakan lolos SMUP dan membutuhkan Letter of Acceptance (LoA), silakan mengirimkan surat permohonan melalui e-mail: <strong>dit.akademik@unpad.ac.id</strong></li>
+<div>
+<svg>
+<path></path>
+</svg>
+</div>
+<div>
+				Butuh Bantuan?			</div>

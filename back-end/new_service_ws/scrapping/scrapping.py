@@ -1,4 +1,4 @@
-FIX
+# FIX
 import requests
 import cloudscraper
 from bs4 import BeautifulSoup
@@ -319,11 +319,12 @@ def delete_folder(folder_path=sc_dir):
         print(f"Folder '{folder_path}' tidak ditemukan.")
 
 
-
-
-
+    
 
 import requests
+import asyncio
+import websockets
+import json
 
 def mainscrapping(start_url="https://smup.unpad.ac.id/"):
 
@@ -357,19 +358,37 @@ def mainscrapping(start_url="https://smup.unpad.ac.id/"):
         print("HASH SAMA: tidak ada perubahan konten. Menghapus doc_new...")
         safe_delete(os.path.join(current_dir, "doc_new"))
     else:
-        print("HASH BERBEDA: update dataset. Menghapus doc lama dan mengganti doc_new menjadi doc...")
-        safe_delete(os.path.join(current_dir, "doc"))
-        os.rename(os.path.join(current_dir, "doc_new"), os.path.join(current_dir, "doc"))
+        print("HASH BERBEDA: update dataset...")
+        # 1. Update folder fisik
+        # safe_delete(os.path.join(current_dir, "doc"))
+        # os.rename(os.path.join(current_dir, "doc_new"), os.path.join(current_dir, "doc"))
+
+        # 2. Update via HTTP (FastAPI)
         try:
-            r = requests.get(
-                "http://127.0.0.1:3067/do-rag"
-            )
-            print("Server RAG response:", r.text)
+            r = requests.get("http://127.0.0.1:3067/do-rag", timeout=10)
+            print("Server FastAPI RAG response:", r.text)
         except Exception as e:
-            print("Gagal POST ke backend RAG:", e)
+            print("Gagal GET ke FastAPI RAG:", e)
+
+        # 3. Update via WebSocket (Server WS)
+        # Kita buat fungsi internal async agar bisa dipanggil di main() sinkron
+        async def notify_ws():
+            uri = "ws://localhost:8765"
+            try:
+                async with websockets.connect(uri) as websocket:
+                    payload = {"action": "admin_reload_rag"}
+                    await websocket.send(json.dumps(payload))
+                    # Tunggu konfirmasi dari server
+                    response = await asyncio.wait_for(websocket.recv(), timeout=5)
+                    print(f"WS Notification Response: {response}")
+            except Exception as e:
+                print(f"Gagal mengirim sinyal reload ke WebSocket: {e}")
+
+        # Jalankan fungsi async di tengah fungsi sync
+        asyncio.run(notify_ws())
 
     
-    print("Selesai. Keluar dalam 5 detik...")
+    print("Selesai. Keluar dalam 50 detik...")
     time.sleep(50)
     # 7. Exit program
     print("Program selesai. Keluar.")

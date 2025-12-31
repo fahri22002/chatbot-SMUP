@@ -1,0 +1,119 @@
+URL page ini: https://info.admission.unpad.ac.id
+
+<div><span>top of page</span></div>
+<div></div>
+<div><iframe></iframe></div>
+<div><?xml version="1.0" encoding="UTF-8"?>
+<svg>
+<g>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+<path></path>
+</g>
+</svg>
+</div>
+<div><a><img/></a></div>
+<div><wow-image><img/></wow-image></div>
+<h2><span><span><span><span><span><span>Excellent, Inclusive, and Impactful <br/>
+<span>Your Global Journey Begins at Universitas Padjadjaran</span></span></span></span></span></span></span></h2>
+<p><span><span>Dear Prospective Students,</span></span></p>
+<p><span><span><span>​</span></span></span></p>
+<p><span><span>Greetings from Universitas Padjadjaran.</span></span></p>
+<p><span><span>Wilujeng Sumping — Welcome.</span></span></p>
+<p><span><span>In the heart of West Java, Universitas Padjadjaran (Unpad) stands as a hub where knowledge, culture, and community converge. We offer a diverse range of programs designed to inspire academic achievement, foster meaningful cultural exchange, and promote international collaboration.</span></span></p>
+<p><span><span>As one of Indonesia’s largest universities, Unpad is committed to advancing diverse fields of study, including science, technology, health, agriculture, economics, law, social and political sciences, and humanities. Our dedicated faculties continuously strengthen their expertise and contribute to national and global development.</span></span></p>
+<p><span><span>At Unpad, international students are welcomed into a variety of undergraduate and graduate programs designed to provide a globally relevant education while immersing them in Indonesia’s rich cultural environment. Programs are offered in two main formats :</span></span><br/>
+ </p>
+<p><span>Regular programs</span><span><span> conducted in <span>Bahasa Indonesia,</span></span></span></p>
+<p> </p>
+<p><span>International programs</span><span><span> which are delivered primarily in <span>English</span>.</span></span></p>
+<p><span><span>For students in regular programs, Unpad offers the Bahasa Indonesia for Foreign Speakers (BIPA) program to build language proficiency and cultural understanding. Meanwhile, the international programs provide an English-taught curriculum designed according to international standards, ensuring a valuable academic experience for students aspiring to achieve globally recognized qualifications.</span></span></p>
+<p><span><span>This website serves as the official information portal for international applicants to Universitas Padjadjaran. It provides clear and accessible guidance on admission procedures, study programs, eligibility requirements, scholarship opportunities, and practical information about studying and living in Indonesia. Reflecting Unpad’s commitment to being Excellent, Inclusive, and Impactful, this platform welcomes aspiring scholars from around the world to become part of a vibrant academic community dedicated to knowledge, innovation, and social contribution.</span></span></p>
+<p><span><span><span><span>​</span>​</span></span></span></p>
+<p><span><span>Regards,</span></span><br/>
+<span>Universitas Padjadjaran</span></p>
+<div><svg>
+<g>
+<path></path>
+</g>
+</svg>
+</div>
+<h3><span><span><span>Student Teacher Ratio</span></span></span></h3>
+<p><span><span><span><span><span>15:1</span></span></span></span></span></p>
+<h3><span><span><span>QS Asia University Ranking</span></span></span></h3>
+<p><span><span><span><span><span>134</span></span></span></span></span></p>
+<h3><span><span><span>THE Impact</span></span></span></h3>
+<p><span><span><span><span><span>100</span></span></span></span></span></p>
+<h3><span><span><span>QS World University<br/>
+Rankings</span></span></span></h3>
+<p><span><span><span><span><span>515</span></span></span></span></span></p>
+<div><picture><source/><img/></picture><picture><source/><img/></picture></div>
+<div><style>#pro-gallery-comp-jrug77eu .gallery-item-container { opacity: 0 }</style></div>
+<div><link/><script>try {
+            window.requestAnimationFrame(function() {
+              setTimeout(() => {
+                
+  
+      var ele = document.getElementById('pro-gallery-comp-jrug77eu');
+      var pgMeasures = ele.getBoundingClientRect();
+      var options = (() => "layoutParams_cropRatio:1|layoutParams_structure_galleryRatio_value:0|layoutParams_repeatingGroupTypes:|layoutParams_gallerySpacing:0|groupTypes:1,2h,2v,3t,3b,3l,3r|numberOfImagesPerRow:3|collageAmount:0.8|textsVerticalPadding:0|textsHorizontalPadding:0|calculateTextBoxHeightMode:MANUAL|targetItemSize:505|cubeRatio:1|externalInfoHeight:0|externalInfoWidth:0|isRTL:false|isVertical:false|minItemSize:120|groupSize:3|chooseBestGroup:true|cubeImages:false|cubeType:fill|smartCrop:false|collageDensity:0.8|imageMargin:15|hasThumbnails:false|galleryThumbnailsAlignment:bottom|gridStyle:0|titlePlacement:SHOW_ON_HOVER|arrowsSize:22|slideshowInfoSize:200|imageInfoType:NO_BACKGROUND|textBoxHeight:0|scrollDirection:0|galleryLayout:0|gallerySizeType:smart|gallerySize:1|cropOnlyFill:false|numberOfImagesPerCol:1|groupsPerStrip:0|scatter:0|enableInfiniteScroll:true|thumbnailSpacings:0|arrowsPosition:0|thumbnailSize:120|calculateTextBoxWidthMode:PERCENT|textBoxWidthPercent:50|useMaxDimensions:false|rotatingGroupTypes:|fixedColumns:0|rotatingCropRatios:|gallerySizePx:0|placeGroupsLtr:false")(ele);
+      var width = pgMeasures.width;
+      var height = pgMeasures.height;
+
+      var isIOS = /iPad|iPhone|iPod/.test(navigator?.userAgent);
+      if(isIOS) {
+        width = width;
+        width = width;
+        height = height;
+        height = height;
+      } else {
+        width = width;
+        width = width;
+        height = height;
+        height = height;
+      }
+
+      pgMeasures = { top: pgMeasures.top, width, height };
+
+  var isVertical = options.includes('layoutParams_structure_scrollDirection:"VERTICAL"');
+  var layoutFixerUrl =  '/_serverless/pro-gallery-css-v4-server/layoutCss?ver=2&id=comp-jrug77eu&items=3476_1280_853|3485_1280_853|3513_1280_853|5151_7360_4912|3553_1280_853|3477_768_465|3349_360_200|3602_1280_853&container=' + pgMeasures.top + '_' + pgMeasures.width + '_' + pgMeasures.height + '_' + window.innerHeight + '&options=' + options;
+  document.getElementById('layout-fixer-style-comp-jrug77eu').setAttribute('href', encodeURI(layoutFixerUrl));
+  
+              }, 0);
+            });
+        } catch (e) {
+          console.warn('Cannot set layoutFixer css', e);
+        }</script></div>
+<div><span>bottom of page</span></div>

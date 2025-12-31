@@ -1,0 +1,368 @@
+URL page ini: https://smup.unpad.ac.id/snbt
+
+<li><a>SMUP at glance</a></li>
+<li><a>Misi dan Prinsip</a></li>
+<li><a>Tujuan</a></li>
+<li><a>Tugas dan Fungsi</a></li>
+<li><a>Landasan Hukum</a></li>
+<li><a>Prosedur Sanggah</a></li>
+<li><a>Seleksi Nasional Berdasarkan Prestasi (SNBP)</a></li>
+<li><a>Seleksi Nasional Berdasarkan Tes (SNBT)</a></li>
+<li><a>Skema Ujian SMUP</a></li>
+<li><a>Skema UTBK dan Rapor</a></li>
+<li><a>Minat dan Bakat / Prestasi Non Akademik</a></li>
+<li><a>Seleksi Kelas International / IUP</a></li>
+<li><a>Seleksi Disabilitas</a></li>
+<li><a>Mekanisme Pengumuman</a></li>
+<li><a>Beasiswa Program Doktoral Padjadjaran (BPDP)</a></li>
+<li><a>Beasiswa Unggulan Pascasarjana Padjadjaran (BUPP)</a></li>
+<li><a>Beasiswa PMDSU</a></li>
+<li><a>Beasiswa LPDP</a></li>
+<li><a>Beasiswa Pendidikan Indonesia</a></li>
+<li><a>Beasiswa JFLS</a></li>
+<li><a>Beasiswa BRIN</a></li>
+<li><a>Magister</a></li>
+<li><a>Magister Berbasis Project</a></li>
+<li><a>Magister Double Degree</a></li>
+<li><a>Magister Rekognisi Pembelajaran Lampau (RPL)</a></li>
+<li><a>Profesi</a></li>
+<li><a>Spesialis dan Subspesialis</a></li>
+<li><a>Doktor</a></li>
+<li><a>Kepakaran Dosen</a></li>
+<li><a>International Program</a></li>
+<li><a>International Student Admission</a></li>
+<li><a>Fakultas</a></li>
+<li><a>Blog</a></li>
+<div>
+					Quick Menu				</div>
+<li><a>Pendaftaran</a></li>
+<li><a>Metode Pembayaran</a></li>
+<li><a>FAQ</a></li>
+<div>
+									Sarjana								</div>
+<h1>
+									Seleksi Nasional Berdasarkan Tes (SNBT)								</h1>
+<div></div>
+<div>Informasi Umum</div>
+<div>Informasi Registrasi</div>
+<div>Tanggal Penting</div>
+<div>Uang Kuliah Tunggal (UKT)</div>
+<h2>Informasi Umum</h2>
+<p><!-- wp:heading {"level":4} --></p>
+<h4>Tujuan</h4>
+<li>Memprediksi calon mahasiswa yang mampu menyelesaikan studi di Perguruan Tinggi Negeri (PTN) dengan baik dan tepat waktu. PTN adalah perguruan tinggi yang diselenggarakan oleh pemerintah, meliputi PTN Akademik dan/atau PTN Vokasi.</li>
+<li>Memberi kesempatan bagi calon mahasiswa untuk mengikuti tes secara fleksibel dengan memilih lokasi tes yang sesuai.</li>
+<li>Menyeleksi calon mahasiswa yang diprediksi mampu menyelesaikan studi di PTN dengan baik dan tepat waktu berdasarkan hasil UTBK</li>
+<li>Memberi kesempatan bagi calon mahasiswa untuk memilih PTN secara lintas wilayah.</li>
+<h4><strong>Ketentuan Umum</strong></h4>
+<li>Peserta SNBT hanya diperbolehkan mengikuti UTBK 2026 sebanyak satu kali.</li>
+<li>Hasil UTBK 2026 hanya berlaku untuk mengikuti SNBT dan penerimaan di PTN tahun 2026.</li>
+<li>Seleksi Jalur SNBT 2026 berdasarkan hasil UTBK 2026, dan ditambah portofolio bagi peserta yang memilih program studi seni dan/atau olahraga.</li>
+<li>Siswa yang telah dinyatakan lulus seleksi jalur SNBP 2026, SNBP 2025, dan SNBP 2024 tidak dapat mengikuti SNBT 2026.</li>
+<h4><strong>Persyaratan Peserta</strong></h4>
+<p><!-- /wp:heading --> <!-- wp:list {"ordered":true} --></p>
+<li>
+<ol><!-- wp:list-item --></ol>
+</li>
+<li>Peserta harus memiliki Akun SNPMB Siswa. Registrasi Akun SNPMB Siswa dapat dilakukan di <a>Portal SNPMB</a>.</li>
+<li>Warga Negara Indonesia (WNI) yang memiliki Nomor Induk Kependudukan (NIK).</li>
+<li>identitas, meliputi nama, kelas, NISN dan NPSN;</li>
+<li>pas foto terbaru (berwarna);</li>
+<li>tanda tangan Kepala Sekolah/Madrasah; dan</li>
+<li>stempel/cap sekolah.</li>
+<li>Siswa lulusan SMA/SMK/MA atau yang sederajat tahun 2024 dan 2025 atau Lulusan Paket C tahun 2024 dan 2025 dengan umur maksimal 25 tahun (per 1 Juli 2026)</li>
+<li>Bagi lulusan SMA sederajat dari luar negeri harus memiliki ijazah yang sudah disetarakan.</li>
+<li>Bagi peserta yang memilih program studi bidang Seni dan/atau Olahraga wajib mengunggah portofolio.</li>
+<li>Memiliki kesehatan yang memadai sehingga tidak mengganggu kelancaran proses studi.</li>
+<li>Bagi peserta berkebutuhan khusus tunanetra wajib mengunggah Surat Pernyataan Tuna Netra.</li>
+<li>Membayar biaya UTBK.</li>
+<p><!-- /wp:list-item --></p>
+<h4><strong>Materi Tes</strong></h4>
+<b>Tes Potensi Skolastik (TPS)</b>
+<li>Penalaran Umum</li>
+<li>Pengetahuan dan Pemahaman Umum</li>
+<li>Pemahaman Bacaan dan Menulis</li>
+<li>Pengetahuan Kuantitatif</li>
+<b>Tes Literasi</b>
+<li>Literasi dalam Bahasa Indonesia</li>
+<li>Literasi dalam Bahasa Inggris</li>
+<li>Penalaran Matematika</li>
+<h4><strong>Pendaftaran UTBK-SNBT</strong></h4>
+<b>Login Portal SNPMB dan Memilih Menu Pendaftaran UTBK-SNBT</b>
+<b>Melengkapi Biodata</b>
+<b>Memilih Program Studi dan Mengunggah Portofolio</b>
+<b>Memilih Pusat UTBK</b>
+<b>Melakukan Pembayaran</b>
+<b>Mengunduh Kartu Peserta UTBK-SNBT</b>
+<h4><strong>Ketentuan Pilihan Program Studi</strong></h4>
+<b>bebas memilih program studi di PTN Akademik dan/atau PTN Vokasi.</b>
+<b>memilih maksimal 4 (empat) program studi</b>
+<li>Urutan dalam pemilihan program studi menyatakan prioritas pilihan.</li>
+<th>Jumlah Pilihan</th>
+<th>Ketentuan Pilihan</th>
+<th>Contoh Alternatif Pilihan Program Studi</th>
+<td>1 Pilihan Program Studi</td>
+<td>Bebas memilih di program apapun</td>
+<b>atau</b>
+<li>1 Diploma Tiga.</li>
+<td>2 Pilihan Program Studi</td>
+<li>1 Diploma Empat/Sarjana Terapan dan 1 Diploma Tiga.</li>
+<td>3 Pilihan Program Studi</td>
+<li>3 Diploma Tiga.</li>
+<td>4 Pilihan Program Studi</td>
+<li>1 Sarjana, dan 3 Diploma Tiga.</li>
+<p><!-- /wp:list-item --> <!-- wp:list {"ordered":true} --></p>
+<h4><strong>Daya Tampung</strong></h4>
+<li>Daya tampung program studi per PTN tahun 2026 dapat dilihat pada <a>sub menu PTN SNBT</a></li>
+<li>Syarat untuk diterima di program studi dapat dilihat di laman PTN yang dituju.</li>
+<h4><strong>Biaya UTBK</strong></h4>
+<b>Rp.200.000,00 (dua ratus ribu rupiah)</b>
+<p><!-- /wp:list --></p>
+<h2>Informasi Registrasi</h2>
+<p><strong>Akan diinformasikan kemudian</strong></p>
+<h2>Tanggal Penting</h2>
+<p><!-- wp:heading {"level":3} --></p>
+<h3>Jadwal UTBK-SNBT 2026</h3>
+<p><!-- /wp:heading --> <!-- wp:table --></p>
+<th>Kegiatan</th>
+<th>Waktu</th>
+<td>Registrasi Akun SNPMB Siswa</td>
+<td>12 Januari – 07 April 2026</td>
+<td>Pendaftaran UTBK-SNBT</td>
+<td>25 Maret – 07 April 2026</td>
+<td>Pembayaran Biaya UTBK</td>
+<td>25 Maret – 08 April 2026</td>
+<td>Pelaksanaan UTBK</td>
+<td>21 – 30 April 2026</td>
+<td>Pengumuman Hasil SNBT</td>
+<td>25 Mei 2026</td>
+<td>Masa Unduh Sertifikat UTBK</td>
+<td>02 Juni – 31 Juli 2026</td>
+<p><!-- /wp:table --> <!-- wp:list --></p>
+<li>Seluruh kegiatan pada hari yang sudah ditentukan akan dimulai dan diakhiri pukul 15.00 WIB.</li>
+<li>Jadwal pelaksanaan proses verifikasi dokumen peserta dan/atau pendaftaran ulang di PTN dapat dilihat di laman masing-masing PTN yang dituju.</li>
+<h2>Uang Kuliah Tunggal (UKT)</h2>
+<p><!-- wp:heading --></p>
+<p><!-- /wp:heading --></p>
+<p><!-- wp:paragraph --></p>
+<p>TARIF UANG KULIAH TUNGGAL (UKT) MAHASISWA SARJANA DAN SARJANA TERAPAN JALUR SNBP DAN SNBT</p>
+<p><!-- /wp:paragraph --></p>
+<p>Tarif Uang Kuliah Tunggal (UKT) Dan Iuran Pengembangan Institusi (IPI) Jalur Seleksi Nasional Berdasarkan Prestasi (SNBP) Seleksi Nasional Berdasarkan Test (SNBT) Dan Seleksi Mandiri Universitas Padjadjaran Tahun Akademik 2025/2026 Sesuai Dengan Keputusan Rektor Universitas Padjadjaran Nomor: 110/UN6.RKT/Kep/HK/2025</p>
+<p><!-- wp:table {"style":{"border":{"width":"1px"}}} --></p>
+<th><strong>NO</strong></th>
+<th><strong>NAMA FAKULTAS</strong></th>
+<th><strong>NAMA PROGRAM STUDI</strong></th>
+<th><strong>JENJANG</strong></th>
+<th><strong>UKT KELOMPOK 1 (Rp)</strong></th>
+<th><strong>UKT KELOMPOK 2 (Rp)</strong></th>
+<th><strong>UKT KELOMPOK 3 (Rp)</strong></th>
+<th><strong>UKT KELOMPOK 4 (Rp)</strong></th>
+<th><strong>UKT KELOMPOK 5(Rp)</strong></th>
+<th><strong>UKT KELOMPOK 6 (Rp)</strong></th>
+<th><strong>UKT KELOMPOK 7 (Rp)</strong></th>
+<th><strong>UKT KELOMPOK 8(Rp)</strong></th>
+<td>1</td>
+<td>Hukum</td>
+<td>Ilmu Hukum</td>
+<td>Sarjana</td>
+<td>500.000</td>
+<td>1.000.000</td>
+<td>2.000.000</td>
+<td>3.000.000</td>
+<td>4.000.000</td>
+<td>5.000.000</td>
+<td>7.000.000</td>
+<td>9.000.000</td>
+<td>2</td>
+<td>Ekonomi dan Bisnis</td>
+<td>Akuntansi</td>
+<td>3.500.000</td>
+<td>6.500.000</td>
+<td>7.750.000</td>
+<td>3</td>
+<td>Bisnis Digital</td>
+<td>4</td>
+<td>Ekonomi Islam</td>
+<td>4.500.000</td>
+<td>6.000.000</td>
+<td>7.500.000</td>
+<td>5</td>
+<td>Ilmu Ekonomi</td>
+<td>6</td>
+<td>Manajemen</td>
+<td>2.500.000</td>
+<td>7</td>
+<td>Kedokteran</td>
+<td>11.500.000</td>
+<td>16.000.000</td>
+<td>20.500.000</td>
+<td>24.000.000</td>
+<td>8</td>
+<td>Kedokteran Hewan</td>
+<td>2.200.000</td>
+<td>8.500.000</td>
+<td>11.000.000</td>
+<td>12.500.000</td>
+<td>9</td>
+<td>Matematika dan llmu Pengetahuan Alam</td>
+<td>Biologi</td>
+<td>5.750.000</td>
+<td>8.000.000</td>
+<td>10</td>
+<td>Fisika</td>
+<td>11</td>
+<td>Geofisika</td>
+<td>12</td>
+<td>Ilmu Aktuaria</td>
+<td>2.250.000</td>
+<td>13</td>
+<td>Kimia</td>
+<td>14</td>
+<td>Matematika</td>
+<td>4.250.000</td>
+<td>5.250.000</td>
+<td>15</td>
+<td>Statistika</td>
+<td>16</td>
+<td>Teknik Elektro</td>
+<td>10.000.000</td>
+<td>12.000.000</td>
+<td>17</td>
+<td>Teknik Informatika</td>
+<td>5.500.000</td>
+<td>9.500.000</td>
+<td>18</td>
+<td>Pertanian</td>
+<td>Agribisnis</td>
+<td>19</td>
+<td>Agroteknologi</td>
+<td>20</td>
+<td>Kedokteran Gigi</td>
+<td>15.000.000</td>
+<td>18.000.000</td>
+<td>21</td>
+<td>llmu Sosial dan llmu Politik</td>
+<td>Administrasi Bisnis K. Pangandaran</td>
+<td>22</td>
+<td>Administrasi Publik</td>
+<td>23</td>
+<td>Antropologi</td>
+<td>24</td>
+<td>Hubungan Internasional</td>
+<td>25</td>
+<td>Administrasi Bisnis</td>
+<td>26</td>
+<td>Kesejahteraan Sosial</td>
+<td>27</td>
+<td>Ilmu Pemerintahan</td>
+<td>28</td>
+<td>Ilmu Politik</td>
+<td>29</td>
+<td>Sosiologi</td>
+<td>30</td>
+<td>Ilmu Budaya</td>
+<td>Ilmu Sejarah</td>
+<td>31</td>
+<td>Sastra Arab</td>
+<td>32</td>
+<td>Sastra Indonesia</td>
+<td>33</td>
+<td>Sastra Inggris</td>
+<td>34</td>
+<td>Sastra Jepang</td>
+<td>35</td>
+<td>Sastra Jerman</td>
+<td>36</td>
+<td>Sastra Perancis</td>
+<td>37</td>
+<td>Sastra Rusia</td>
+<td>38</td>
+<td>Sastra Sunda</td>
+<td>39</td>
+<td>Psikologi</td>
+<td>40</td>
+<td>Peternakan</td>
+<td>41</td>
+<td>Peternakan PSDKU Pangandaran</td>
+<td>42</td>
+<td>llmu Komunikasi</td>
+<td>Hubungan Masyarakat</td>
+<td>43</td>
+<td>Ilmu Komunikasi</td>
+<td>44</td>
+<td>Ilmu Komunikasi K. Pangandaran</td>
+<td>45</td>
+<td>Jurnalistik</td>
+<td>46</td>
+<td>Manajemen Komunikasi</td>
+<td>47</td>
+<td>Perpustakaan dan Sains Informasi</td>
+<td>48</td>
+<td>Televisi dan Film</td>
+<td>49</td>
+<td>Keperawatan</td>
+<td>2.750.000</td>
+<td>50</td>
+<td>Keperawatan K. Pangandaran</td>
+<td>51</td>
+<td>Perikanan dan Ilmu Kelautan</td>
+<td>Ilmu Kelautan</td>
+<td>6.750.000</td>
+<td>52</td>
+<td>Perikanan</td>
+<td>53</td>
+<td>Perikanan Laut Tropis</td>
+<td>54</td>
+<td>Teknologi lndustri Pertanian</td>
+<td>Teknik Pertanian</td>
+<td>1.500.000</td>
+<td>55</td>
+<td>Teknologi Industri Pertanian</td>
+<td>56</td>
+<td>Teknologi Pangan</td>
+<td>57</td>
+<td>Farmasi</td>
+<td>14.000.000</td>
+<td>58</td>
+<td>Teknik Geologi</td>
+<td>8.250.000</td>
+<td>13.000.000</td>
+<td>59</td>
+<td>Akuntansi Perpajakan</td>
+<td>Sarjana Terapan</td>
+<td>60</td>
+<td>Akuntansi Sektor Publik</td>
+<td>61</td>
+<td>Bisnis Internasional</td>
+<td>62</td>
+<td>Pemasaran Digital</td>
+<td>63</td>
+<td>Kebidanan</td>
+<td>64</td>
+<td>Teknologi Industri Kimia</td>
+<td>65</td>
+<td>Agrotekno-preneur</td>
+<td>66</td>
+<td>Administrasi Keuangan Publik</td>
+<td>67</td>
+<td>Administrasi Pemerintahan</td>
+<td>68</td>
+<td>Bisnis Logistik</td>
+<td>69</td>
+<td>Kearsipan Digital</td>
+<td>70</td>
+<td>Bahasa dan Budaya Tiongkok</td>
+<td>71</td>
+<td>Manajemen Produksi Media</td>
+<td>72</td>
+<td>Pariwisata Bahari</td>
+<p><!-- /wp:table --></p>
+<p><!-- wp:spacer {"height":"10px"} --></p>
+<p><!-- /wp:spacer --></p>
+<div>
+<svg>
+<path></path>
+</svg>
+</div>
+<div>
+				Butuh Bantuan?			</div>

@@ -1,0 +1,108 @@
+URL page ini: https://smup.unpad.ac.id/seleksi-kelas-international
+
+<p><span>The Bachelor of Communication Science program is an international undergraduate program which is a part of the Frontier Advancement Program: internationalization at home and internationally accredited by AQAS accreditation agency from Germany. As a study program that joins the Frontier Advancement Program, the learning process is offered bilingually to support internationalization. Students in the Bachelor of Communication Science program will be awarded opportunities to partake in student exchanges at Sungkyunkwan University Korea, Myongji University Korea, Woosong University Korea, Ajou University Korea, and Hanyang University Korea for one or two semesters during the fifth or sixth semester of university. For the study programs that are included in the Frontier Advancement Program, students will have the opportunity to receive Global certification (AWS, LinkedIn Learning, Google) for the duration of their study, as well as project-based learning methods. Students will also have the opportunity to attend guest lectures from partner universities abroad that collaborate with the Faculty of Communication Science. </span></p>
+<li><span>Sungkyunkwan University Korea</span></li>
+<li><span>Myongji University Korea</span></li>
+<li><span>Woosong University Korea</span></li>
+<li><span>Ajou University Korea</span></li>
+<li><span>Hanyang University Korea </span></li>
+<b>14. International Undergraduate Program in Marine Science</b>
+<p><span>The Bachelor of Marine Science program is an international undergraduate program which is a part of the Frontier Advancement Program: internationalization at home and internationally accredited by the ASIIN accreditation agency from Germany, and the Institute of Marine Engineering Science and Technology (IMarEST). As a study program that is included in the Frontier Advancement Program, the learning process is provided bilingually to support internationalization. Students in the Bachelor of Communication Science program will have the opportunity to participate in student exchanges at Guang Xi University, China for one semester during the fifth or sixth semester of university. For the study programs that are included in the Frontier Advancement Program, students will have the opportunity to receive Global certification (AWS, LinkedIn Learning, Google) for the duration of their study, as well as project-based learning methods. Students will also have the opportunity to attend guest lectures from partner universities abroad that collaborate with the Faculty of Communication Science. </span></p>
+<li><span>Mokpo National University (MNU)</span></li>
+<li><span>Guangxi University China</span></li>
+<li><span>Fulbright University</span></li>
+<th>No.</th>
+<th>Faculty</th>
+<th>Study Program</th>
+<th>Total Capacity</th>
+<th>Available Capacity</th>
+<th>Brochure</th>
+<td>1</td>
+<td>Law</td>
+<td>40</td>
+<td>8</td>
+<td><a>Click here</a></td>
+<td>2</td>
+<td>Economics and business</td>
+<td>Accounting</td>
+<td>50</td>
+<td>13</td>
+<td>Management</td>
+<td>60</td>
+<td>Islamic Economics</td>
+<td>34</td>
+<td>Economics</td>
+<td>42</td>
+<td>Digital Business</td>
+<td>11</td>
+<td>3</td>
+<td>Medicine</td>
+<td>9</td>
+<td>4</td>
+<td>Dentistry</td>
+<td>30</td>
+<td>6</td>
+<td>5</td>
+<td>Social and Political Sciences</td>
+<td>International Relations</td>
+<td>Business Administration</td>
+<td>18</td>
+<td>Communication Science</td>
+<td>65</td>
+<td>17</td>
+<td>7</td>
+<td>Fisheries and Marine Science</td>
+<td>Marine Science</td>
+<td>Pharmacy</td>
+<td>24</td>
+<p><!-- /wp:heading --></p>
+<h2>Tuition Fees</h2>
+<p><!-- wp:heading {"textAlign":"center","level":5} --></p>
+<p><span>The tuition fees for the International Undergraduate Program (IUP) at Universitas Padjadjaran consist of two components:</span></p>
+<li><span>This fee is paid at the beginning of each semester and covers academic services, facilities, and resources provided throughout the semester.</span></li>
+<li><span>This is a one-time payment made upon admission. It contributes to the enhancement and sustainability of institutional infrastructure and development.</span></li>
+<p><strong>Tuition Fees for International Undergraduate Programs Academic Year 2025/2026</strong></p>
+<p><strong><!-- /wp:heading --> <!-- wp:table --></strong></p>
+<th><strong>No.</strong></th>
+<th><strong>Faculty</strong></th>
+<th><strong>Study Program</strong></th>
+<th><strong>Per Semester Tuition Fee</strong></th>
+<th><strong>Institutional Development Fee</strong></th>
+<td>15,000,000</td>
+<td>50,000,000</td>
+<td>13,000,000</td>
+<td>65,000,000</td>
+<td>67,500,000</td>
+<td>45,000,000</td>
+<td>195,000,000</td>
+<td>43,000,000</td>
+<td>190,000,000</td>
+<td>75,000,000</td>
+<td>55,000,000</td>
+<td>Fisheries Science</td>
+<td>16,000,000</td>
+<td>30,000,000</td>
+<td>20,000,000</td>
+<td>100,000,000</td>
+<p><!-- /wp:table --></p>
+<h2>Important Dates</h2>
+<p><!-- wp:table --></p>
+<li><strong>Batch 1: 21 January – 21 February 2025</strong></li>
+<li><strong>Batch 2: 17 March – 30 April 2025</strong></li>
+<li><strong>Batch 3: 2 June – 2 July 2025 at 3:00 pm WIB</strong></li>
+<li><strong>Batch 1: March, 10th 2025 at 3:00 pm WIB</strong></li>
+<li><strong>Batch 2: 16th May 2025 at 3:00 pm WIB</strong></li>
+<li><strong>Batch 3: 12th July 2025 at 3:00 PM WIB</strong></li>
+<li><strong>Batch 1: March, 11 – 14th 2025 at 12:00 pm WIB</strong></li>
+<li><strong>Batch 2: May, 16 – 19th 2025</strong></li>
+<li><span>Batch 3: </span></li>
+<li><strong>Batch 1: March, 11-17th 2025 at 11:59 pm WIB</strong></li>
+<li><strong>Batch 2: May, 16 – 22th 2025</strong></li>
+<p><i><span>Note: Submitting personal details and documents confirms the participant’s commitment to finalize registration and re-enrollment</span></i></p>
+<div>
+<svg>
+<path></path>
+</svg>
+</div>
+<div>
+				Butuh Bantuan?			</div>

@@ -352,10 +352,21 @@ async def handler(ws: WebSocketServerProtocol):
                 print(f"[message+file] saved {message_id_str} file {saved_name} for chat {chat_id}")
 
             # Di server.py (WebSocket), tambahkan action baru
+            # Di dalam handler(ws: WebSocketServerProtocol):
+
             elif action == "admin_reload_rag":
-                # Pastikan hanya boleh dipanggil dari IP internal atau dengan secret token
-                rag.reload_rag()
-                await ws.send(json.dumps({"status": "ok", "message": "RAG Reloaded"}))
+                # Kamu bisa tambahkan pengecekan token rahasia di sini jika perlu
+                try:
+                    rag.reload_rag() # Memperbarui INDEXED_DOCS di memori proses WS
+                    await ws.send(json.dumps({
+                        "status": "ok", 
+                        "action": "admin_reload_rag", 
+                        "message": "Index RAG pada WebSocket berhasil diperbarui"
+                    }))
+                    print("[admin] RAG Reloaded via WebSocket command")
+                except Exception as e:
+                    await ws.send(json.dumps({"status": "error", "message": str(e)}))
+
             elif action == "ping":
                 # simple keepalive
                 await ws.send(json.dumps({"status":"ok","action":"pong"}))

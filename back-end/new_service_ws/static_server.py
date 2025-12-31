@@ -1,23 +1,33 @@
-from aiohttp import web
+# FIX
 import os
-
-import os
-from fastapi import FastAPI, Request
+import time
+import threading
+import schedule
+from fastapi import FastAPI, Request, Query, HTTPException, UploadFile, File, Form
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles # Pengganti aiohttp static
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-import uvicorn
-from fastapi import FastAPI, Request, UploadFile, File, Form # Tambahkan UploadFile, File, Form
-import shutil
-from pypdf import PdfReader
-from pydantic import BaseModel
-import io
+from motor.motor_asyncio import AsyncIOMotorClient
+from bson import ObjectId
+
+# Import modul internal kamu
 import scrapping.run as rsc
 import rag.rag as rag
-import schedule
-import threading
-import time
 
+# --- KONFIGURASI ---
 PUBLIC_DIR = "public"
+if not os.path.exists(PUBLIC_DIR):
+    os.makedirs(PUBLIC_DIR)
+
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/yourdb")
+client = AsyncIOMotorClient(MONGO_URI)
+db = client["newSMUP"]
+chats_col = db["chats"]
+messages_col = db["messages"]
+device_tokens_col = db["device_tokens"]
+
+# --- SCHEDULER ---
 def start_scheduler():
     def job():
         print("Menjalankan scrapping terjadwal...")
@@ -28,51 +38,34 @@ def start_scheduler():
             schedule.run_pending()
             time.sleep(1)
 
-    # Atur jadwal - jam 1 malam saja
-    schedule.every().day.at("01:00").do(job)
-
-    # Thread daemon
+    schedule.every().day.at("19:16").do(job)
     t = threading.Thread(target=scheduler_thread, daemon=True)
     t.start()
     print("Scheduler berjalan di background.")
 
+# --- LIFECYCLE ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print(">>> Server startup: memulai index")
     rag.load_and_index_documents()
-
-    # START SCHEDULER DISINI
     start_scheduler()
-
     yield
     print(">>> Server shutdown")
-async def handle_static(request):
-    file_path = os.path.join(PUBLIC_DIR, request.match_info['path'])
-    if not os.path.isfile(file_path):
-        raise web.HTTPNotFound()
-    return web.FileResponse(file_path)
 
-import os
-from fastapi import FastAPI, Query, HTTPException
-from fastapi.responses import JSONResponse
-from motor.motor_asyncio import AsyncIOMotorClient
-from bson import ObjectId
-from datetime import datetime
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/yourdb")
-client = AsyncIOMotorClient(MONGO_URI)
-db = client["newSMUP"]
+# --- APP INITIALIZATION ---
+app = FastAPI(lifespan=lifespan)
 
-chats_col = db["chats"]
-messages_col = db["messages"]
-device_tokens_col = db["device_tokens"]
+# Setup Folder Static (Pengganti handle_static aiohttp)
+app.mount("/public", StaticFiles(directory=PUBLIC_DIR), name="public")
 
-app = FastAPI()
-
+# Helper MongoDB
 def oid(s):
     try:
         return ObjectId(s)
     except:
         return None
+
+# --- ENDPOINTS ---
 @app.get("/messages")
 async def get_messages(
     chatId: str,
@@ -81,7 +74,6 @@ async def get_messages(
     limit: int = Query(50, ge=1, le=200),
     skip: int = Query(0, ge=0)
 ):
-    # Validate deviceToken
     device = await device_tokens_col.find_one({"deviceToken": deviceToken})
     if not device:
         raise HTTPException(403, detail="Invalid deviceToken")
@@ -90,7 +82,6 @@ async def get_messages(
     if not chat_oid:
         raise HTTPException(400, detail="Invalid chatId")
 
-    # Validate chat ownership
     chat = await chats_col.find_one({"_id": chat_oid})
     if not chat:
         raise HTTPException(404, detail="Chat not found")
@@ -98,11 +89,10 @@ async def get_messages(
     if chat.get("chatToken") != chatToken:
         raise HTTPException(403, detail="Invalid chatToken")
 
-    # Fetch messages
     cursor = (
         messages_col
         .find({"chatId": chat_oid})
-        .sort("createdAt", 1)    # ascending order
+        .sort("createdAt", 1)
         .skip(skip)
         .limit(limit)
     )
@@ -113,20 +103,34 @@ async def get_messages(
             "id": str(m["_id"]),
             "msg": m.get("msg", ""),
             "sender": m.get("sender", ""),
-            "attachment": m.get("attachment"),   # URL string
+            "attachment": m.get("attachment"),
             "createdAt": m.get("createdAt"),
             "updatedAt": m.get("updatedAt")
         })
 
-    return JSONResponse({
+    return {
         "status": "ok",
         "chatId": chatId,
         "count": len(results),
         "messages": results
-    })
+    }
 
-start_scheduler()
-app = web.Application()
-app.router.add_get('/public/{path:.*}', handle_static)
-
-web.run_app(app, port=3067)
+@app.get("/do-rag")
+async def do_scrapping():
+    try:
+        # 2. Reload Index RAG agar file baru terbaca di memori
+        rag.reload_rag()
+        
+        
+        return {
+            "Status": "Succeed", 
+            "Message": "Index diperbarui.",
+        }
+    except Exception as e:
+        return {"Status": "Error", "Message": str(e)}
+    
+# --- RUN SERVER ---
+PORT = os.getenv("PORT", 3067)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=PORT)
