@@ -48,6 +48,10 @@ next-env.d.ts
 .vscode/
 .idea/
 
+venv/
+.venv/
+env/
+
 # lock files (optional — jika kamu tidak ingin commit lock file)
 # package-lock.json
 # yarn.lock

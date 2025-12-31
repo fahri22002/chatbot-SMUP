@@ -6,7 +6,7 @@ const path = require('path'); // Tambahan: Import Path
 const fs = require('fs');     // Tambahan: Import FS
 
 /**
- * @description Membuat akun admin baru
+ * @description Membuat akun admin baru (Hanya bisa oleh admin lain yang sudah login)
  */
 const createAccount = async (req, res) => {
   const { username, password } = req.body;
@@ -52,7 +52,7 @@ const createAccount = async (req, res) => {
 
 
 /**
- * @description Login admin
+ * @description Login untuk admin yang sudah ada
  */
 const login = async (req, res) => {
   const { username, password } = req.body;
@@ -70,6 +70,9 @@ const login = async (req, res) => {
 
     req.session.adminId = admin._id;
     req.session.username = admin.username;
+    
+    // --- TAMBAHAN BARU: Simpan Role ke Session ---
+    req.session.role = admin.role; 
 
     req.session.save(err => {
       if (err) {
@@ -81,7 +84,8 @@ const login = async (req, res) => {
         error: false,
         message: 'Berhasil Sign In',
         adminId: admin._id,
-        username: admin.username
+        username: admin.username,
+        role: admin.role // Kirim juga ke frontend agar bisa disimpan di localStorage
       });
     });
   } catch (error) {
@@ -107,6 +111,93 @@ const logout = (req, res) => {
     res.clearCookie('connect.sid'); 
     res.status(200).json({ error: false, message: 'Berhasil logout' });
   });
+};
+
+// 1. GET ALL ADMINS
+const getAllAdmins = async (req, res) => {
+  try {
+    // Ambil semua admin tapi sembunyikan password
+    const admins = await Admin.find({}, '-password').sort({ createdAt: -1 });
+    res.status(200).json({ error: false, data: admins });
+  } catch (error) {
+    res.status(500).json({ error: true, message: error.message });
+  }
+};
+
+// 2. UPDATE PASSWORD ADMIN
+const updateAdminPassword = async (req, res) => {
+  const { id } = req.params;
+  const { newPassword } = req.body;
+
+  if (!newPassword || newPassword.length < 6) {
+    return res.status(400).json({ error: true, message: 'Password minimal 6 karakter' });
+  }
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await Admin.findByIdAndUpdate(id, { password: hashedPassword });
+
+    res.status(200).json({ error: false, message: 'Password berhasil diperbarui' });
+  } catch (error) {
+    res.status(500).json({ error: true, message: error.message });
+  }
+};
+
+// 3. DELETE ADMIN
+const deleteAdmin = async (req, res) => {
+  const { id } = req.params;
+  
+  // Cegah menghapus diri sendiri (Opsional, tapi disarankan)
+  if (req.session.adminId === id) {
+    return res.status(400).json({ error: true, message: 'Tidak dapat menghapus akun sendiri saat login.' });
+  }
+
+  try {
+    await Admin.findByIdAndDelete(id);
+    res.status(200).json({ error: false, message: 'Admin berhasil dihapus' });
+  } catch (error) {
+    res.status(500).json({ error: true, message: error.message });
+  }
+};
+
+const changeOwnPassword = async (req, res) => {
+  const adminId = req.session.adminId; // Ambil ID dari session login
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: true, message: 'Password lama dan baru diperlukan' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: true, message: 'Password baru minimal 6 karakter' });
+  }
+
+  try {
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ error: true, message: 'Admin tidak ditemukan' });
+    }
+
+    // 1. Verifikasi Password Lama (PENTING!)
+    const isMatch = await bcrypt.compare(currentPassword, admin.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: true, message: 'Password lama salah' });
+    }
+
+    // 2. Hash Password Baru
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // 3. Update Database
+    admin.password = hashedPassword;
+    await admin.save();
+
+    res.status(200).json({ error: false, message: 'Password berhasil diubah' });
+  } catch (error) {
+    res.status(500).json({ error: true, message: error.message });
+  }
 };
 
 const getAllChats = async (req, res) => {
@@ -288,6 +379,10 @@ module.exports = {
   login, 
   logout,
   createAccount, 
+  getAllAdmins,
+  updateAdminPassword,
+  deleteAdmin,
+  changeOwnPassword,
   getChatHistory, 
   deleteOldChats,
   getAllChats,

@@ -1,6 +1,6 @@
 // buatHash.js
 const bcrypt = require('bcrypt');
-const password = '4dm1n2025'; // <-- GANTI DENGAN PASSWORD YANG ANDA INGINKAN
+const password = '4dm1n5MUP'; // <-- GANTI DENGAN PASSWORD YANG ANDA INGINKAN
 
 const saltRounds = 10;
 

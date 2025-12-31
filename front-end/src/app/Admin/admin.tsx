@@ -9,16 +9,20 @@ import {
   Bot,
   Loader2,
   LogOut,
-  UserPlus,
   DatabaseZap,
   ChevronsLeft,
   ImageIcon,
+  Settings,
+  Users,
 } from 'lucide-react';
 import Image from 'next/image';
-import KnowledgeView from './knowledge-view';
-import CreateAdminView from './create-admin-view';
 import { toast } from 'sonner';
-import RagView from './RAG-view'; // Pastikan file ini ada di folder yang sama
+
+// --- IMPORT VIEW COMPONENTS ---
+import KnowledgeView from './knowledge-view';
+import RagView from './RAG-view'; 
+import ManageAdminView from './manage-admin-view';
+import SettingsView from './settings-view';
 
 // --- INTERFACES ---
 interface ChatSession {
@@ -59,8 +63,7 @@ interface DeleteOldChatsResponse {
   message: string;
 }
 
-// 1. PERBAIKAN TIPE: Tambahkan 'RAG' disini
-type ActiveView = 'history' | 'knowledge' | 'RAG' | 'createAdmin';
+type ActiveView = 'history' | 'knowledge' | 'RAG' | 'manageAdmin' | 'settings';
 
 // --- KOMPONEN Sidebar ---
 const AdminSidebar = ({
@@ -68,16 +71,18 @@ const AdminSidebar = ({
   onNavClick,
   onLogout,
   isLoggingOut,
+  userRole, // <--- 1. TERIMA PROP ROLE
 }: {
   activeView: ActiveView;
   onNavClick: (view: ActiveView) => void;
   onLogout: () => void;
   isLoggingOut: boolean;
+  userRole: string | null; // Tipe data role
 }) => {
   const [isOpen, setIsOpen] = useState(true);
 
-  // 2. PERBAIKAN NAV ITEMS: Pastikan view sesuai dengan type ActiveView
-  const navItems = [
+  // Daftar item navigasi dasar
+  const allNavItems = [
     {
       view: 'history' as ActiveView,
       icon: MessageSquare,
@@ -89,16 +94,32 @@ const AdminSidebar = ({
       label: 'Knowledge Base',
     },
     {
-      view: 'RAG' as ActiveView, // Tombol ini akan mengaktifkan case 'RAG'
+      view: 'RAG' as ActiveView,
       icon: DatabaseZap,
       label: 'RAG Manager',
     },
     {
-      view: 'createAdmin' as ActiveView,
-      icon: UserPlus,
-      label: 'Create Admin',
+      view: 'manageAdmin' as ActiveView,
+      icon: Users,
+      label: 'Manajemen Admin',
+      requiresSuperAdmin: true, // <--- Tandai menu ini butuh Super Admin
+    },
+    {
+      view: 'settings' as ActiveView,
+      icon: Settings,
+      label: 'Pengaturan Akun',
     },
   ];
+
+  // 2. FILTER ITEM BERDASARKAN ROLE
+  const navItems = allNavItems.filter((item) => {
+    // Jika item butuh super admin, cek apakah userRole == 'SUPER_ADMIN'
+    if (item.requiresSuperAdmin) {
+      return userRole === 'SUPER_ADMIN';
+    }
+    // Jika tidak butuh syarat khusus, tampilkan saja
+    return true;
+  });
 
   return (
     <aside
@@ -111,7 +132,7 @@ const AdminSidebar = ({
       <div className='px-2 mb-8 h-8'>
         {isOpen ? (
           <h1 className='text-2xl font-bold text-gray-900 dark:text-white whitespace-nowrap'>
-            Admin
+            Admin Panel
           </h1>
         ) : (
           <ChevronsLeft className='w-6 h-6 text-gray-900 dark:text-white' />
@@ -481,23 +502,22 @@ const ChatHistoryView = () => {
                       >
                         <div
                           className={`text-sm leading-relaxed 
-      [&_p]:mb-2 [&_p:last-child]:mb-0 
-      [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:mb-2
-      [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:mb-2
-      [&_li]:pl-1 [&_li]:mb-1
-      [&_strong]:font-bold
-      [&_a]:underline 
-      [&_table]:w-full [&_table]:border-collapse [&_table]:mb-2 [&_table]:mt-2
-      [&_th]:border [&_th]:p-2 [&_th]:bg-black/5 dark:[&_th]:bg-white/5 [&_th]:text-left
-      [&_td]:border [&_td]:p-2
-      
-      /* Styling dinamis tergantung pengirim (User vs Bot) agar Table Border terlihat jelas */
-      ${
-        msg.sender === 'user'
-          ? '[&_a]:text-blue-200 hover:[&_a]:text-white [&_th]:border-white/20 [&_td]:border-white/20'
-          : '[&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_th]:border-gray-300 dark:[&_th]:border-gray-600 [&_td]:border-gray-300 dark:[&_td]:border-gray-600'
-      }
-    `}
+                            [&_p]:mb-2 [&_p:last-child]:mb-0 
+                            [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:mb-2
+                            [&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:mb-2
+                            [&_li]:pl-1 [&_li]:mb-1
+                            [&_strong]:font-bold
+                            [&_a]:underline 
+                            [&_table]:w-full [&_table]:border-collapse [&_table]:mb-2 [&_table]:mt-2
+                            [&_th]:border [&_th]:p-2 [&_th]:bg-black/5 dark:[&_th]:bg-white/5 [&_th]:text-left
+                            [&_td]:border [&_td]:p-2
+                            
+                            ${
+                              msg.sender === 'user'
+                                ? '[&_a]:text-blue-200 hover:[&_a]:text-white [&_th]:border-white/20 [&_td]:border-white/20'
+                                : '[&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_th]:border-gray-300 dark:[&_th]:border-gray-600 [&_td]:border-gray-300 dark:[&_td]:border-gray-600'
+                            }
+                          `}
                           dangerouslySetInnerHTML={{ __html: msg.msg }}
                         />
                       </div>
@@ -530,6 +550,17 @@ const ChatHistoryView = () => {
 export default function AdminDashboard() {
   const [activeView, setActiveView] = useState<ActiveView>('history');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  
+  // 3. STATE BARU UNTUK ROLE
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  // 4. AMBIL ROLE DARI LOCALSTORAGE SAAT MOUNT
+  useEffect(() => {
+    // Pastikan di halaman Login Anda sudah menyimpan 'role' ke localStorage
+    // Contoh: localStorage.setItem('role', response.data.role);
+    const role = localStorage.getItem('role');
+    setUserRole(role);
+  }, []);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -539,6 +570,10 @@ export default function AdminDashboard() {
         credentials: 'include',
       });
       if (!res.ok) throw new Error('Proses logout gagal.');
+      
+      // Bersihkan localStorage saat logout
+      localStorage.removeItem('role'); 
+      
       window.location.href = '/login';
     } catch (err) {
       if (err instanceof Error) {
@@ -550,7 +585,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // 3. PERBAIKAN SWITCH CASE: Menambahkan case 'RAG' dan menghapus duplikasi
   const renderView = () => {
     switch (activeView) {
       case 'history':
@@ -559,21 +593,26 @@ export default function AdminDashboard() {
         return <KnowledgeView onBack={() => setActiveView('history')} />;
       case 'RAG':
         return <RagView onBack={() => setActiveView('history')} />;
-      case 'createAdmin':
-        return <CreateAdminView onBack={() => setActiveView('history')} />;
+      case 'manageAdmin':
+        // Extra Protection: Jika bukan super admin tapi memaksa akses view ini, kembalikan ke history
+        if (userRole !== 'SUPER_ADMIN') return <ChatHistoryView />;
+        return <ManageAdminView onBack={() => setActiveView('history')} />;
+      case 'settings':
+        return <SettingsView />;
       default:
-        // Jika tidak ada case yang cocok (fallback), tampilkan history
         return <ChatHistoryView />;
     }
   };
 
   return (
     <div className='flex h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-200 font-sans'>
+      {/* 5. KIRIM ROLE KE SIDEBAR */}
       <AdminSidebar
         activeView={activeView}
         onNavClick={setActiveView}
         onLogout={handleLogout}
         isLoggingOut={isLoggingOut}
+        userRole={userRole}
       />
       <main className='flex-1 overflow-y-auto h-screen'>{renderView()}</main>
     </div>
