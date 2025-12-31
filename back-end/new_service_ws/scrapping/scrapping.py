@@ -1,3 +1,4 @@
+FIX
 import requests
 import cloudscraper
 from bs4 import BeautifulSoup
@@ -361,14 +362,15 @@ def mainscrapping(start_url="https://smup.unpad.ac.id/"):
         os.rename(os.path.join(current_dir, "doc_new"), os.path.join(current_dir, "doc"))
         try:
             r = requests.get(
-                "http://127.0.0.1:8080/do-rag"
+                "http://127.0.0.1:3067/do-rag"
             )
             print("Server RAG response:", r.text)
         except Exception as e:
             print("Gagal POST ke backend RAG:", e)
 
     
-
+    print("Selesai. Keluar dalam 5 detik...")
+    time.sleep(50)
     # 7. Exit program
     print("Program selesai. Keluar.")
     os._exit(0)

@@ -312,7 +312,8 @@ def mainrag(history, question):
     try:
         response = qa_chain.invoke({
             "question": question,
-            "context": context_text
+            "context": context_text,
+            "chat_history": history
         })
         return response['text']
 

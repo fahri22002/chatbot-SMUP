@@ -49,9 +49,9 @@ else: # Linux/Lainnya (Asumsi menggunakan gnome-terminal)
 
 # --- Eksekusi ---
 
-print("Memulai proses kedua di terminal baru...")
 
 def run_scrapping():
+    print("Memulai proses kedua di terminal baru...")
     try:
         # Jalankan scrapping.py sebagai proses terpisah
         # 'Popen' memulai proses dan TIDAK MENUNGGU

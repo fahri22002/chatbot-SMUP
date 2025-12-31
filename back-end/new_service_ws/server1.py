@@ -1,3 +1,4 @@
+# FIX
 # server.py
 import os
 import asyncio
@@ -350,12 +351,19 @@ async def handler(ws: WebSocketServerProtocol):
 
                 print(f"[message+file] saved {message_id_str} file {saved_name} for chat {chat_id}")
 
+            # Di server.py (WebSocket), tambahkan action baru
+            elif action == "admin_reload_rag":
+                # Pastikan hanya boleh dipanggil dari IP internal atau dengan secret token
+                rag.reload_rag()
+                await ws.send(json.dumps({"status": "ok", "message": "RAG Reloaded"}))
             elif action == "ping":
                 # simple keepalive
                 await ws.send(json.dumps({"status":"ok","action":"pong"}))
                 if chat_id:
                     last_connected[chat_id] = now_ms()
                     active_websockets[chat_id] = ws
+            
+
 
             else:
                 await ws.send(json.dumps({"status":"error","message":"unknown action"}))

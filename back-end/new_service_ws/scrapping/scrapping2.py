@@ -112,6 +112,8 @@ def crawl_bfs(start, max_depth=1):
                 q.append((full, d+1))
         time.sleep(1)
 
+import time # Pastikan import time di bagian atas file
+
 def main():
     shutil.rmtree(NEW_DIR, ignore_errors=True)
     crawl_bfs(START_URL)
@@ -120,15 +122,28 @@ def main():
     new_hash = hash_folder(OUT_DIR)
 
     if old_hash == new_hash:
+        print("Data tidak berubah. Menghapus folder baru.")
         shutil.rmtree(NEW_DIR)
     else:
+        print("Data berubah. Memperbarui folder dokumen...")
         shutil.rmtree(DOC_DIR, ignore_errors=True)
         os.rename(NEW_DIR, DOC_DIR)
+        
         try:
-            requests.get("http://127.0.0.1:8080/do-rag")
-        except:
-            pass
+            # Mengirim request ke endpoint RAG
+            response = requests.get("http://127.0.0.1:3067/do-rag", timeout=10)
+            
+            # Print status code dan teks respons
+            print(f"RAG Update Response Status: {response.status_code}")
+            print(f"RAG Update Response Body: {response.text}")
+        except Exception as e:
+            print(f"Gagal menghubungi endpoint RAG: {e}")
 
+    # Menunggu 5 detik sebelum keluar
+    print("Selesai. Keluar dalam 5 detik...")
+    time.sleep(50)
+    
+    # Gunakan os._exit(0) hanya jika benar-benar ingin menghentikan thread/proses secara paksa
     os._exit(0)
 
 if __name__ == "__main__":
