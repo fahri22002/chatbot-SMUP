@@ -240,6 +240,45 @@ async def handler(ws: WebSocketServerProtocol):
 
                 print(f"[message] saved {message_oid} for chat {chat_id}")
 
+                # ... (kode action lainnya) ...
+
+            # === TAMBAHAN BARU: LOAD HISTORY ===
+            elif action == "get_history":
+                # 1. Validasi Token (Sama seperti send_message)
+                device_token = data.get("deviceToken")
+                device_doc = await device_tokens_col.find_one({"deviceToken": device_token})
+                if not device_doc or device_doc.get("lastChatId") != chat_id:
+                     await ws.send(json.dumps({"status":"error", "message":"unauthorized"}))
+                     continue
+                
+                chat_oid = str_to_oid(chat_id)
+                if not chat_oid:
+                    continue
+
+                # 2. Ambil Pesan dari Database
+                cursor = messages_col.find({"chatId": chat_oid}).sort("createdAt", 1)
+                stored_messages = await cursor.to_list(None)
+
+                # 3. Format agar sesuai dengan Frontend React
+                history_payload = []
+                for m in stored_messages:
+                    # Konversi 'SELF' -> 'bot', 'USER' -> 'user'
+                    sender_fe = "bot" if m.get("sender") == "SELF" else "user"
+                    history_payload.append({
+                        "sender": sender_fe,
+                        "text": m.get("text", ""),
+                        "attachmentUrl": m.get("attachment")
+                    })
+
+                # 4. Kirim ke Frontend
+                await ws.send(json.dumps({
+                    "status": "ok",
+                    "action": "get_history",
+                    "messages": history_payload
+                }))
+            
+            # ... (kode action lainnya) ...
+
             # SEND MESSAGE WITH ATTACHMENT (single binary expected after header)
             elif action == "send_message_with_attachment":
 
@@ -392,6 +431,8 @@ async def handler(ws: WebSocketServerProtocol):
             active_websockets.pop(cid, None)
             last_connected[cid] = now_ms()
         print(f"[cleanup] connection {client} cleaned - removed {to_drop}")
+
+
 
 async def main():
     ensure_storage()

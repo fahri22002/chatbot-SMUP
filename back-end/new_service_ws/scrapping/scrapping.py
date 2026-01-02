@@ -360,8 +360,8 @@ def mainscrapping(start_url="https://smup.unpad.ac.id/"):
     else:
         print("HASH BERBEDA: update dataset...")
         # 1. Update folder fisik
-        # safe_delete(os.path.join(current_dir, "doc"))
-        # os.rename(os.path.join(current_dir, "doc_new"), os.path.join(current_dir, "doc"))
+        safe_delete(os.path.join(current_dir, "doc"))
+        os.rename(os.path.join(current_dir, "doc_new"), os.path.join(current_dir, "doc"))
 
         # 2. Update via HTTP (FastAPI)
         try:

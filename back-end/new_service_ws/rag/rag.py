@@ -13,7 +13,7 @@ from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.chains import LLMChain
 from langchain.output_parsers import CommaSeparatedListOutputParser
-
+from langchain.prompts import PromptTemplate
 # --- IMPORT NLTK (WORDNET) ---
 import nltk
 from nltk.corpus import wordnet as wn
@@ -102,19 +102,20 @@ RIWAYAT PERCAKAPAN:
 PERTANYAAN: {question}
 
 ⚙️ FORMAT JAWABAN (WAJIB HTML):
-- Jawaban HARUS ditulis dalam format HTML yang valid.
-- Gunakan tag <p> untuk paragraf.
-- Gunakan tag <ul> dan <li> untuk list/poin-poin.
-- Gunakan tag <table>, <thead>, <tbody>, <tr>, <th>, <td> dengan atribut border="1" style="border-collapse: collapse; width: 100%;" untuk menyajikan data tabel.
-- Gunakan <strong> untuk penekanan teks.
-- JANGAN gunakan Markdown (seperti **bold** atau markdown table).
-- Jika konteks tidak menjawab, katakan: "Maaf, informasi tidak ditemukan."
+1.  Jawaban HARUS dalam format HTML valid (tanpa tag ```html di awal).
+2.  Gunakan tag <p> untuk setiap paragraf.
+3.  Untuk langkah-langkah atau urutan, GUNAKAN tag <ol> dan <li> (Ordered List).
+4.  Untuk poin-poin daftar, GUNAKAN tag <ul> dan <li> (Unordered List).
+5.  Untuk tabel, GUNAKAN tag <table border="1" style="border-collapse: collapse; width: 100%;">, <thead>, <tbody>, <tr>, <th>, dan <td>.
+6.  Gunakan <strong> untuk menebalkan teks penting.
+7.  JANGAN gunakan format Markdown (seperti **bold** atau - list).
+8.  Jika informasi tidak ada di konteks, katakan: "<p>Maaf, informasi tersebut tidak ditemukan dalam dokumen.</p>"
 
 JAWABAN (HTML):
 """
 
 qa_prompt = PromptTemplate(
-    input_variables=["chat_history", "context", "question"],
+    input_variables=["history", "context", "question"],
     template=qa_template
 )
 qa_chain = LLMChain(llm=llm, prompt=qa_prompt, memory=memory)

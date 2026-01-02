@@ -9,7 +9,6 @@ import {
   Bot,
   Loader2,
   LogOut,
-  DatabaseZap,
   ChevronsLeft,
   ImageIcon,
   Settings,
@@ -19,8 +18,7 @@ import Image from 'next/image';
 import { toast } from 'sonner';
 
 // --- IMPORT VIEW COMPONENTS ---
-import KnowledgeView from './knowledge-view';
-import RagView from './RAG-view'; 
+
 import ManageAdminView from './manage-admin-view';
 import SettingsView from './settings-view';
 
@@ -88,16 +86,7 @@ const AdminSidebar = ({
       icon: MessageSquare,
       label: 'Chat History',
     },
-    {
-      view: 'knowledge' as ActiveView,
-      icon: DatabaseZap,
-      label: 'Knowledge Base',
-    },
-    {
-      view: 'RAG' as ActiveView,
-      icon: DatabaseZap,
-      label: 'RAG Manager',
-    },
+
     {
       view: 'manageAdmin' as ActiveView,
       icon: Users,
@@ -589,10 +578,7 @@ export default function AdminDashboard() {
     switch (activeView) {
       case 'history':
         return <ChatHistoryView />;
-      case 'knowledge':
-        return <KnowledgeView onBack={() => setActiveView('history')} />;
-      case 'RAG':
-        return <RagView onBack={() => setActiveView('history')} />;
+  
       case 'manageAdmin':
         // Extra Protection: Jika bukan super admin tapi memaksa akses view ini, kembalikan ke history
         if (userRole !== 'SUPER_ADMIN') return <ChatHistoryView />;
