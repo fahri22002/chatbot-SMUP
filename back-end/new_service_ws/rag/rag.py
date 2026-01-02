@@ -12,8 +12,8 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.chains import LLMChain
-from langchain.output_parsers import CommaSeparatedListOutputParser
 from langchain.prompts import PromptTemplate
+
 # --- IMPORT NLTK (WORDNET) ---
 import nltk
 from nltk.corpus import wordnet as wn
@@ -22,13 +22,13 @@ from nltk.tokenize import word_tokenize
 # Setup NLTK (Download data jika belum ada)
 try:
     nltk.data.find('tokenizers/punkt')
-    nltk.data.find('tokenizers/punkt_tab') # Cek keberadaan punkt_tab
+    nltk.data.find('tokenizers/punkt_tab')
     nltk.data.find('corpora/wordnet')
     nltk.data.find('corpora/omw-1.4')
 except LookupError:
     print("Downloading NLTK data (WordNet & Tokenizers)...")
     nltk.download('punkt')
-    nltk.download('punkt_tab') # <--- TAMBAHKAN BARIS INI (PENTING!)
+    nltk.download('punkt_tab')
     nltk.download('wordnet')
     nltk.download('omw-1.4') 
     print("NLTK data downloaded.")
@@ -44,6 +44,7 @@ genai.configure(api_key=api_key)
 
 # --- GLOBAL VARIABLES ---
 INDEXED_DOCS = [] 
+URL_HISTORY = {} # Variabel untuk menyimpan mapping Filename -> URL
 
 # --- LANGCHAIN SETUP ---
 
@@ -63,7 +64,7 @@ memory = ConversationBufferWindowMemory(
     input_key="question"
 )
 
-# B. Setup Prompt Reranking (LLM Menentukan Similarity)
+# B. Setup Prompt Reranking
 rerank_template = """
 Anda adalah sistem penilai relevansi dokumen.
 Diberikan pertanyaan pengguna dan daftar kutipan dokumen, tugas Anda adalah memilih dokumen mana yang paling relevan untuk menjawab pertanyaan tersebut.
@@ -123,7 +124,6 @@ qa_chain = LLMChain(llm=llm, prompt=qa_prompt, memory=memory)
 
 # --- FUNGSI UTILITY ---
 
-# 1. Embedding
 def get_embedding(text):
     try:
         result = genai.embed_content(
@@ -135,7 +135,6 @@ def get_embedding(text):
         print(f"Error embedding: {e}")
         return np.zeros(768, dtype=np.float32)
 
-# 2. Cosine Similarity
 def cosine_similarity(a, b):
     norm_a = np.linalg.norm(a)
     norm_b = np.linalg.norm(b)
@@ -143,9 +142,37 @@ def cosine_similarity(a, b):
         return 0.0
     return np.dot(a, b) / (norm_a * norm_b)
 
-# 3. Load & Index
+def load_url_history(path="./scrapping/doc/urlHistory.txt"):
+    """
+    Membaca file urlHistory.txt dan mengubahnya menjadi dictionary.
+    Format file: filename.txt | https://url...
+    """
+    url_map = {}
+    if not os.path.exists(path):
+        print(f"WARNING: File {path} tidak ditemukan.")
+        return url_map
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                if "|" in line:
+                    parts = line.strip().split("|", 1)
+                    if len(parts) == 2:
+                        fname = parts[0].strip()
+                        url = parts[1].strip()
+                        url_map[fname] = url
+        print(f"--- URL History Loaded: {len(url_map)} entries ---")
+    except Exception as e:
+        print(f"Error loading URL history: {e}")
+    
+    return url_map
+
 def load_and_index_documents(folder_path="./scrapping/doc/pages", cache_path="./scrapping/doc/embeddings_cache.json"):
-    global INDEXED_DOCS
+    global INDEXED_DOCS, URL_HISTORY
+    
+    # 1. Load URL History terlebih dahulu
+    URL_HISTORY = load_url_history()
+
     print(f"\n--- Memulai Indexing Dokumen dari: {folder_path} ---")
 
     folder = Path(folder_path)
@@ -179,20 +206,18 @@ def load_and_index_documents(folder_path="./scrapping/doc/pages", cache_path="./
                 emb = get_embedding(text)
                 cache[key] = emb.tolist()
 
-            # Pre-tokenize text untuk WordNet search agar cepat
             tokens = set(word_tokenize(text.lower()))
 
             new_docs.append({
                 "id": f"DOC_{i}",
                 "filename": file.name,
                 "text": text,
-                "tokens": tokens, # Simpan token set
+                "tokens": tokens,
                 "embedding": emb
             })
         except Exception as e:
             print(f"Skip {file.name}: {e}")
 
-    # Simpan cache
     try:
         with open(cache_path, "w", encoding="utf-8") as f:
             json.dump(cache, f)
@@ -202,9 +227,47 @@ def load_and_index_documents(folder_path="./scrapping/doc/pages", cache_path="./
     print(f"--- Selesai! {len(INDEXED_DOCS)} dokumen terindeks. ---")
 
 
+def format_answer_with_sources(answer_text, docs):
+    """
+    Menambahkan link sumber referensi ke bawah jawaban.
+    Prioritas:
+    1. Cek di URL_HISTORY berdasarkan filename.
+    2. Cek regex URL di dalam teks dokumen.
+    """
+    found_urls = set()
+    
+    # 1. Cek dari URL_HISTORY
+    for doc in docs:
+        fname = doc.get('filename')
+        if fname and fname in URL_HISTORY:
+            found_urls.add(URL_HISTORY[fname])
+
+    # 2. Cek dari isi text (Fallback jika tidak ada di history)
+    for doc in docs:
+        text_content = doc.get('text', '')
+        urls = re.findall(r'(?:URL|Url|page ini|link)\s*:?\s*(https?://\S+)', text_content)
+        for url in urls:
+            clean_url = url.rstrip('.,;)')
+            found_urls.add(clean_url)
+
+    # Bersihkan output LLM dari formatting block
+    clean_answer = answer_text.replace("```html", "").replace("```", "")
+
+    # Susun HTML Sumber
+    if found_urls:
+        list_items = "".join([f'<li><a href="{u}" target="_blank" style="color: #2563eb; text-decoration: underline;">{u}</a></li>' for u in found_urls])
+        sources_html = f"""
+        <br><hr style="border-top: 1px solid #e5e7eb; margin: 16px 0;">
+        <p><strong>Sumber Referensi:</strong></p>
+        <ul>{list_items}</ul>
+        """
+        return clean_answer + sources_html
+    
+    return clean_answer
+
+
 # --- RETRIEVAL ENGINE ---
 
-# A. Retrieval via Embedding (Semantic)
 def retrieve_by_embedding(question, k=5):
     if not INDEXED_DOCS: return []
     try:
@@ -221,43 +284,30 @@ def retrieve_by_embedding(question, k=5):
     except:
         return []
 
-# B. Retrieval via WordNet/Keyword (Lexical)
 def retrieve_by_wordnet(question, k=5):
     if not INDEXED_DOCS: return []
     
-    # 1. Tokenisasi Pertanyaan
     q_tokens = word_tokenize(question.lower())
-    
-    # 2. Perluas Keyword dengan WordNet (Bahasa Indonesia)
     expanded_keywords = set(q_tokens)
     for token in q_tokens:
-        # Ambil synsets bahasa indonesia
         synsets = wn.synsets(token, lang='ind')
         for syn in synsets:
             for lemma in syn.lemmas(lang='ind'):
                 expanded_keywords.add(lemma.name().lower().replace('_', ' '))
     
-    # print(f"DEBUG: Expanded Keywords via WordNet: {expanded_keywords}")
-
-    # 3. Scoring Dokumen (Hitung overlap kata)
     scored = []
     for doc in INDEXED_DOCS:
-        # Hitung irisan antara token dokumen dan keyword query
         doc_tokens = doc["tokens"]
         match_count = len(doc_tokens.intersection(expanded_keywords))
-        
         if match_count > 0:
             scored.append((match_count, doc))
     
-    # 4. Sortir berdasarkan jumlah match
     scored.sort(reverse=True, key=lambda x: x[0])
     return [doc for score, doc in scored[:k]]
 
 
 # --- MAIN RAG LOGIC ---
 
-def mainrag0(history, question):
-    return f"<p>RAG belum diinisialisasi. {question}</p>"
 def mainrag0(history, question, ocr_text=None):
     return f"<p>RAG belum diinisialisasi. {question} dengan OCR : {ocr_text}</p>"
 
@@ -268,37 +318,24 @@ def mainrag(history, question):
 
     print(f"\nProcessing: {question}")
 
-    # 1. HYBRID RETRIEVAL (Embedding + WordNet)
-    # Ambil 5 dari embedding, 5 dari wordnet
+    # 1. Retrieval
     docs_emb = retrieve_by_embedding(question, k=5)
     docs_wn = retrieve_by_wordnet(question, k=5)
-
-    # Gabungkan dan hapus duplikat
     combined_docs = {d['id']: d for d in (docs_emb + docs_wn)}.values()
     
     if not combined_docs:
         return "<p>Maaf, tidak ditemukan informasi yang relevan.</p>"
 
-    # 2. LLM RERANKING (LLM Nentuin Similarity)
-    # Siapkan string untuk prompt reranking
+    # 2. Reranking
     docs_str = "\n".join([f"ID: {d['id']}\nCuplikan: {d['text'][:300]}...\n" for d in combined_docs])
-    
     try:
         print("--- Melakukan Reranking via LLM ---")
-        rerank_res = rerank_chain.invoke({
-            "question": question,
-            "docs_list": docs_str
-        })
-        
-        # Parse output ID dari LLM (contoh: "DOC_1, DOC_5")
+        rerank_res = rerank_chain.invoke({"question": question, "docs_list": docs_str})
         relevant_ids = [x.strip() for x in rerank_res['text'].split(',')]
-        
-        # Filter dokumen berdasarkan ID yang dipilih LLM
         final_docs = [d for d in combined_docs if d['id'] in relevant_ids]
         
-        # Fallback: Jika LLM salah format atau jawab NONE, pakai Top-3 Embedding
         if not final_docs:
-            print("Fallback: Reranking tidak menemukan hasil, menggunakan Top Embedding.")
+            print("Fallback: Top Embedding.")
             final_docs = docs_emb[:3]
         else:
             print(f"LLM Memilih Dokumen: {[d['filename'] for d in final_docs]}")
@@ -307,7 +344,7 @@ def mainrag(history, question):
         print(f"Reranking Error: {e}")
         final_docs = docs_emb[:3]
 
-    # 3. GENERATE ANSWER (Format HTML)
+    # 3. Generate Answer
     context_text = "\n\n".join([f"Sumber: {d['filename']}\nIsi: {d['text']}" for d in final_docs])
 
     try:
@@ -316,7 +353,8 @@ def mainrag(history, question):
             "context": context_text,
             "chat_history": history
         })
-        return response['text']
+        # UPDATE: Format jawaban dengan link sumber
+        return format_answer_with_sources(response['text'], final_docs)
 
     except Exception as e:
         return f"<p>Error generation: {str(e)}</p>"
@@ -326,59 +364,42 @@ def mainragocr(history, question, ocr_text=None):
     if not INDEXED_DOCS:
         load_and_index_documents()
 
-    print(f"\nProcessing: {question} and OCR {ocr_text}")
+    print(f"\nProcessing OCR RAG: {question}")
 
-    question = question + "\n Ditambah dengan konteks gambar atau dokumen serta semua textnya:\n" + (ocr_text if ocr_text else "")
+    question_combined = question + "\n[Info Tambahan dari Gambar/OCR]:\n" + (ocr_text if ocr_text else "")
 
-    # 1. HYBRID RETRIEVAL (Embedding + WordNet)
-    # Ambil 5 dari embedding, 5 dari wordnet
-    docs_emb = retrieve_by_embedding(question, k=5)
-    docs_wn = retrieve_by_wordnet(question, k=5)
-
-    # Gabungkan dan hapus duplikat
+    docs_emb = retrieve_by_embedding(question_combined, k=5)
+    docs_wn = retrieve_by_wordnet(question_combined, k=5)
     combined_docs = {d['id']: d for d in (docs_emb + docs_wn)}.values()
     
     if not combined_docs:
         return "<p>Maaf, tidak ditemukan informasi yang relevan.</p>"
 
-    # 2. LLM RERANKING (LLM Nentuin Similarity)
-    # Siapkan string untuk prompt reranking
     docs_str = "\n".join([f"ID: {d['id']}\nCuplikan: {d['text'][:300]}...\n" for d in combined_docs])
     
     try:
-        print("--- Melakukan Reranking via LLM ---")
-        rerank_res = rerank_chain.invoke({
-            "question": question,
-            "docs_list": docs_str
-        })
-        
-        # Parse output ID dari LLM (contoh: "DOC_1, DOC_5")
+        print("--- Melakukan Reranking (OCR Context) ---")
+        rerank_res = rerank_chain.invoke({"question": question_combined, "docs_list": docs_str})
         relevant_ids = [x.strip() for x in rerank_res['text'].split(',')]
-        
-        # Filter dokumen berdasarkan ID yang dipilih LLM
         final_docs = [d for d in combined_docs if d['id'] in relevant_ids]
         
-        # Fallback: Jika LLM salah format atau jawab NONE, pakai Top-3 Embedding
         if not final_docs:
-            print("Fallback: Reranking tidak menemukan hasil, menggunakan Top Embedding.")
             final_docs = docs_emb[:3]
-        else:
-            print(f"LLM Memilih Dokumen: {[d['filename'] for d in final_docs]}")
 
     except Exception as e:
         print(f"Reranking Error: {e}")
         final_docs = docs_emb[:3]
 
-    # 3. GENERATE ANSWER (Format HTML)
     context_text = "\n\n".join([f"Sumber: {d['filename']}\nIsi: {d['text']}" for d in final_docs])
 
     try:
         response = qa_chain.invoke({
-            "question": question,
+            "question": question_combined,
             "context": context_text,
             "chat_history": history
         })
-        return response['text']
+        # UPDATE: Format jawaban dengan link sumber
+        return format_answer_with_sources(response['text'], final_docs)
 
     except Exception as e:
         return f"<p>Error generation: {str(e)}</p>"
