@@ -1,3 +1,4 @@
+# FIX BANGET
 # server.py
 import os
 import asyncio
@@ -10,7 +11,8 @@ load_dotenv()
 
 import websockets
 from websockets.server import WebSocketServerProtocol
-from bson import ObjectId
+from bson.objectid import ObjectId
+
 
 from db import chats_col, messages_col, device_tokens_col
 from model import make_chat_doc, make_message_doc, str_to_oid
@@ -27,7 +29,7 @@ ALLOWED_EXT = {".png", ".jpg", ".jpeg", ".pdf"}
 BASE_FILE_URL = os.getenv("BASE_FILE_URL", "")
 
 # RAG
-import rag.rag as rag
+import rag.rag_temp as rag
 import rag.ocr as ocr
 
 # In-memory maps
@@ -57,7 +59,7 @@ async def monitor_inactive_chats():
                     active_websockets.pop(cid_str, None)
                     continue
                 ws = active_websockets.get(cid_str)
-                if ws is None or ws.closed:
+                if ws is None or ws.close_code is not None:
                     await mark_chat_nonactive(oid)
                     last_connected.pop(cid_str, None)
                     active_websockets.pop(cid_str, None)
@@ -65,7 +67,6 @@ async def monitor_inactive_chats():
         except Exception as e:
             print("monitor error:", e)
             await asyncio.sleep(1)
-
 # Utilities
 def gen_chat_token() -> str:
     return uuid.uuid4().hex + uuid.uuid4().hex  # long random token
@@ -93,15 +94,29 @@ async def validate_device_token(chat_oid, device_token: str) -> bool:
     return stored == device_token
 
 
-async def handler(ws: WebSocketServerProtocol, path):
+async def handler(ws: WebSocketServerProtocol):
     client = ws.remote_address
     print(f"[connect] from {client}")
+    # KUNCI: Tambahkan variabel ini di awal handler untuk menampung metadata file
+    # pending_upload = None
     try:
+        pending_upload_metadata = None
         async for raw in ws:
             if isinstance(raw, bytes):
-                # unexpected bytes frame (we expect binary only after server prompts)
-                await ws.send(json.dumps({"status":"error","message":"Unexpected binary frame. Send header first."}))
-                continue
+                if isinstance(raw, bytes):
+                    if pending_upload_metadata:
+                        p = pending_upload_metadata
+                        # 1. Simpan biner ke storage
+                        saved_name = save_binary_file(p["temp_id"], p["filename"], raw)
+                        
+                        # 2. Balas ke frontend: "Ini nama file kamu di server"
+                        await ws.send(json.dumps({
+                            "status": "ok",
+                            "action": "upload_file",
+                            "server_filename": saved_name 
+                        }))
+                        pending_upload_metadata = None # Kosongkan kantong
+                    continue
 
             try:
                 data = json.loads(raw)
@@ -130,6 +145,14 @@ async def handler(ws: WebSocketServerProtocol, path):
                     "deviceToken": device_token
                 }))
                 continue
+
+            # A. Action baru untuk registrasi upload
+            elif action == "upload_file":
+                pending_upload_metadata = {
+                    "temp_id": uuid.uuid4().hex,
+                    "filename": data.get("filename")
+                }
+                await ws.send(json.dumps({"status": "ok", "action": "ready_for_upload"}))
 
             # CREATE CHAT (Device Token Mode)
             elif action == "create_chat":
@@ -218,30 +241,59 @@ async def handler(ws: WebSocketServerProtocol, path):
 
                 msg_text = data.get("msg", "")
 
-                # INSERT MESSAGE
+                # INSERT MESSAGE USER
                 msg_doc = make_message_doc(chat_oid, msg_text, None, sender="USER")
                 r = await messages_col.insert_one(msg_doc)
                 message_oid = r.inserted_id
 
-                # RAG REPLY
-                
+                # --- BAGIAN STREAMING RAG ---
                 msg_history = await messages_col.find({"chatId": chat_oid}).sort("createdAt", 1).to_list(None)
-                reply_text = rag.mainrag(msg_history,msg_text)
-                reply = make_message_doc(chat_oid, reply_text, None, sender="SELF")
-                await messages_col.insert_one(reply)
+                formatted_history = ""
+                for m in msg_history:
+                    role = "User" if m.get("sender") == "USER" else "AI"
+                    formatted_history += f"{role}: {m.get('text')}\n"
+                
+                full_reply = ""
+                # Beritahu frontend bahwa streaming dimulai
+                await ws.send(json.dumps({
+                    "status": "start_stream",
+                    "action": "send_message",
+                    "messageId": str(message_oid)
+                }))
 
+                # Panggil generator streaming dari rag_temp
+                async for chunk in rag.mainrag_stream(formatted_history, msg_text):
+                    full_reply += chunk
+                    # Kirim potongan teks langsung ke WebSocket
+                    await ws.send(json.dumps({
+                        "status": "streaming",
+                        "chunk": chunk
+                    }))
+
+                # Setelah streaming selesai, tambahkan sumber referensi
+                # Kita panggil format_answer_with_sources di akhir
+                # Ambil docs lagi (atau simpan dari mainrag_stream)
+                docs_for_sources = await rag.VECTOR_STORE.asimilarity_search(msg_text, k=4)
+                docs_dict = [{"filename": d.metadata.get("source"), "text": d.page_content} for d in docs_for_sources]
+                
+                final_html = rag.format_answer_with_sources(full_reply, docs_dict)
+
+                # SIMPAN JAWABAN LENGKAP KE DATABASE
+                reply_doc = make_message_doc(chat_oid, final_html, None, sender="SELF")
+                await messages_col.insert_one(reply_doc)
+
+                # Beritahu frontend bahwa streaming selesai
                 await ws.send(json.dumps({
                     "status": "ok",
                     "action": "send_message",
-                    "messageId": str(message_oid),
-                    "reply": reply_text
+                    "final_reply": final_html # Kirim versi lengkap dengan sumber
                 }))
 
-                print(f"[message] saved {message_oid} for chat {chat_id}")
+                print(f"[stream] completed for chat {chat_id}")
 
-            # SEND MESSAGE WITH ATTACHMENT (single binary expected after header)
+                # ... (kode action lainnya) ...
+
             elif action == "send_message_with_attachment":
-
 
                 # DEVICE TOKEN VALIDATION
                 device_token = data.get("deviceToken")
@@ -259,6 +311,7 @@ async def handler(ws: WebSocketServerProtocol, path):
                     }))
                     continue
 
+                # CHECK TOKEN & CHAT EXISTENCE
                 chat_oid = str_to_oid(chat_id)
                 if chat_oid is None:
                     await ws.send(json.dumps({"status":"error","message":"invalid chatId"}))
@@ -268,6 +321,7 @@ async def handler(ws: WebSocketServerProtocol, path):
                 if not chat_doc:
                     await ws.send(json.dumps({"status":"error","message":"invalid chatId"}))
                     continue
+
 
                 # NONACTIVE CHECK
                 if chat_doc.get("status") == "NONACTIVE":
@@ -284,71 +338,189 @@ async def handler(ws: WebSocketServerProtocol, path):
                     await ws.send(json.dumps({"status":"error","message":"rate_limit_exceeded","remaining":remaining, "time_retry":get_retry_after(device_token)}))
                     continue
 
-                filename = data.get("filename")
-                declared_size = data.get("filesize")
-                mimetype = data.get("mimetype")
                 msg_text = data.get("msg", "")
+                uploaded_file = data.get("filename")
 
-                # placeholder message
-                placeholder = make_message_doc(chat_oid, msg_text, None, sender="USER")
-                r = await messages_col.insert_one(placeholder)
+                # 1. Simpan pesan USER ke database
+                file_url = f"{BASE_FILE_URL}/public/upload/{uploaded_file}" if BASE_FILE_URL else f"/public/upload/{uploaded_file}"
+                print("Received send_message_with_attachment for file:", file_url)
+                msg_doc = make_message_doc(chat_oid, msg_text, file_url, sender="USER")
+                r = await messages_col.insert_one(msg_doc)
                 message_oid = r.inserted_id
-                message_id_str = str(message_oid)
 
-                # request binary
+                # 2. OCR (Karena file fisik SUDAH ADA di server dari proses upload_file tadi)
+                ocr_path = os.path.join(os.getenv("STORAGE_PATH", "public/upload"), uploaded_file)
+                ocr_text = ocr.ocr_file(ocr_path) # <--- PERBEDAANNYA DISINI
+
+
+                # --- BAGIAN STREAMING RAG ---
+                msg_history = await messages_col.find({"chatId": chat_oid}).sort("createdAt", 1).to_list(None)
+                formatted_history = ""
+                for m in msg_history:
+                    role = "User" if m.get("sender") == "USER" else "AI"
+                    formatted_history += f"{role}: {m.get('text')}\n"
+                
+                full_reply = ""
+                # Beritahu frontend bahwa streaming dimulai
+                await ws.send(json.dumps({
+                    "status": "start_stream",
+                    "action": "send_message",
+                    "messageId": str(message_oid)
+                }))
+
+                # Panggil generator streaming dari rag_temp
+                async for chunk in rag.mainrag_stream(formatted_history, msg_text):
+                    full_reply += chunk
+                    # Kirim potongan teks langsung ke WebSocket
+                    await ws.send(json.dumps({
+                        "status": "streaming",
+                        "chunk": chunk
+                    }))
+
+                # Setelah streaming selesai, tambahkan sumber referensi
+                # Kita panggil format_answer_with_sources di akhir
+                # Ambil docs lagi (atau simpan dari mainrag_stream)
+                docs_for_sources = await rag.VECTOR_STORE.asimilarity_search(msg_text, k=4)
+                docs_dict = [{"filename": d.metadata.get("source"), "text": d.page_content} for d in docs_for_sources]
+                
+                final_html = rag.format_answer_with_sources(full_reply, docs_dict)
+
+                # SIMPAN JAWABAN LENGKAP KE DATABASE
+                reply_doc = make_message_doc(chat_oid, final_html, None, sender="SELF")
+                await messages_col.insert_one(reply_doc)
+
+                # Beritahu frontend bahwa streaming selesai
                 await ws.send(json.dumps({
                     "status": "ok",
-                    "action": "ready_for_binary",
-                    "messageId": message_id_str
+                    "action": "send_message",
+                    "final_reply": final_html # Kirim versi lengkap dengan sumber
                 }))
 
-                # receive binary
-                try:
-                    binary_frame = await asyncio.wait_for(ws.recv(), timeout=30)
-                except asyncio.TimeoutError:
-                    await ws.send(json.dumps({"status":"error","message":"timeout waiting for binary"}))
+                print(f"[stream] completed for chat {chat_id}")
+
+                # ... (kode action lainnya) ...
+
+            # === TAMBAHAN BARU: LOAD HISTORY ===
+            elif action == "get_history":
+                # 1. Validasi Token (Sama seperti send_message)
+                device_token = data.get("deviceToken")
+                device_doc = await device_tokens_col.find_one({"deviceToken": device_token})
+                if not device_doc or device_doc.get("lastChatId") != chat_id:
+                     await ws.send(json.dumps({"status":"error", "message":"unauthorized"}))
+                     continue
+                
+                chat_oid = str_to_oid(chat_id)
+                if not chat_oid:
                     continue
 
-                if not isinstance(binary_frame, (bytes, bytearray)):
-                    await ws.send(json.dumps({"status":"error","message":"expected binary frame"}))
-                    continue
+                # 2. Ambil Pesan dari Database
+                cursor = messages_col.find({"chatId": chat_oid}).sort("createdAt", 1)
+                stored_messages = await cursor.to_list(None)
 
-                actual_size = len(binary_frame)
-                allowed, reason = is_allowed_file(filename, mimetype, declared_size, actual_size)
-                if not allowed:
-                    await messages_col.update_one(
-                        {"_id": message_oid},
-                        {"$set": {"attachment": None, "updatedAt": datetime.utcnow()}}
-                    )
-                    await ws.send(json.dumps({"status":"error","message":"file_rejected","reason":reason}))
-                    continue
+                # 3. Format agar sesuai dengan Frontend React
+                history_payload = []
+                for m in stored_messages:
+                    # Konversi 'SELF' -> 'bot', 'USER' -> 'user'
+                    sender_fe = "bot" if m.get("sender") == "SELF" else "user"
+                    history_payload.append({
+                        "sender": sender_fe,
+                        "text": m.get("text", ""),
+                        "attachmentUrl": m.get("attachment")
+                    })
 
-                # save file
-                saved_name = save_binary_file(message_id_str, filename, binary_frame)
-
-                file_url = f"{BASE_FILE_URL}/public/upload/{saved_name}" if BASE_FILE_URL else f"/public/upload/{saved_name}"
-
-                await messages_col.update_one(
-                    {"_id": message_oid},
-                    {"$set": {"attachment": file_url, "updatedAt": datetime.utcnow()}}
-                )
-
-                # RAG reply
-                ocr_msg_text = ocr.ocr_file(os.path.join(os.getenv("STORAGE_PATH", "public/upload"), saved_name))
-                msg_history = await messages_col.find({"chatId": chat_oid}).sort("createdAt", 1).to_list(None)
-                reply_text = rag.mainragocr(msg_history, msg_text, ocr_msg_text)
-                reply = make_message_doc(chat_oid, reply_text, None, sender="SELF")
-                await messages_col.insert_one(reply)
-
+                # 4. Kirim ke Frontend
                 await ws.send(json.dumps({
-                    "status":"ok",
-                    "action":"send_message_with_attachment",
-                    "messageId": message_id_str,
-                    "attachment": saved_name,
-                    "reply": reply_text
+                    "status": "ok",
+                    "action": "get_history",
+                    "messages": history_payload
                 }))
+            
+            # ... (kode action lainnya) ...
 
-                print(f"[message+file] saved {message_id_str} file {saved_name} for chat {chat_id}")
+            # SEND MESSAGE WITH ATTACHMENT (single binary expected after header)
+            # elif action == "send_message_with_attachment":
+
+
+            #     # DEVICE TOKEN VALIDATION
+            #     device_token = data.get("deviceToken")
+            #     device_doc = await device_tokens_col.find_one({"deviceToken": device_token})
+            #     if not device_doc:
+            #         await ws.send(json.dumps({"status":"error","message":"invalid deviceToken"}))
+            #         continue
+
+            #     # DEVICE MUST BE BOUND TO THIS CHAT
+            #     if device_doc.get("lastChatId") != chat_id:
+            #         await ws.send(json.dumps({
+            #             "status": "error",
+            #             "message": "chat_not_bound_to_device",
+            #             "refresh": True
+            #         }))
+            #         continue
+
+            #     chat_oid = str_to_oid(chat_id)
+            #     if chat_oid is None:
+            #         await ws.send(json.dumps({"status":"error","message":"invalid chatId"}))
+            #         continue
+
+            #     chat_doc = await chats_col.find_one({"_id": chat_oid})
+            #     if not chat_doc:
+            #         await ws.send(json.dumps({"status":"error","message":"invalid chatId"}))
+            #         continue
+
+            #     # NONACTIVE CHECK
+            #     if chat_doc.get("status") == "NONACTIVE":
+            #         await ws.send(json.dumps({
+            #             "status": "error",
+            #             "message": "chat_nonactive",
+            #             "refresh": True
+            #         }))
+            #         continue
+
+            #     # RATE LIMIT
+            #     if not allow_send(device_token):
+            #         remaining = get_remaining(device_token)
+            #         await ws.send(json.dumps({"status":"error","message":"rate_limit_exceeded","remaining":remaining, "time_retry":get_retry_after(device_token)}))
+            #         continue
+
+            #     msg_text = data.get("msg", "")
+            #     uploaded_file = data.get("attachment") # Referensi file dari tahap sebelumnya
+                
+            #     # Simpan pesan user ke DB
+            #     msg_doc = make_message_doc(chat_oid, msg_text, uploaded_file, sender="USER")
+            #     await messages_col.insert_one(msg_doc)
+
+            #     # Beritahu streaming dimulai
+            #     await ws.send(json.dumps({"status": "start_stream", "action": "send_message"}))
+
+            #     full_reply = ""
+            #     # Jika ada file, jalankan RAG OCR, jika tidak RAG biasa
+            #     if uploaded_file:
+            #         ocr_path = os.path.join(os.getenv("STORAGE_PATH", "public/upload"), uploaded_file)
+            #         ocr_text = ocr.ocr_file(ocr_path)
+            #         # Gunakan formatted history untuk context
+            #         async for chunk in rag.mainragocr_stream(formatted_history, msg_text, ocr_text):
+            #             full_reply += chunk
+            #             await ws.send(json.dumps({"status": "streaming", "chunk": chunk}))
+            #     else:
+            #         async for chunk in rag.mainrag_stream(formatted_history, msg_text):
+            #             full_reply += chunk
+            #             await ws.send(json.dumps({"status": "streaming", "chunk": chunk}))
+
+            #     # Simpan balasan bot dan kirim status 'ok'
+            # # Di dalam handler(ws: WebSocketServerProtocol):
+
+            elif action == "admin_reload_rag":
+                # Kamu bisa tambahkan pengecekan token rahasia di sini jika perlu
+                try:
+                    rag.reload_rag() # Memperbarui INDEXED_DOCS di memori proses WS
+                    await ws.send(json.dumps({
+                        "status": "ok", 
+                        "action": "admin_reload_rag", 
+                        "message": "Index RAG pada WebSocket berhasil diperbarui"
+                    }))
+                    print("[admin] RAG Reloaded via WebSocket command")
+                except Exception as e:
+                    await ws.send(json.dumps({"status": "error", "message": str(e)}))
 
             elif action == "ping":
                 # simple keepalive
@@ -356,6 +528,8 @@ async def handler(ws: WebSocketServerProtocol, path):
                 if chat_id:
                     last_connected[chat_id] = now_ms()
                     active_websockets[chat_id] = ws
+            
+
 
             else:
                 await ws.send(json.dumps({"status":"error","message":"unknown action"}))
@@ -373,6 +547,8 @@ async def handler(ws: WebSocketServerProtocol, path):
             active_websockets.pop(cid, None)
             last_connected[cid] = now_ms()
         print(f"[cleanup] connection {client} cleaned - removed {to_drop}")
+
+
 
 async def main():
     ensure_storage()

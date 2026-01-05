@@ -24,15 +24,18 @@ type Message = {
   text: string;
   attachmentUrl?: string;
 };
-
+let finalFileName = "";
 // Tipe respons dari Server Python
 interface WsResponse {
-  status: 'ok' | 'error';
+  status: 'ok' | 'error' | 'start_stream' | 'streaming';
   action?: string;
   message?: string;
   deviceToken?: string;
   chatId?: string;
   reply?: string;
+  chunk?: string;         // Tambahkan ini untuk potongan teks
+  final_reply?: string;   // Tambahkan ini untuk jawaban lengkap + sumber
+  server_filename?: string;
   attachment?: string;
   reason?: string;
   remaining?: number;
@@ -45,6 +48,8 @@ const initialMessages: Message[] = [
     text: 'Selamat datang! Ada yang bisa saya bantu terkait informasi kampus? (Saya bisa menampilkan tabel, list, dan format rapi lainnya).',
   },
 ];
+
+
 
 export default function Chatbot() {
   // --- STATE UTAMA ---
@@ -132,7 +137,7 @@ export default function Chatbot() {
   // ----------------------------------------------------------------------
   // 2. LOGIKA PENANGANAN PESAN MASUK (ROUTER)
   // ----------------------------------------------------------------------
-  const handleWsMessage = (data: WsResponse) => {
+  const handleWsMessage1 = (data: WsResponse) => {
     console.log('[WS RECV]', data);
 
     if (data.status === 'error') {
@@ -253,7 +258,142 @@ export default function Chatbot() {
         break;
     }
   };
+  // Tambahkan state baru
+  const [uploadedFileServerName, setUploadedFileServerName] = useState<string | null>(null);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      pendingFileRef.current = file;
+      
+      // LANGSUNG UPLOAD: Kirim header registrasi upload ke server
+      ws.current?.send(JSON.stringify({
+        action: 'upload_file',
+        filename: file.name,
+      }));
+    }
+  };
+
+  const handleWsMessage = (data: WsResponse) => {
+    console.log('[WS RECV]', data);
+
+    if (data.status === 'error') {
+      setLoading(false);
+      // Handle error spesifik
+      if (
+        data.message === 'chat_not_bound_to_device' ||
+        data.message === 'invalid deviceToken'
+      ) {
+        // Reset token dan register ulang
+        localStorage.removeItem('deviceToken');
+        ws.current?.send(JSON.stringify({ action: 'register_device' }));
+      } else if (data.message === 'rate_limit_exceeded') {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: 'bot',
+            text: `⚠️ Terlalu banyak pesan. Mohon tunggu beberapa saat. (Sisa: ${data.remaining})`,
+          },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: 'bot',
+            text: `⚠️ Error: ${data.message || 'Unknown error'}`,
+          },
+        ]);
+      }
+      return;
+    }
+
+    // GABUNGKAN SEMUA LOGIKA DI DALAM SWITCH STATUS
+    switch (data.status) {
+      case 'start_stream':
+        setLoading(false); 
+        // Tambahkan bubble bot kosong
+        setMessages((prev) => [...prev, { sender: 'bot', text: '' }]);
+        break;
+
+      case 'streaming':
+        if (data.chunk) {
+          setMessages((prev) => {
+            const newMessages = [...prev];
+            const lastIndex = newMessages.length - 1;
+            if (lastIndex >= 0 && newMessages[lastIndex].sender === 'bot') {
+              // Tambahkan chunk ke pesan terakhir
+              newMessages[lastIndex] = {
+                ...newMessages[lastIndex],
+                text: newMessages[lastIndex].text + data.chunk
+              };
+            }
+            return newMessages;
+          });
+        }
+        break;
+
+      case 'ok':
+        // Streaming Selesai atau Response Biasa
+        if (data.action === 'ready_for_upload') {
+           // GUNAKAN REF, jangan gunakan state selectedFile
+            const fileToSend = pendingFileRef.current; 
+            
+            if (fileToSend && ws.current) {
+              console.log("Mengirim biner untuk file:", fileToSend.name);
+              const reader = new FileReader();
+              reader.onload = () => {
+                if (reader.result instanceof ArrayBuffer) {
+                  ws.current?.send(reader.result); // KIRIM BINER SEKARANG
+                  pendingFileRef.current = null;   // Kosongkan ref setelah terkirim
+                }
+              };
+              reader.readAsArrayBuffer(fileToSend);
+            } else {
+              console.error("File tidak ditemukan di pendingFileRef!");
+            }
+          } 
+          else if (data.action === 'upload_file' && data.server_filename) {
+            // Simpan nama file dari server
+            setUploadedFileServerName(data.server_filename);
+            console.log("File aman di storage server:", data.server_filename);
+            finalFileName = data.server_filename;
+          }
+        if (data.action === 'send_message' || data.action === 'send_message_with_attachment') {
+          setLoading(false);
+          if (data.final_reply) {
+            setMessages((prev) => {
+              const newMessages = [...prev];
+              const lastIndex = newMessages.length - 1;
+              if (lastIndex >= 0 && newMessages[lastIndex].sender === 'bot') {
+                newMessages[lastIndex].text = data.final_reply!;
+              }
+              return newMessages;
+            });
+          }
+        } 
+        // Logika Sesi/Handshake
+        else if (data.action === 'register_device' && data.deviceToken) {
+          localStorage.setItem('deviceToken', data.deviceToken);
+          setDeviceToken(data.deviceToken);
+          ws.current?.send(JSON.stringify({ action: 'create_chat', deviceToken: data.deviceToken }));
+        }
+        else if (data.action === 'create_chat' && data.chatId) {
+          setChatId(data.chatId);
+          const token = localStorage.getItem('deviceToken');
+          ws.current?.send(JSON.stringify({ action: 'get_history', chatId: data.chatId, deviceToken: token }));
+        }
+        else if (data.action === 'get_history' && data.messages) {
+          setMessages([initialMessages[0], ...data.messages]);
+        }
+        else if (data.action === 'ready_for_binary' && pendingFileRef.current) {
+          // ... (logika binary tetap sama)
+        }
+        break;
+    }
+  };
+
+ 
   // ----------------------------------------------------------------------
   // 3. UI HANDLERS (SEND MESSAGE)
   // ----------------------------------------------------------------------
@@ -262,7 +402,7 @@ export default function Chatbot() {
     setInput(e.target.value);
   };
 
-  const handleSend = async () => {
+  const handleSend1 = async () => {
     if ((!input.trim() && !selectedFile) || loading || !isWsConnected) return;
     if (!deviceToken || !chatId) {
       alert('Sedang menghubungkan ke sesi chat, coba lagi sesaat lagi...');
@@ -318,11 +458,64 @@ export default function Chatbot() {
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+  const handleSend = async () => {
+    if ((!input.trim() && !selectedFile) || loading || !isWsConnected) return;
+    if (!deviceToken || !chatId) {
+      alert('Sedang menghubungkan ke sesi chat...');
+      return;
+    }
+
+    const userMsg = input;
+    const currentFile = selectedFile;
+    
+    // AMBIL NAMA FILE DARI SERVER (Jika ada)
+    const finalFileName = uploadedFileServerName || currentFile?.name;
+
+    // 1. Tampilkan Chat User di UI
+    const newMessage: Message = { sender: 'user', text: userMsg };
+    if (currentFile) {
+      newMessage.attachmentUrl = URL.createObjectURL(currentFile);
+      if (!userMsg) newMessage.text = `Mengirim file: ${currentFile.name}`;
+    }
+    setMessages((prev) => [...prev, newMessage]);
+
+    // Reset UI
+    setInput('');
+    setSelectedFile(null);
+    setLoading(true);
+
+    // 2. Kirim ke WebSocket
+    if (currentFile) {
+      ws.current?.send(
+        JSON.stringify({
+          action: 'send_message_with_attachment',
+          deviceToken: deviceToken,
+          chatId: chatId,
+          msg: userMsg,
+          filename: finalFileName, // <--- GUNAKAN NAMA HASIL HASH SERVER
+          mimetype: currentFile.type,
+          filesize: currentFile.size,
+        })
+      );
+      // Reset state server name setelah digunakan
+      setUploadedFileServerName(null); 
+    } else {
+      ws.current?.send(
+        JSON.stringify({
+          action: 'send_message',
+          deviceToken,
+          chatId,
+          msg: userMsg,
+        })
+      );
     }
   };
+
+  // const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.files && e.target.files[0]) {
+  //     setSelectedFile(e.target.files[0]);
+  //   }
+  // };
 
   // Auto-scroll ke bawah
   useEffect(() => {
