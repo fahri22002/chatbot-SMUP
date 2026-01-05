@@ -28,6 +28,7 @@ interface ChatSession {
   createdAt: string;
 }
 
+// Interface untuk data yang digunakan di Frontend (UI)
 interface Message {
   sender: 'user' | 'bot';
   msg: string;
@@ -35,11 +36,13 @@ interface Message {
   attachmentUrl?: string | null;
 }
 
+// Interface untuk data mentah dari Backend/Database
+// UPDATE: Disesuaikan dengan output console (attachment)
 interface BackendMessage {
   sender: 'USER' | 'BOT';
   msg: string;
   createdAt: string;
-  attachmentUrl?: string | null;
+  attachment?: string | null; // Menggunakan 'attachment' sesuai DB
 }
 
 interface SelectedConversation {
@@ -212,12 +215,13 @@ const ChatHistoryView = () => {
       if (!res.ok) throw new Error('Gagal mengambil riwayat chat.');
       const data: ChatHistoryResponse = await res.json();
 
+      // UPDATE: Mapping dari 'attachment' (DB) ke 'attachmentUrl' (Frontend)
       const transformedMessages: Message[] = data.data.map(
         (msg: BackendMessage): Message => ({
           msg: msg.msg,
           createdAt: msg.createdAt,
           sender: msg.sender === 'USER' ? 'user' : 'bot',
-          attachmentUrl: msg.attachmentUrl,
+          attachmentUrl: msg.attachment || null, // Mapping field attachment
         })
       );
 
@@ -344,11 +348,6 @@ const ChatHistoryView = () => {
       <section className='grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0 pb-2'>
         
         {/* List Panel */}
-        {/* PERUBAHAN DISINI:
-            h-[500px] : Tinggi default di HP (fixed height agar scrollable di dalam kotak)
-            lg:h-[calc(100vh-180px)] : Di layar besar, tingginya menyesuaikan layar dikurangi Header & Padding.
-            Hasilnya: Panel memanjang tapi menyisakan ruang kosong di bawah (tidak mentok pojok).
-        */}
         <div className='lg:col-span-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg h-[500px] lg:h-[calc(100vh-180px)] flex flex-col shadow-sm'>
           <div className='p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0'>
             <h2 className='text-lg font-semibold flex items-center mb-4 gap-2 text-gray-900 dark:text-white'>
@@ -401,7 +400,6 @@ const ChatHistoryView = () => {
         </div>
 
         {/* Detail Panel */}
-        {/* Logic Tinggi yang sama diterapkan disini */}
         <div className='lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg h-[600px] lg:h-[calc(100vh-180px)] flex flex-col shadow-sm'>
           {detailLoading ? (
             <div className='flex justify-center items-center h-full text-gray-500'>
@@ -454,6 +452,7 @@ const ChatHistoryView = () => {
                         msg.sender === 'user' ? 'items-end' : 'items-start'
                       }`}
                     >
+                      {/* RENDER GAMBAR JIKA ADA ATTACHMENT */}
                       {msg.attachmentUrl && (
                         <div className='bg-gray-100 dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 mb-1'>
                           <a
@@ -469,7 +468,7 @@ const ChatHistoryView = () => {
                               height={0}
                               sizes='100vw'
                               className='w-full max-w-[200px] h-auto rounded-md hover:opacity-90 transition-opacity'
-                              unoptimized
+                              unoptimized // Penting jika domain gambar belum di-config
                             />
                           </a>
                           <div className='flex items-center gap-1 mt-2 text-xs text-gray-500 dark:text-gray-400'>
@@ -589,10 +588,6 @@ export default function AdminDashboard() {
         isLoggingOut={isLoggingOut}
         userRole={userRole}
       />
-      {/* Di sini tidak menggunakan h-screen/overflow-hidden 
-         agar layout lebih fleksibel, namun component ChatHistoryView
-         di dalamnya akan membatasi tingginya sendiri dengan `calc`.
-      */}
       <main className='flex-1 w-full'>
         {renderView()}
       </main>
