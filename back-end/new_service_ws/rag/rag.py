@@ -6,6 +6,7 @@ from pathlib import Path
 import json
 import re
 from collections import Counter
+from natsort import natsorted
 
 # --- IMPORT LANGCHAIN ---
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -190,7 +191,7 @@ def load_and_index_documents(folder_path="./scrapping/doc/pages", cache_path="./
             pass
 
     new_docs = []
-    files = list(folder.glob("*.txt"))
+    files = natsorted(list(folder.glob("*.txt")), key=lambda x: x.name) # <-- PAKAI YANG BARU INI
     
     for i, file in enumerate(files):
         try:

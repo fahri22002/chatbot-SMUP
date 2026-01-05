@@ -341,7 +341,7 @@ export default function Chatbot() {
 
   // --- RENDER UI ---
   return (
-    <div className='flex flex-col items-center justify-center w-full h-[100dvh] md:min-h-[75vh] md:h-auto md:py-8 md:px-6 bg-gray-50 dark:bg-gray-950'>
+    <div className='flex flex-col items-center justify-center w-full h-[100dvh] md:min-h-[95vh] md:h-auto md:py-8 md:px-6 bg-gray-50 dark:bg-gray-950'>
       {/* Container Utama */}
       <div className='w-full h-full md:h-[80vh] md:max-w-6xl mx-auto bg-white dark:bg-gray-900 md:rounded-2xl md:shadow-2xl md:border border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden'>
         {/* HEADER */}
@@ -429,7 +429,7 @@ export default function Chatbot() {
                   )}
 
                   {msg.sender === 'bot' ? (
-                    <div className='prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed overflow-x-auto break-words'>
+                    <div className='prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed break-words'>
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         rehypePlugins={[rehypeRaw]}
@@ -451,9 +451,10 @@ export default function Chatbot() {
 
                           // 3. Handling Ordered List (Numbering <ol>)
                           ol: ({ ...props }) => (
+                            // Use list-inside so markers appear inside the content box (prevents clipping of 2-digit markers)
                             <ol
                               {...props}
-                              className='list-decimal ml-5 mb-4 space-y-1'
+                              className='list-decimal list-inside ml-0 pl-4 mb-4 space-y-1'
                             />
                           ),
 
@@ -467,7 +468,8 @@ export default function Chatbot() {
 
                           // 5. Handling List Item (<li>)
                           li: ({ ...props }) => (
-                            <li {...props} className='pl-1' />
+                            // remove extra left padding on items to keep marker aligned
+                            <li {...props} className='pl-0' />
                           ),
 
                           // 6. Handling Table (HTML <table>)
