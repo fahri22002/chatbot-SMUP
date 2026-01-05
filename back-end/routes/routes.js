@@ -5,7 +5,6 @@ const {
   nonactiveChat, 
   postMsg, 
   postHeartbeat,
-  createChatwithConsent,
   // postConsent,
 } = require("../controller/appController.js");
 
@@ -21,7 +20,7 @@ router.use('/admin', adminRouter);
 // App routes
 router.get('/chat', getChat);
 // router.post('/create-chat', createChat);
-router.post('/create-chat', createChatwithConsent);
+router.post('/create-chat', createChat);
 // router.post('/consent', postConsent);
 router.get('/nonactive', nonactiveChat);
 router.post('/send-msg', upload.single('attachment'), postMsg);

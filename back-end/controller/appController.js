@@ -8,7 +8,6 @@ const fs = require('fs');
 // const { admin } = require("../auth/middleware.js");
 
 console.log('🔥 appController loaded — siap jalan!');
-const consentList = new Map();
 
 const getChat = async (req, res) => {
   try {
@@ -148,9 +147,10 @@ const postMsg = async (req, res) => {
   }
 };
 
-const createChatwithConsent = async (req, res) => {
+const createChat = async (req, res) => {
   try {
-    const { captchaToken, consent } = req.body;
+    // Kita tetap butuh captcha, tapi hapus consent
+    const { captchaToken } = req.body; // <-- Consent dihapus dari sini
 
     if (!captchaToken) {
       return res
@@ -160,78 +160,42 @@ const createChatwithConsent = async (req, res) => {
 
     const secretKey = process.env.RECAPTCHA_SECRET_KEY;
     if (!secretKey) {
-      console.error('RECAPTCHA_SECRET_KEY tidak ditemukan di file .env');
-      return res
-        .status(500)
-        .json({ error: true, message: 'Konfigurasi server error.' });
+      return res.status(500).json({ error: true, message: 'Konfigurasi server error.' });
     }
 
     const verificationUrl = 'https://www.google.com/recaptcha/api/siteverify';
-
     const params = new URLSearchParams();
     params.append('secret', secretKey);
     params.append('response', captchaToken);
+    
     const verificationResponse = await axios.post(verificationUrl, params, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
 
     const { success, 'error-codes': errorCodes } = verificationResponse.data;
 
     if (!success) {
-      console.warn('Verifikasi CAPTCHA gagal:', errorCodes);
-      return res
-        .status(401)
-        .json({
-          error: true,
-          message: 'Verifikasi CAPTCHA gagal. Silakan coba lagi.',
-        });
+      return res.status(401).json({ error: true, message: 'Verifikasi CAPTCHA gagal. Silakan coba lagi.' });
     }
-    if (req.session.chatId) {
-      setChatNonActive(req.session.chatId, req.session.consent);
-      delete req.session.chatId;
-      delete req.session.consent;
-    }
-    const status = 'ACTIVE';
 
-    // Buat dan simpan chat
-    const newChat = new Chat({ status });
-    await newChat.save();
-
-    req.session.chatId = newChat._id;
-    req.session.consent = consent || 'false';
-
-    consentList.set(req.session.chatId, req.session.consent);
-    console.log(
-      `Sesi chat ${newChat._id} dibuat dengan consent=${req.session.consent}`
-    );
-
-    res.status(201).json({
-      message: 'Chat berhasil dibuat',
-      data: newChat,
-    });
-  } catch (error) {
-    console.error('Error saat membuat chat:', error);
-    if (error.response) {
-      console.error('Error data from Google:', error.response.data);
-    }
-    res.status(500).json({ error: 'Gagal membuat chat' });
-  }
-};
-
-const createChat = async (req, res) => {
-  try {
+    // Jika ada sesi lama, nonaktifkan saja (JANGAN DIHAPUS)
     if (req.session.chatId) {
       setChatNonActive(req.session.chatId);
       delete req.session.chatId;
+      // delete req.session.consent; <-- HAPUS INI
     }
+    
     const status = 'ACTIVE';
 
-    // Buat dan simpan chat
     const newChat = new Chat({ status });
     await newChat.save();
+
     req.session.chatId = newChat._id;
+    // req.session.consent = consent || 'false'; <-- HAPUS INI
+    
+    // consentList.set(req.session.chatId, req.session.consent); <-- HAPUS INI
+
+    console.log(`Sesi chat ${newChat._id} dibuat (Permanent Storage)`);
 
     res.status(201).json({
       message: 'Chat berhasil dibuat',
@@ -283,9 +247,8 @@ const deleteChatAndAttachments = async (chatId) => {
   }
 };
 
-const setChatNonActive = async (chatId, consent) => {
+const setChatNonActive = async (chatId) => {
   try {
-    // Cek apakah chat dengan chatId ini masih aktif
     const chat = await Chat.findById(chatId);
 
     if (!chat) {
@@ -298,7 +261,9 @@ const setChatNonActive = async (chatId, consent) => {
       console.log('Chat sudah tidak aktif.');
       return null;
     }
-    console.log(`[LOG]: NONACTIVE : ${chatId}`);
+    
+    console.log(`[LOG]: Mengubah status menjadi NONACTIVE : ${chatId}`);
+    
     const updatedChat = await Chat.findByIdAndUpdate(
       chatId,
       { status: 'NONACTIVE' },
@@ -310,15 +275,14 @@ const setChatNonActive = async (chatId, consent) => {
       return null;
     }
 
-    // Hapus dari Map
     lastHeartbeat.delete(chatId);
-    // Validasi minimal isi pesan
-    console.log(consent);
-    console.log(consent == 'true');
-    console.log(consent == 'false');
+
+    // [PENTING: BAGIAN INI DIHAPUS AGAR TIDAK MENGHAPUS DATA]
+    /*
     if (consent != 'true') {
       await deleteChatAndAttachments(chatId);
     }
+    */
 
     return updatedChat;
   } catch (error) {
@@ -330,27 +294,20 @@ const setChatNonActive = async (chatId, consent) => {
 const nonactiveChat = async (req, res) => {
   try {
     if (!req.session.chatId) {
-      return res
-        .status(400)
-        .json({ error: true, message: 'Chat belum dibuat' });
+      return res.status(400).json({ error: true, message: 'Chat belum dibuat' });
     }
 
-    // Panggil fungsi logic
-    const updatedChat = await setChatNonActive(
-      req.session.chatId,
-      req.session.consent
-    );
+    // [UBAH] Tidak perlu kirim req.session.consent lagi
+    const updatedChat = await setChatNonActive(req.session.chatId);
 
     if (!updatedChat) {
-      return res
-        .status(404)
-        .json({ error: true, message: 'Chat tidak ditemukan' });
+      return res.status(404).json({ error: true, message: 'Chat tidak ditemukan' });
     }
-    // Hapus session setelah di-nonaktifkan
+    
     delete req.session.chatId;
 
     return res.status(200).json({
-      message: 'Status chat berhasil diubah menjadi NONACTIVE',
+      message: 'Status chat berhasil diubah menjadi NONACTIVE (Data tersimpan)',
       data: updatedChat,
     });
   } catch (error) {
@@ -441,5 +398,4 @@ module.exports = {
   postMsg,
   setInterval,
   postHeartbeat,
-  createChatwithConsent,
 };
