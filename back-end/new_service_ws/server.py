@@ -70,7 +70,7 @@ async def monitor_inactive_chats():
 def gen_chat_token() -> str:
     return uuid.uuid4().hex + uuid.uuid4().hex  # long random token
 
-def is_allowed_file(filename: str, mimetype: str | None, declared_size: int | None, actual_size: int) -> (bool, str):
+def is_allowed_file(filename: str, mimetype: str | None, declared_size: int | None, actual_size: int) -> tuple[bool, str]:
     _, ext = os.path.splitext(filename or "")
     ext = ext.lower()
     if ext not in ALLOWED_EXT:
@@ -225,7 +225,7 @@ async def handler(ws: WebSocketServerProtocol, path):
 
                 # RAG REPLY
                 
-                msg_history = await messages_col.find({"chatId": chat_oid}).sort("createdAt", 1).to_list(None)
+                msg_history = await messages_col.find({"chatId": str(chat_oid)}).sort("createdAt", 1).to_list(None)
                 reply_text = rag.mainrag(msg_history,msg_text)
                 reply = make_message_doc(chat_oid, reply_text, None, sender="SELF")
                 await messages_col.insert_one(reply)
@@ -335,7 +335,7 @@ async def handler(ws: WebSocketServerProtocol, path):
 
                 # RAG reply
                 ocr_msg_text = ocr.ocr_file(os.path.join(os.getenv("STORAGE_PATH", "public/upload"), saved_name))
-                msg_history = await messages_col.find({"chatId": chat_oid}).sort("createdAt", 1).to_list(None)
+                msg_history = await messages_col.find({"chatId": str(chat_oid)}).sort("createdAt", 1).to_list(None)
                 reply_text = rag.mainragocr(msg_history, msg_text, ocr_msg_text)
                 reply = make_message_doc(chat_oid, reply_text, None, sender="SELF")
                 await messages_col.insert_one(reply)

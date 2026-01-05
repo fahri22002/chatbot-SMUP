@@ -15,7 +15,7 @@ def make_chat_doc(device_token: str, status: str = "ACTIVE"):
 
 def make_message_doc(chat_oid: ObjectId, msg: str, attachment_filename: str | None, sender: str = "USER"):
     doc = {
-        "chatId": chat_oid,   # store as ObjectId
+        "chatId": str(chat_oid),   # <--- UBAH JADI INI (Disimpan sebagai String)
         "msg": msg,
         "attachment": attachment_filename,
         "sender": sender,

@@ -18,7 +18,6 @@ import Image from 'next/image';
 import { toast } from 'sonner';
 
 // --- IMPORT VIEW COMPONENTS ---
-
 import ManageAdminView from './manage-admin-view';
 import SettingsView from './settings-view';
 
@@ -69,29 +68,27 @@ const AdminSidebar = ({
   onNavClick,
   onLogout,
   isLoggingOut,
-  userRole, // <--- 1. TERIMA PROP ROLE
+  userRole,
 }: {
   activeView: ActiveView;
   onNavClick: (view: ActiveView) => void;
   onLogout: () => void;
   isLoggingOut: boolean;
-  userRole: string | null; // Tipe data role
+  userRole: string | null;
 }) => {
   const [isOpen, setIsOpen] = useState(true);
 
-  // Daftar item navigasi dasar
   const allNavItems = [
     {
       view: 'history' as ActiveView,
       icon: MessageSquare,
       label: 'Chat History',
     },
-
     {
       view: 'manageAdmin' as ActiveView,
       icon: Users,
       label: 'Manajemen Admin',
-      requiresSuperAdmin: true, // <--- Tandai menu ini butuh Super Admin
+      requiresSuperAdmin: true,
     },
     {
       view: 'settings' as ActiveView,
@@ -100,20 +97,17 @@ const AdminSidebar = ({
     },
   ];
 
-  // 2. FILTER ITEM BERDASARKAN ROLE
   const navItems = allNavItems.filter((item) => {
-    // Jika item butuh super admin, cek apakah userRole == 'SUPER_ADMIN'
     if (item.requiresSuperAdmin) {
       return userRole === 'SUPER_ADMIN';
     }
-    // Jika tidak butuh syarat khusus, tampilkan saja
     return true;
   });
 
   return (
     <aside
-      className={`flex flex-col h-screen p-4 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700
-                 transition-all duration-300 ease-in-out overflow-x-hidden
+      className={`sticky top-0 h-screen flex flex-col p-4 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700
+                 transition-all duration-300 ease-in-out z-20 flex-shrink-0
                  ${isOpen ? 'w-64' : 'w-20'}`}
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
@@ -178,7 +172,6 @@ const ChatHistoryView = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetch daftar chat
   const fetchChatList = async () => {
     try {
       setListLoading(true);
@@ -207,7 +200,6 @@ const ChatHistoryView = () => {
     fetchChatList();
   }, []);
 
-  // Handle pilih percakapan (Fetch detail chat history)
   const handleSelectConversation = async (chatId: string) => {
     if (selectedConversation?._id === chatId) return;
     try {
@@ -246,7 +238,6 @@ const ChatHistoryView = () => {
     }
   };
 
-  // Fungsi hapus satu chat
   const executeDeleteChat = async (id: string) => {
     try {
       const res = await fetch(`http://localhost:5000/api/admin/chats/${id}`, {
@@ -284,7 +275,6 @@ const ChatHistoryView = () => {
     });
   };
 
-  // Fungsi hapus chat lama
   const executeDeleteOldChats = async () => {
     try {
       const res = await fetch(
@@ -332,7 +322,7 @@ const ChatHistoryView = () => {
   return (
     <div className='p-4 sm:p-6 lg:p-8 h-full flex flex-col'>
       {/* Header */}
-      <header className='mb-8 flex justify-between items-start'>
+      <header className='mb-6 flex justify-between items-start flex-shrink-0'>
         <div>
           <h1 className='text-3xl font-bold text-gray-900 dark:text-white tracking-tight'>
             Chat History
@@ -351,10 +341,16 @@ const ChatHistoryView = () => {
       </header>
 
       {/* Chat History Section */}
-      <section className='grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1'>
+      <section className='grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0 pb-2'>
+        
         {/* List Panel */}
-        <div className='lg:col-span-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg h-[600px] flex flex-col'>
-          <div className='p-4 border-b border-gray-200 dark:border-gray-700'>
+        {/* PERUBAHAN DISINI:
+            h-[500px] : Tinggi default di HP (fixed height agar scrollable di dalam kotak)
+            lg:h-[calc(100vh-180px)] : Di layar besar, tingginya menyesuaikan layar dikurangi Header & Padding.
+            Hasilnya: Panel memanjang tapi menyisakan ruang kosong di bawah (tidak mentok pojok).
+        */}
+        <div className='lg:col-span-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg h-[500px] lg:h-[calc(100vh-180px)] flex flex-col shadow-sm'>
+          <div className='p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0'>
             <h2 className='text-lg font-semibold flex items-center mb-4 gap-2 text-gray-900 dark:text-white'>
               <MessageSquare /> Riwayat Percakapan
             </h2>
@@ -369,7 +365,7 @@ const ChatHistoryView = () => {
               />
             </div>
           </div>
-          <div className='overflow-y-auto flex-1'>
+          <div className='overflow-y-auto flex-1 custom-scrollbar'>
             {listLoading ? (
               <div className='flex justify-center items-center h-full text-gray-500'>
                 <Loader2 className='w-8 h-8 animate-spin' />
@@ -405,14 +401,15 @@ const ChatHistoryView = () => {
         </div>
 
         {/* Detail Panel */}
-        <div className='lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg h-[600px] flex flex-col'>
+        {/* Logic Tinggi yang sama diterapkan disini */}
+        <div className='lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg h-[600px] lg:h-[calc(100vh-180px)] flex flex-col shadow-sm'>
           {detailLoading ? (
             <div className='flex justify-center items-center h-full text-gray-500'>
               <Loader2 className='w-12 h-12 animate-spin' />
             </div>
           ) : selectedConversation ? (
             <>
-              <header className='p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center'>
+              <header className='p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0'>
                 <div>
                   <h3 className='font-bold text-gray-900 dark:text-white'>
                     Detail Percakapan
@@ -429,7 +426,7 @@ const ChatHistoryView = () => {
                   <span>Hapus</span>
                 </button>
               </header>
-              <div className='flex-1 overflow-y-auto p-6 flex flex-col gap-5'>
+              <div className='flex-1 overflow-y-auto p-6 flex flex-col gap-5 custom-scrollbar'>
                 {selectedConversation.messages.map((msg, index) => (
                   <div
                     key={index}
@@ -440,7 +437,7 @@ const ChatHistoryView = () => {
                     }`}
                   >
                     <div
-                      className={`p-2 rounded-full ${
+                      className={`p-2 rounded-full flex-shrink-0 ${
                         msg.sender === 'user'
                           ? 'bg-blue-600'
                           : 'bg-gray-500 dark:bg-gray-700'
@@ -539,14 +536,9 @@ const ChatHistoryView = () => {
 export default function AdminDashboard() {
   const [activeView, setActiveView] = useState<ActiveView>('history');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  
-  // 3. STATE BARU UNTUK ROLE
   const [userRole, setUserRole] = useState<string | null>(null);
 
-  // 4. AMBIL ROLE DARI LOCALSTORAGE SAAT MOUNT
   useEffect(() => {
-    // Pastikan di halaman Login Anda sudah menyimpan 'role' ke localStorage
-    // Contoh: localStorage.setItem('role', response.data.role);
     const role = localStorage.getItem('role');
     setUserRole(role);
   }, []);
@@ -560,7 +552,6 @@ export default function AdminDashboard() {
       });
       if (!res.ok) throw new Error('Proses logout gagal.');
       
-      // Bersihkan localStorage saat logout
       localStorage.removeItem('role'); 
       
       window.location.href = '/login';
@@ -580,7 +571,6 @@ export default function AdminDashboard() {
         return <ChatHistoryView />;
   
       case 'manageAdmin':
-        // Extra Protection: Jika bukan super admin tapi memaksa akses view ini, kembalikan ke history
         if (userRole !== 'SUPER_ADMIN') return <ChatHistoryView />;
         return <ManageAdminView onBack={() => setActiveView('history')} />;
       case 'settings':
@@ -591,8 +581,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className='flex h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-200 font-sans'>
-      {/* 5. KIRIM ROLE KE SIDEBAR */}
+    <div className='flex min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-200 font-sans'>
       <AdminSidebar
         activeView={activeView}
         onNavClick={setActiveView}
@@ -600,7 +589,13 @@ export default function AdminDashboard() {
         isLoggingOut={isLoggingOut}
         userRole={userRole}
       />
-      <main className='flex-1 overflow-y-auto h-screen'>{renderView()}</main>
+      {/* Di sini tidak menggunakan h-screen/overflow-hidden 
+         agar layout lebih fleksibel, namun component ChatHistoryView
+         di dalamnya akan membatasi tingginya sendiri dengan `calc`.
+      */}
+      <main className='flex-1 w-full'>
+        {renderView()}
+      </main>
     </div>
   );
 }
