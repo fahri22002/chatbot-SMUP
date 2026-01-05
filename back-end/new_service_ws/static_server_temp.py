@@ -13,7 +13,7 @@ from bson import ObjectId
 
 # Import modul internal kamu
 import scrapping.run as rsc
-import rag.rag as rag
+import rag.rag_temp as rag
 
 # --- KONFIGURASI ---
 PUBLIC_DIR = "public"
@@ -38,7 +38,7 @@ def start_scheduler():
             schedule.run_pending()
             time.sleep(1)
 
-    schedule.every().day.at("20:28").do(job)
+    schedule.every().day.at("01:00").do(job)
     t = threading.Thread(target=scheduler_thread, daemon=True)
     t.start()
     print("Scheduler berjalan di background.")

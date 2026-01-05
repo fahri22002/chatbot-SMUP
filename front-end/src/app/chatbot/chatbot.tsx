@@ -479,10 +479,17 @@ export default function Chatbot() {
     }
     setMessages((prev) => [...prev, newMessage]);
 
-    // Reset UI
-    setInput('');
-    setSelectedFile(null);
-    setLoading(true);
+    // --- BAGIAN PERBAIKAN ---
+  setInput('');
+  setSelectedFile(null);
+  setUploadedFileServerName(null); // Reset nama file server
+  setLoading(true);
+
+  // RESET INPUT FILE DI DOM
+  if (fileInputRef.current) {
+    fileInputRef.current.value = ''; 
+  }
+  // ------------------------
 
     // 2. Kirim ke WebSocket
     if (currentFile) {

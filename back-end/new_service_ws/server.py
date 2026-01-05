@@ -369,7 +369,7 @@ async def handler(ws: WebSocketServerProtocol):
                 }))
 
                 # Panggil generator streaming dari rag_temp
-                async for chunk in rag.mainrag_stream(formatted_history, msg_text):
+                async for chunk in rag.mainragocr_stream(formatted_history, msg_text, ocr_text):
                     full_reply += chunk
                     # Kirim potongan teks langsung ke WebSocket
                     await ws.send(json.dumps({
