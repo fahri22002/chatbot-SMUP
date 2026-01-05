@@ -1,166 +1,124 @@
 @import 'tailwindcss';
 
+/* --- 1. DEFINISI VARABEL DEFAULT (LIGHT MODE) --- */
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --primary: #2563eb;
-
-  --muted: #6b7280;
-  --glass: rgba(255,255,255,0.06);
-  --chat-bg: #f1f5f9;
+  /* Palet Warna UNPAD */
+  --unpad-gold: #FFC700;
+  --unpad-black: #111111;
+  --unpad-navy: #1E3A8A;
+  --unpad-cream: #FEF5D4;
+  --unpad-slate: #2C2E31;
+  --unpad-dark-yellow: ##F9A129; /* Warna Baru */
+  
+  /* System Variables (Default: LIGHT) */
+  --background: #FAFAFA;       
+  --foreground: #111111;       
+  --surface: #FFFFFF;          
+  
+  /* Chat Specific (Default: LIGHT) */
+  --chat-bg: #FFFFFF;          
+  --bubble-bot: #FEF5D4;       /* Bot: Krem */
+  --text-bot: #111111;         
+  
+  /* REVISI: Link Referensi & Aksen Utama jadi Dark Yellow (#9E6600) */
+  --link-color: ##F9A129; 
+  --user-bubble-bg: ##F9A129;   
 }
 
-/* Dark mode overrides */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #020617;
-    --foreground: #f8fafc;
-    --card: #0f172a;
-    --primary: #3b82f6;
+/* Override Dark Mode */
+:root.dark {
+  --background: #0A0A0A;       
+  --foreground: #EDEDED;       
+  --surface: #0f0f10;
 
-    --muted: #9ca3af;
-    --chat-bg: #071026;
-  }
+  --chat-bg: #111111;          
+  --bubble-bot: #2C2E31;       
+  --text-bot: #F3F4F6;         
+  
+  /* Di Dark Mode, Link & User tetap terbaca jelas */
+  --link-color: #FFC700;       /* Gold di dark mode agar kontras */
+  --user-bubble-bg: ##F9A129;   /* User tetap Dark Yellow */
+}
+
+html, body, #__next {
+  height: 100%;
+  min-height: 100dvh;
+  background: var(--background);
+  color: var(--foreground);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
 }
 
 /* ============================= */
-/* Chat Layout */
+/* CHAT UI STYLING               */
 /* ============================= */
 
 .chat-container {
-  border-radius: 14px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--chat-bg);
 }
 
-/* Header */
-.chat-header {
-  padding-top: 0.9rem;
-  padding-bottom: 0.9rem;
-}
-
-/* Chat body / messages */
-.chat-body {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-  padding-bottom: 0.5rem;
-}
-
-/* Message row */
-.message-row {
-  align-items: flex-end;
-}
-
-/* Avatars */
-.avatar .w-9 {
-  width: 36px;
-  height: 36px;
-}
-
-/* Message bubbles */
 .message-bubble {
-  padding: 12px 14px;
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(2,6,23,0.06);
-  word-wrap: break-word;
-  animation: fadeInUp 180ms ease-out;
+  padding: 14px 18px;
+  border-radius: 14px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+  line-height: 1.6;
+  position: relative;
+  animation: fadeInUp 0.2s ease-out forwards;
 }
 
-/* Bot bubble */
-.bot-bubble {
-  border-radius: 12px;
-}
-
-/* User bubble */
+/* USER BUBBLE */
+/* REVISI FINAL: Menggunakan variabel --user-bubble-bg (Dark Yellow) */
 .user-bubble {
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(37,99,235,0.14);
+  background-color: var(--user-bubble-bg) !important; /* Pakai !important agar tidak tertimpa */
+  color: #FFFFFF;
+  border-radius: 18px 18px 4px 18px;
 }
 
-/* Images inside bubbles */
+/* BOT BUBBLE */
+.bot-bubble {
+  background-color: var(--bubble-bot);
+  color: var(--text-bot); 
+  border-radius: 18px 18px 18px 4px;
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+:root.dark .bot-bubble,
+.dark .bot-bubble {
+  border-color: rgba(255,255,255,0.1);
+}
+
 .message-bubble img {
   max-width: 100%;
-  height: auto;
-  display: block;
   border-radius: 8px;
+  margin-top: 8px;
+  display: block;
 }
 
-/* Small status dot */
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  box-shadow: 0 0 0 4px rgba(0,0,0,0.02);
+/* REVISI: Link menggunakan warna Dark Yellow (Light Mode) */
+.prose a {
+  color: var(--link-color) !important;
+  text-decoration: underline;
+  font-weight: 600;
 }
 
-/* Footer / input */
-.chat-footer {
-  padding: 1.05rem;
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.02),
-    rgba(255,255,255,0)
-  );
-}
-
-/* ============================= */
-/* Custom Scrollbar */
-/* ============================= */
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
+/* SCROLLBAR */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(148,163,184,0.25);
+  background-color: rgba(0,0,0,0.15);
   border-radius: 10px;
 }
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(148,163,184,0.14);
+:root.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.15);
 }
-
-/* ============================= */
-/* Animations */
-/* ============================= */
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ============================= */
-/* Responsive */
-/* ============================= */
-
-@media (max-width: 640px) {
-  .chat-container {
-    border-radius: 12px;
-  }
-
-  .message-bubble {
-    padding: 10px 12px;
-  }
-
-  .chat-body {
-    padding: 1rem;
-  }
-}
-
-/* Input & buttons alignment */
-.chat-footer .rounded-full {
-  min-width: 44px;
-  min-height: 44px;
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

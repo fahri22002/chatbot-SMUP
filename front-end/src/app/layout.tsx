@@ -10,7 +10,7 @@ import { Toaster } from 'sonner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Admin & Chatbot',
+  title: 'SMUP UNPAD ChatBot',
   description: 'Aplikasi Admin dan Chatbot',
 };
 

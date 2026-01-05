@@ -1,4 +1,3 @@
-// app/Admin/admin.tsx
 'use client';
 import { useState, useEffect } from 'react';
 import {
@@ -13,12 +12,14 @@ import {
   ImageIcon,
   Settings,
   Users,
+  UserPlus,
 } from 'lucide-react';
 import Image from 'next/image';
 import { toast } from 'sonner';
 
 // --- IMPORT VIEW COMPONENTS ---
 import ManageAdminView from './manage-admin-view';
+import CreateAdminView from './create-admin-view';
 import SettingsView from './settings-view';
 
 // --- INTERFACES ---
@@ -28,7 +29,6 @@ interface ChatSession {
   createdAt: string;
 }
 
-// Interface untuk data yang digunakan di Frontend (UI)
 interface Message {
   sender: 'user' | 'bot';
   msg: string;
@@ -36,13 +36,11 @@ interface Message {
   attachmentUrl?: string | null;
 }
 
-// Interface untuk data mentah dari Backend/Database
-// UPDATE: Disesuaikan dengan output console (attachment)
 interface BackendMessage {
   sender: 'USER' | 'BOT';
   msg: string;
   createdAt: string;
-  attachment?: string | null; // Menggunakan 'attachment' sesuai DB
+  attachment?: string | null;
 }
 
 interface SelectedConversation {
@@ -63,9 +61,9 @@ interface DeleteOldChatsResponse {
   message: string;
 }
 
-type ActiveView = 'history' | 'knowledge' | 'RAG' | 'manageAdmin' | 'settings';
+type ActiveView = 'history' | 'knowledge' | 'RAG' | 'manageAdmin' | 'createAdmin' | 'settings';
 
-// --- KOMPONEN Sidebar ---
+// --- KOMPONEN Sidebar (Glassmorphism Enhanced & Recolored) ---
 const AdminSidebar = ({
   activeView,
   onNavClick,
@@ -94,6 +92,12 @@ const AdminSidebar = ({
       requiresSuperAdmin: true,
     },
     {
+      view: 'createAdmin' as ActiveView,
+      icon: UserPlus,
+      label: 'Buat Admin',
+      requiresSuperAdmin: true,
+    },
+    {
       view: 'settings' as ActiveView,
       icon: Settings,
       label: 'Pengaturan Akun',
@@ -109,19 +113,20 @@ const AdminSidebar = ({
 
   return (
     <aside
-      className={`sticky top-0 h-screen flex flex-col p-4 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700
+      className={`sticky top-0 h-screen flex flex-col p-4 border-r border-white/40
                  transition-all duration-300 ease-in-out z-20 flex-shrink-0
+                 bg-white/60 backdrop-blur-xl shadow-[4px_0_24px_rgba(0,0,0,0.05)]
                  ${isOpen ? 'w-64' : 'w-20'}`}
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
       <div className='px-2 mb-8 h-8'>
         {isOpen ? (
-          <h1 className='text-2xl font-bold text-gray-900 dark:text-white whitespace-nowrap'>
+          <h1 className='text-2xl font-bold text-gray-800 whitespace-nowrap drop-shadow-sm'>
             Admin Panel
           </h1>
         ) : (
-          <ChevronsLeft className='w-6 h-6 text-gray-900 dark:text-white' />
+          <ChevronsLeft className='w-6 h-6 text-gray-800' />
         )}
       </div>
 
@@ -130,12 +135,14 @@ const AdminSidebar = ({
           <button
             key={item.view}
             onClick={() => onNavClick(item.view)}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
                       ${!isOpen && 'justify-center'} 
                       ${
                         activeView === item.view
-                          ? 'bg-blue-600 text-white'
-                          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                          // REPLACED: bg-blue-600 -> bg-[#F9A129]
+                          ? 'bg-[#F9A129] text-white shadow-lg shadow-[#F9A129]/30 backdrop-blur-md'
+                          // REPLACED: hover:text-blue-600 -> hover:text-[#F9A129]
+                          : 'text-gray-700 hover:bg-white/50 hover:text-[#F9A129] hover:shadow-sm'
                       }`}
           >
             <item.icon className='w-5 h-5 flex-shrink-0' />
@@ -147,7 +154,7 @@ const AdminSidebar = ({
       <button
         onClick={onLogout}
         disabled={isLoggingOut}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 dark:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50/50 hover:shadow-sm transition-all disabled:opacity-50
                   ${!isOpen && 'justify-center'}`}
       >
         {isLoggingOut ? (
@@ -165,7 +172,7 @@ const AdminSidebar = ({
   );
 };
 
-// --- KOMPONEN Tampilan History Chat ---
+// --- KOMPONEN Tampilan History Chat (Glassmorphism Enhanced & Recolored) ---
 const ChatHistoryView = () => {
   const [chatList, setChatList] = useState<ChatSession[]>([]);
   const [selectedConversation, setSelectedConversation] =
@@ -215,13 +222,12 @@ const ChatHistoryView = () => {
       if (!res.ok) throw new Error('Gagal mengambil riwayat chat.');
       const data: ChatHistoryResponse = await res.json();
 
-      // UPDATE: Mapping dari 'attachment' (DB) ke 'attachmentUrl' (Frontend)
       const transformedMessages: Message[] = data.data.map(
         (msg: BackendMessage): Message => ({
           msg: msg.msg,
           createdAt: msg.createdAt,
           sender: msg.sender === 'USER' ? 'user' : 'bot',
-          attachmentUrl: msg.attachment || null, // Mapping field attachment
+          attachmentUrl: msg.attachment || null,
         })
       );
 
@@ -327,17 +333,17 @@ const ChatHistoryView = () => {
     <div className='p-4 sm:p-6 lg:p-8 h-full flex flex-col'>
       {/* Header */}
       <header className='mb-6 flex justify-between items-start flex-shrink-0'>
-        <div>
-          <h1 className='text-3xl font-bold text-gray-900 dark:text-white tracking-tight'>
+        <div className='bg-white/20 backdrop-blur-sm p-4 rounded-2xl border border-white/40 shadow-sm'>
+          <h1 className='text-3xl font-bold text-gray-900 tracking-tight drop-shadow-sm'>
             Chat History
           </h1>
-          <p className='text-gray-600 dark:text-gray-400 mt-1'>
+          <p className='text-gray-700 mt-1 font-medium'>
             Manajemen dan monitoring aktivitas chatbot.
           </p>
         </div>
         <button
           onClick={handleDeleteOldChats}
-          className='flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded-lg'
+          className='flex items-center gap-2 bg-red-500/90 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-xl shadow-lg shadow-red-500/20 backdrop-blur-sm transition-all'
         >
           <Trash2 className='w-5 h-5' />
           <span>Hapus Chat Lama</span>
@@ -347,10 +353,10 @@ const ChatHistoryView = () => {
       {/* Chat History Section */}
       <section className='grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0 pb-2'>
         
-        {/* List Panel */}
-        <div className='lg:col-span-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg h-[500px] lg:h-[calc(100vh-180px)] flex flex-col shadow-sm'>
-          <div className='p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0'>
-            <h2 className='text-lg font-semibold flex items-center mb-4 gap-2 text-gray-900 dark:text-white'>
+        {/* List Panel (Glassmorphism) */}
+        <div className='lg:col-span-1 bg-white/50 backdrop-blur-md border border-white/50 rounded-2xl h-[500px] lg:h-[calc(100vh-180px)] flex flex-col shadow-xl ring-1 ring-white/60'>
+          <div className='p-4 border-b border-white/30 flex-shrink-0 bg-white/20 rounded-t-2xl'>
+            <h2 className='text-lg font-semibold flex items-center mb-4 gap-2 text-gray-800'>
               <MessageSquare /> Riwayat Percakapan
             </h2>
             <div className='relative'>
@@ -360,11 +366,12 @@ const ChatHistoryView = () => {
                 placeholder='Cari ID percakapan...'
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className='w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200 rounded-lg border border-gray-200 dark:border-gray-700 pl-10 pr-4 py-2 text-sm'
+                // REPLACED: focus:border-blue-400 -> focus:border-[#F9A129]
+                className='w-full bg-white/40 focus:bg-white/80 text-gray-900 rounded-xl border border-white/40 focus:border-[#F9A129] pl-10 pr-4 py-2 text-sm outline-none transition-all placeholder:text-gray-500 shadow-inner'
               />
             </div>
           </div>
-          <div className='overflow-y-auto flex-1 custom-scrollbar'>
+          <div className='overflow-y-auto flex-1 custom-scrollbar p-2 space-y-2'>
             {listLoading ? (
               <div className='flex justify-center items-center h-full text-gray-500'>
                 <Loader2 className='w-8 h-8 animate-spin' />
@@ -374,16 +381,17 @@ const ChatHistoryView = () => {
                 <button
                   key={conv._id}
                   onClick={() => handleSelectConversation(conv._id)}
-                  className={`w-full text-left p-4 border-l-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 ${
+                  className={`w-full text-left p-4 rounded-xl border transition-all duration-200 ${
                     selectedConversation?._id === conv._id
-                      ? 'bg-blue-600/10 dark:bg-blue-600/20 border-blue-500'
-                      : 'border-transparent'
+                      // REPLACED: bg-blue-600/10 border-blue-400/50 -> bg-[#F9A129]/10 border-[#F9A129]/50
+                      ? 'bg-[#F9A129]/10 border-[#F9A129]/50 shadow-md backdrop-blur-sm'
+                      : 'border-transparent hover:bg-white/40 hover:border-white/40'
                   }`}
                 >
-                  <p className='font-bold text-gray-900 dark:text-white text-sm truncate'>
+                  <p className='font-bold text-gray-800 text-sm truncate'>
                     ID: {conv._id}
                   </p>
-                  <p className='text-sm text-gray-600 dark:text-gray-400 truncate mt-1'>
+                  <p className='text-sm text-gray-600 truncate mt-1'>
                     Status: {conv.status}
                   </p>
                   <p className='text-xs text-gray-500 mt-2'>
@@ -399,32 +407,32 @@ const ChatHistoryView = () => {
           </div>
         </div>
 
-        {/* Detail Panel */}
-        <div className='lg:col-span-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg h-[600px] lg:h-[calc(100vh-180px)] flex flex-col shadow-sm'>
+        {/* Detail Panel (Glassmorphism) */}
+        <div className='lg:col-span-2 bg-white/50 backdrop-blur-md border border-white/50 rounded-2xl h-[600px] lg:h-[calc(100vh-180px)] flex flex-col shadow-xl ring-1 ring-white/60'>
           {detailLoading ? (
             <div className='flex justify-center items-center h-full text-gray-500'>
               <Loader2 className='w-12 h-12 animate-spin' />
             </div>
           ) : selectedConversation ? (
             <>
-              <header className='p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0'>
+              <header className='p-4 border-b border-white/30 flex justify-between items-center flex-shrink-0 bg-white/20 rounded-t-2xl'>
                 <div>
-                  <h3 className='font-bold text-gray-900 dark:text-white'>
+                  <h3 className='font-bold text-gray-900'>
                     Detail Percakapan
                   </h3>
-                  <p className='text-sm text-gray-600 dark:text-gray-400'>
+                  <p className='text-sm text-gray-600'>
                     {selectedConversation._id}
                   </p>
                 </div>
                 <button
                   onClick={() => handleDeleteChat(selectedConversation._id)}
-                  className='flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-2 rounded-lg'
+                  className='flex items-center gap-2 bg-red-600/90 hover:bg-red-700 text-white font-semibold px-3 py-2 rounded-lg shadow-md transition-all backdrop-blur-sm'
                 >
                   <Trash2 className='w-4 h-4' />
                   <span>Hapus</span>
                 </button>
               </header>
-              <div className='flex-1 overflow-y-auto p-6 flex flex-col gap-5 custom-scrollbar'>
+              <div className='flex-1 overflow-y-auto p-6 flex flex-col gap-5 custom-scrollbar bg-white/10'>
                 {selectedConversation.messages.map((msg, index) => (
                   <div
                     key={index}
@@ -435,26 +443,25 @@ const ChatHistoryView = () => {
                     }`}
                   >
                     <div
-                      className={`p-2 rounded-full flex-shrink-0 ${
+                      className={`p-2 rounded-full flex-shrink-0 shadow-lg ${
                         msg.sender === 'user'
-                          ? 'bg-blue-600'
-                          : 'bg-gray-500 dark:bg-gray-700'
+                          // REPLACED: bg-blue-600 -> bg-[#F9A129]
+                          ? 'bg-[#F9A129] text-white'
+                          : 'bg-white/90 text-gray-600 backdrop-blur-sm'
                       }`}
                     >
                       {msg.sender === 'user' ? (
-                        <User className='w-4 h-4 text-white' />
+                        <User className='w-4 h-4' />
                       ) : (
-                        <Bot className='w-4 h-4 text-white' />
+                        <Bot className='w-4 h-4' />
                       )}
                     </div>
                     <div
-                      className={`flex flex-col gap-2 ${
-                        msg.sender === 'user' ? 'items-end' : 'items-start'
-                      }`}
+                      className={`flex flex-col gap-2 ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
                     >
                       {/* RENDER GAMBAR JIKA ADA ATTACHMENT */}
                       {msg.attachmentUrl && (
-                        <div className='bg-gray-100 dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 mb-1'>
+                        <div className='bg-white/60 p-2 rounded-xl border border-white/50 mb-1 shadow-sm backdrop-blur-sm'>
                           <a
                             href={msg.attachmentUrl}
                             target='_blank'
@@ -467,11 +474,11 @@ const ChatHistoryView = () => {
                               width={0}
                               height={0}
                               sizes='100vw'
-                              className='w-full max-w-[200px] h-auto rounded-md hover:opacity-90 transition-opacity'
-                              unoptimized // Penting jika domain gambar belum di-config
+                              className='w-full max-w-[200px] h-auto rounded-lg hover:opacity-90 transition-opacity'
+                              unoptimized 
                             />
                           </a>
-                          <div className='flex items-center gap-1 mt-2 text-xs text-gray-500 dark:text-gray-400'>
+                          <div className='flex items-center gap-1 mt-2 text-xs text-gray-600'>
                             <ImageIcon className='w-3 h-3' />
                             <span>Attachment</span>
                           </div>
@@ -479,10 +486,11 @@ const ChatHistoryView = () => {
                       )}
 
                       <div
-                        className={`px-4 py-2 rounded-lg shadow-sm ${
+                        className={`px-4 py-2 rounded-2xl shadow-md backdrop-blur-md border ${
                           msg.sender === 'user'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200'
+                            // REPLACED: bg-blue-600/90 ... border-blue-500 -> bg-[#F9A129]/90 ... border-[#F9A129]
+                            ? 'bg-[#F9A129]/90 text-white rounded-tr-none border-[#F9A129]'
+                            : 'bg-white/80 text-gray-900 border-white/60 rounded-tl-none'
                         }`}
                       >
                         <div
@@ -494,20 +502,22 @@ const ChatHistoryView = () => {
                             [&_strong]:font-bold
                             [&_a]:underline 
                             [&_table]:w-full [&_table]:border-collapse [&_table]:mb-2 [&_table]:mt-2
-                            [&_th]:border [&_th]:p-2 [&_th]:bg-black/5 dark:[&_th]:bg-white/5 [&_th]:text-left
+                            [&_th]:border [&_th]:p-2 [&_th]:bg-black/5 [&_th]:text-left
                             [&_td]:border [&_td]:p-2
                             
                             ${
                               msg.sender === 'user'
-                                ? '[&_a]:text-blue-200 hover:[&_a]:text-white [&_th]:border-white/20 [&_td]:border-white/20'
-                                : '[&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_th]:border-gray-300 dark:[&_th]:border-gray-600 [&_td]:border-gray-300 dark:[&_td]:border-gray-600'
+                                // REPLACED: text-blue-200 -> text-white (agar kontras di background kuning/orange)
+                                ? '[&_a]:text-white hover:[&_a]:text-yellow-100 [&_th]:border-white/20 [&_td]:border-white/20'
+                                // REPLACED: text-blue-600 -> text-[#F9A129]
+                                : '[&_a]:text-[#F9A129] [&_th]:border-gray-300 [&_td]:border-gray-300'
                             }
                           `}
                           dangerouslySetInnerHTML={{ __html: msg.msg }}
                         />
                       </div>
 
-                      <span className='text-[10px] text-gray-400 opacity-70'>
+                      <span className='text-[10px] text-gray-700 font-bold opacity-80 shadow-black/10 drop-shadow-sm'>
                         {new Date(msg.createdAt).toLocaleTimeString()}
                       </span>
                     </div>
@@ -516,12 +526,13 @@ const ChatHistoryView = () => {
               </div>
             </>
           ) : (
-            <div className='flex flex-col items-center justify-center h-full text-gray-500'>
-              <MessageSquare className='w-16 h-16 mb-4' />
-              <h3 className='text-xl font-semibold'>Pilih Percakapan</h3>
-              <p>
-                Pilih salah satu percakapan dari daftar di sebelah kiri untuk
-                melihat detailnya.
+            <div className='flex flex-col items-center justify-center h-full text-gray-600'>
+              <div className="bg-white/40 p-6 rounded-full mb-4 shadow-inner border border-white/50 backdrop-blur-sm">
+                <MessageSquare className='w-12 h-12 text-gray-500' />
+              </div>
+              <h3 className='text-xl font-semibold text-gray-800 drop-shadow-sm'>Pilih Percakapan</h3>
+              <p className="text-gray-600 font-medium bg-white/30 px-3 py-1 rounded-lg">
+                Pilih salah satu percakapan dari daftar di sebelah kiri.
               </p>
             </div>
           )}
@@ -531,7 +542,7 @@ const ChatHistoryView = () => {
   );
 };
 
-// --- KOMPONEN UTAMA: AdminDashboard ---
+// --- KOMPONEN UTAMA: AdminDashboard (Updated Layout with Background) ---
 export default function AdminDashboard() {
   const [activeView, setActiveView] = useState<ActiveView>('history');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -568,10 +579,15 @@ export default function AdminDashboard() {
     switch (activeView) {
       case 'history':
         return <ChatHistoryView />;
-  
+
       case 'manageAdmin':
         if (userRole !== 'SUPER_ADMIN') return <ChatHistoryView />;
         return <ManageAdminView onBack={() => setActiveView('history')} />;
+      
+      case 'createAdmin':
+        if (userRole !== 'SUPER_ADMIN') return <ChatHistoryView />;
+        return <CreateAdminView onBack={() => setActiveView('manageAdmin')} />;
+        
       case 'settings':
         return <SettingsView />;
       default:
@@ -580,7 +596,25 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className='flex min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-200 font-sans'>
+    <div className='flex min-h-screen font-sans relative overflow-hidden'>
+      {/* BACKGROUND LAYER */}
+      <div className="fixed inset-0 z-[0]">
+        {/* Gambar Background Utama */}
+        <Image 
+          src="/Logo.jpg" 
+          alt="Background" 
+          fill 
+          className="object-cover object-center"
+          priority
+        />
+        {/* Overlay Putih Transparan (Kunci Kenyamanan Mata) */}
+        {/* Menggunakan opacity/85 agar gambar terlihat samar (glass) tapi teks tetap kontras */}
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px]" />
+        
+        {/* Gradient Overlay untuk estetika - REPLACED blue-50 -> #F9A129 (Yellow/Orange) tint */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-[#F9A129]/10" />
+      </div>
+
       <AdminSidebar
         activeView={activeView}
         onNavClick={setActiveView}
@@ -588,7 +622,8 @@ export default function AdminDashboard() {
         isLoggingOut={isLoggingOut}
         userRole={userRole}
       />
-      <main className='flex-1 w-full'>
+      
+      <main className='flex-1 w-full relative z-10'>
         {renderView()}
       </main>
     </div>

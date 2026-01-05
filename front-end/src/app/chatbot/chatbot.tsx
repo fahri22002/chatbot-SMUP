@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useTheme } from 'next-themes';
 import {
   Send,
-  Bot,
   Loader2,
   Paperclip,
   FileImage,
@@ -11,13 +11,19 @@ import {
   RotateCcw,
   Wifi,
   WifiOff,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import Image from 'next/image';
 
-// --- IMPORT WAJIB UNTUK TABEL & FORMATTING ---
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+
+// Assets (make sure Logo.jpg exists in /public)
+const BG_IMAGE = '/Logo.jpg';
+const BOT_AVATAR_SRC = '/logo.jpg';
+const PLACEHOLDER_AVATAR = '/logo-unpad-placeholder.png';
 
 type Message = {
   sender: 'bot' | 'user';
@@ -25,7 +31,6 @@ type Message = {
   attachmentUrl?: string;
 };
 
-// Tipe respons dari Server Python
 interface WsResponse {
   status: 'ok' | 'error';
   action?: string;
@@ -36,44 +41,41 @@ interface WsResponse {
   attachment?: string;
   reason?: string;
   remaining?: number;
-  messages?: Message[]; // Tambahan untuk memuat history
+  messages?: Message[];
 }
 
 const initialMessages: Message[] = [
   {
     sender: 'bot',
-    text: 'Selamat datang! Ada yang bisa saya bantu terkait informasi kampus? (Saya bisa menampilkan tabel, list, dan format rapi lainnya).',
+    text: 'Selamat datang di **Layanan SMUP Unpad**! 👋\n\nAda yang bisa saya bantu terkait informasi kampus? (Saya bisa menampilkan tabel, list, dan format rapi lainnya).',
   },
 ];
 
 export default function Chatbot() {
-  // --- STATE UTAMA ---
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // --- STATE KONEKSI & SESI ---
   const [isWsConnected, setIsWsConnected] = useState(false);
   const [deviceToken, setDeviceToken] = useState<string | null>(null);
   const [chatId, setChatId] = useState<string | null>(null);
 
-  // --- REFS ---
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const ws = useRef<WebSocket | null>(null);
+  const { setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-  // Ref untuk menyimpan file sementara saat menunggu sinyal binary dari server
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const ws = useRef<WebSocket | null>(null);
   const pendingFileRef = useRef<File | null>(null);
 
-  // --- KONFIGURASI URL ---
   const WS_URL = 'ws://localhost:8765';
 
-  // ----------------------------------------------------------------------
-  // 1. WEBSOCKET SETUP & HANDSHAKE
-  // ----------------------------------------------------------------------
   useEffect(() => {
-    // Ambil token dari localStorage jika ada
     const storedToken = localStorage.getItem('deviceToken');
     if (storedToken) setDeviceToken(storedToken);
 
@@ -91,16 +93,12 @@ export default function Chatbot() {
     const socket = new WebSocket(WS_URL);
 
     socket.onopen = () => {
-      console.log('✅ WS Connected');
       setIsWsConnected(true);
 
-      // LOGIKA HANDSHAKE AWAL
       const storedToken = localStorage.getItem('deviceToken');
       if (!storedToken) {
-        // 1. Jika belum punya token, register device
         socket.send(JSON.stringify({ action: 'register_device' }));
       } else {
-        // 2. Jika punya token, langsung buat/resume chat
         socket.send(
           JSON.stringify({
             action: 'create_chat',
@@ -111,9 +109,7 @@ export default function Chatbot() {
     };
 
     socket.onclose = () => {
-      console.log('❌ WS Disconnected');
       setIsWsConnected(false);
-      // Reconnect otomatis setelah 3 detik
       setTimeout(() => connectWs(), 3000);
     };
 
@@ -129,20 +125,13 @@ export default function Chatbot() {
     ws.current = socket;
   };
 
-  // ----------------------------------------------------------------------
-  // 2. LOGIKA PENANGANAN PESAN MASUK (ROUTER)
-  // ----------------------------------------------------------------------
   const handleWsMessage = (data: WsResponse) => {
-    console.log('[WS RECV]', data);
-
     if (data.status === 'error') {
       setLoading(false);
-      // Handle error spesifik
       if (
         data.message === 'chat_not_bound_to_device' ||
         data.message === 'invalid deviceToken'
       ) {
-        // Reset token dan register ulang
         localStorage.removeItem('deviceToken');
         ws.current?.send(JSON.stringify({ action: 'register_device' }));
       } else if (data.message === 'rate_limit_exceeded') {
@@ -170,7 +159,6 @@ export default function Chatbot() {
         if (data.deviceToken) {
           localStorage.setItem('deviceToken', data.deviceToken);
           setDeviceToken(data.deviceToken);
-          // Setelah register, langsung create chat
           ws.current?.send(
             JSON.stringify({
               action: 'create_chat',
@@ -183,9 +171,6 @@ export default function Chatbot() {
       case 'create_chat':
         if (data.chatId) {
           setChatId(data.chatId);
-          console.log('Chat Session Active:', data.chatId);
-
-          // === FIX: REQUEST HISTORY SETELAH CHAT AKTIF ===
           const token = localStorage.getItem('deviceToken');
           if (token) {
             ws.current?.send(
@@ -200,9 +185,7 @@ export default function Chatbot() {
         break;
 
       case 'get_history':
-        // === FIX: LOAD HISTORY ===
         if (data.messages && Array.isArray(data.messages)) {
-          // Jika ada history, kita gunakan (gabung dengan welcome message jika kosong)
           if (data.messages.length > 0) {
             setMessages(data.messages);
           }
@@ -220,23 +203,21 @@ export default function Chatbot() {
         break;
 
       case 'ready_for_binary':
-        // Server siap menerima file binary
         if (pendingFileRef.current && ws.current) {
           const file = pendingFileRef.current;
           const reader = new FileReader();
           reader.onload = () => {
             if (reader.result instanceof ArrayBuffer) {
-              ws.current?.send(reader.result); // KIRIM BINARY
+              ws.current?.send(reader.result);
             }
           };
           reader.readAsArrayBuffer(file);
-          pendingFileRef.current = null; // Clear pending
+          pendingFileRef.current = null;
         }
         break;
 
       case 'send_message_with_attachment':
         setLoading(false);
-        // Tampilkan balasan RAG
         if (data.reply) {
           setMessages((prev) => [
             ...prev,
@@ -249,16 +230,15 @@ export default function Chatbot() {
         break;
 
       case 'pong':
-        // Keep-alive response
         break;
     }
   };
 
-  // ----------------------------------------------------------------------
-  // 3. UI HANDLERS (SEND MESSAGE)
-  // ----------------------------------------------------------------------
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setInput(e.target.value);
   };
 
@@ -272,7 +252,6 @@ export default function Chatbot() {
     const userMsg = input;
     const currentFile = selectedFile;
 
-    // 1. Tampilkan Chat User di UI
     const newMessage: Message = { sender: 'user', text: userMsg };
     if (currentFile) {
       newMessage.attachmentUrl = URL.createObjectURL(currentFile);
@@ -280,19 +259,13 @@ export default function Chatbot() {
     }
     setMessages((prev) => [...prev, newMessage]);
 
-    // Reset UI State
     setInput('');
     setSelectedFile(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
     setLoading(true);
 
-    // 2. Kirim ke WebSocket
     if (currentFile) {
-      // FLOW ATTACHMENT:
-      // a. Simpan file di ref sementara
       pendingFileRef.current = currentFile;
-
-      // b. Kirim header JSON
       ws.current?.send(
         JSON.stringify({
           action: 'send_message_with_attachment',
@@ -304,9 +277,7 @@ export default function Chatbot() {
           filesize: currentFile.size,
         })
       );
-      // c. Tunggu respons 'ready_for_binary' di handleWsMessage untuk mengirim body file
     } else {
-      // FLOW TEXT ONLY
       ws.current?.send(
         JSON.stringify({
           action: 'send_message',
@@ -324,12 +295,10 @@ export default function Chatbot() {
     }
   };
 
-  // Auto-scroll ke bawah
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Keep-alive ping setiap 30 detik
   useEffect(() => {
     const interval = setInterval(() => {
       if (ws.current?.readyState === WebSocket.OPEN) {
@@ -339,284 +308,496 @@ export default function Chatbot() {
     return () => clearInterval(interval);
   }, [chatId]);
 
-  // --- RENDER UI ---
+  if (!mounted) return null;
+
+  const isDarkMode = resolvedTheme === 'dark';
+
   return (
-    <div className='flex flex-col items-center justify-center w-full h-[100dvh] md:min-h-[95vh] md:h-auto md:py-8 md:px-6 bg-gray-50 dark:bg-gray-950'>
-      {/* Container Utama */}
-      <div className='w-full h-full md:h-[80vh] md:max-w-6xl mx-auto bg-white dark:bg-gray-900 md:rounded-2xl md:shadow-2xl md:border border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden'>
-        {/* HEADER */}
-        <div className='shrink-0 flex items-center justify-between px-4 py-3 md:px-6 md:py-4 bg-gradient-to-r from-blue-600 to-blue-700'>
-          <div className='flex items-center gap-3 md:gap-4'>
-            <div className='logo w-9 h-9 md:w-11 md:h-11 bg-white/95 rounded-full flex items-center justify-center shadow-sm'>
-              <Bot className='w-4 h-4 md:w-5 md:h-5 text-blue-600' />
-            </div>
-            <div>
-              <h1 className='text-white font-semibold text-base md:text-lg tracking-wide'>
-                Layanan Unpad
-              </h1>
-              <div className='flex items-center gap-2 mt-0.5'>
-                {isWsConnected ? (
-                  <Wifi className='w-3 h-3 text-green-300' />
-                ) : (
-                  <WifiOff className='w-3 h-3 text-red-300' />
-                )}
-                <p className='text-blue-100 text-[10px] md:text-xs font-medium'>
-                  {isWsConnected
-                    ? 'Terhubung'
-                    : 'Terputus (Mencoba reconnect...)'}
-                </p>
-              </div>
-            </div>
-          </div>
+    <div className='min-h-[100dvh] w-full flex items-center justify-center relative'>
+      {/* Background image */}
+      <div
+        className='absolute inset-0 bg-center bg-cover filter brightness-95'
+        style={{
+          backgroundImage: `url("${BG_IMAGE}")`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          backgroundSize: 'cover',
+        }}
+      />
+      {/* subtle overlay so content stays readable */}
+      <div
+        className='absolute inset-0 transition-colors duration-300'
+        style={{
+          background: isDarkMode
+            ? 'rgba(8,8,10,0.6)'
+            : 'rgba(255,255,255,0.55)',
+        }}
+      />
 
-          <div className='flex items-center gap-2 md:gap-3'>
-            <button
-              onClick={() => {
-                setMessages(initialMessages);
-                if (deviceToken) {
-                  ws.current?.send(
-                    JSON.stringify({
-                      action: 'create_chat',
-                      deviceToken: deviceToken,
-                    })
-                  );
-                }
-              }}
-              className='p-1.5 md:p-2 rounded-md bg-white/10 hover:bg-white/20 transition'
-              title='Reset Chat'
-            >
-              <RotateCcw className='w-4 h-4 md:w-5 md:h-5 text-white/90' />
-            </button>
-          </div>
-        </div>
-
-        {/* CHAT BODY */}
-        <div className='flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-gray-900/60 custom-scrollbar'>
-          <div className='space-y-4 md:space-y-5'>
-            {messages.map((msg, index) => (
+      {/* Chat wrapper */}
+      <div className='relative z-10 w-full max-w-6xl mx-4 md:mx-6 lg:mx-8'>
+        <div
+          className={`w-full h-[85vh] mx-auto flex flex-col overflow-hidden rounded-2xl transition-all duration-300`}
+          style={{
+            // Glass: semi-transparent + backdrop blur
+            background: isDarkMode
+              ? 'rgba(6,6,6,0.5)'
+              : 'rgba(255,255,255,0.66)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            border: isDarkMode
+              ? '1px solid rgba(255,255,255,0.06)'
+              : '1px solid rgba(0,0,0,0.06)',
+            boxShadow: isDarkMode
+              ? '0 10px 30px rgba(0,0,0,0.6)'
+              : '0 10px 30px rgba(16,24,40,0.08)',
+          }}
+        >
+          {/* Header */}
+          <div
+            className='shrink-0 flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b'
+            style={{
+              borderColor: isDarkMode
+                ? 'rgba(255,255,255,0.1)'
+                : 'rgba(0,0,0,0.1)',
+            }}
+          >
+            <div className='flex items-center gap-3 md:gap-4'>
               <div
-                key={index}
-                className={`message-row flex items-start gap-2 md:gap-4 ${
-                  msg.sender === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+                className='relative w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden flex items-center justify-center'
+                style={{
+                  border: '2px solid rgba(255,199,0,0.95)',
+                  background: isDarkMode
+                    ? 'rgba(255,255,255,0.03)'
+                    : 'rgba(0,0,0,0.03)',
+                }}
               >
-                {msg.sender === 'bot' && (
-                  <div className='avatar shrink-0 hidden md:block'>
-                    <div className='w-9 h-9 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm'>
-                      <Bot className='w-4 h-4 text-blue-600' />
-                    </div>
-                  </div>
-                )}
+                <Image
+                  src={BOT_AVATAR_SRC}
+                  onError={(e) => {
+                    e.currentTarget.src = PLACEHOLDER_AVATAR;
+                  }}
+                  alt='Unpad Bot'
+                  width={48}
+                  height={48}
+                  className='object-cover w-full h-full'
+                />
+              </div>
 
-                <div
-                  className={`message-bubble max-w-[95%] md:max-w-[85%] ${
-                    msg.sender === 'user'
-                      ? 'user-bubble text-white bg-blue-600 rounded-br-none p-3 md:p-4 rounded-2xl'
-                      : 'bot-bubble bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-100 dark:border-gray-700 rounded-bl-none p-4 md:p-5 rounded-2xl shadow-sm w-full'
-                  }`}
-                >
-                  {/* Tampilan Gambar/Attachment di chat bubble */}
-                  {msg.attachmentUrl && (
-                    <div className='mb-3'>
-                      <Image
-                        src={msg.attachmentUrl}
-                        alt='Attachment'
-                        width={400}
-                        height={260}
-                        className='rounded-lg border border-white/10 object-contain max-h-[200px] w-auto'
-                      />
-                    </div>
-                  )}
-
-                  {msg.sender === 'bot' ? (
-                    <div className='prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed break-words'>
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        rehypePlugins={[rehypeRaw]}
-                        components={{
-                          // 1. Handling Paragraf
-                          p: ({ ...props }) => (
-                            <p {...props} className='mb-2 last:mb-0' />
-                          ),
-
-                          // 2. Handling Link (HTML <a>)
-                          a: ({ ...props }) => (
-                            <a
-                              {...props}
-                              target='_blank'
-                              rel='noopener noreferrer'
-                              className='text-blue-600 dark:text-blue-400 hover:underline font-medium break-all'
-                            />
-                          ),
-
-                          // 3. Handling Ordered List (Numbering <ol>)
-                          ol: ({ ...props }) => (
-                            // Use list-inside so markers appear inside the content box (prevents clipping of 2-digit markers)
-                            <ol
-                              {...props}
-                              className='list-decimal list-inside ml-0 pl-4 mb-4 space-y-1'
-                            />
-                          ),
-
-                          // 4. Handling Unordered List (Bullet <ul>)
-                          ul: ({ ...props }) => (
-                            <ul
-                              {...props}
-                              className='list-disc ml-5 mb-4 space-y-1'
-                            />
-                          ),
-
-                          // 5. Handling List Item (<li>)
-                          li: ({ ...props }) => (
-                            // remove extra left padding on items to keep marker aligned
-                            <li {...props} className='pl-0' />
-                          ),
-
-                          // 6. Handling Table (HTML <table>)
-                          table: ({ ...props }) => (
-                            <div className='overflow-x-auto my-4 rounded-lg border border-gray-200 dark:border-gray-700'>
-                              <table
-                                {...props}
-                                className='min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm'
-                              />
-                            </div>
-                          ),
-                          thead: ({ ...props }) => (
-                            <thead
-                              {...props}
-                              className='bg-gray-50 dark:bg-gray-800'
-                            />
-                          ),
-                          tbody: ({ ...props }) => (
-                            <tbody
-                              {...props}
-                              className='divide-y divide-gray-200 dark:divide-gray-700'
-                            />
-                          ),
-                          tr: ({ ...props }) => (
-                            <tr
-                              {...props}
-                              className='hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors'
-                            />
-                          ),
-                          th: ({ ...props }) => (
-                            <th
-                              {...props}
-                              className='px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider border-b dark:border-gray-700'
-                            />
-                          ),
-                          td: ({ ...props }) => (
-                            <td
-                              {...props}
-                              className='px-4 py-3 whitespace-normal text-gray-700 dark:text-gray-300'
-                            />
-                          ),
-
-                          // 7. Handling Bold (<strong>)
-                          strong: ({ ...props }) => (
-                            <strong
-                              {...props}
-                              className='font-bold text-gray-900 dark:text-white'
-                            />
-                          ),
-                        }}
-                      >
-                        {msg.text}
-                      </ReactMarkdown>
-                    </div>
+              <div>
+                <h1 className='font-bold text-lg md:text-xl tracking-wide transition-colors'>
+                  Layanan{' '}
+                  <span className='text-[#F9A129] dark:text-unpad-gold'>
+                    SMUP UNPAD
+                  </span>
+                </h1>
+                <div className='flex items-center gap-2 mt-1'>
+                  {isWsConnected ? (
+                    <Wifi className='w-3 h-3 text-green-500 animate-pulse' />
                   ) : (
-                    <p className='whitespace-pre-wrap text-sm leading-relaxed'>
-                      {msg.text}
-                    </p>
+                    <WifiOff className='w-3 h-3 text-[#F9A129]' />
                   )}
+                  <p
+                    className='text-[11px] md:text-xs font-medium'
+                    style={{ color: isDarkMode ? '#C7CBD0' : '#6b7280' }}
+                  >
+                    {isWsConnected ? 'Terhubung' : 'Menghubungkan...'}
+                  </p>
                 </div>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {loading && (
-            <div className='flex items-center gap-3 mt-3'>
-              <div className='bg-white dark:bg-gray-800 p-3 rounded-2xl rounded-bl-none shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-2'>
-                <Loader2 className='w-4 h-4 animate-spin text-blue-600' />
-                <span className='text-xs text-gray-500 font-medium'>
-                  Sedang mengetik...
-                </span>
-              </div>
             </div>
-          )}
-        </div>
 
-        {/* INPUT AREA */}
-        <div className='shrink-0 p-3 md:p-6 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800'>
-          {selectedFile && (
-            <div className='flex items-center space-x-2 mb-3 bg-blue-50 dark:bg-blue-900/20 p-2 rounded-lg border border-blue-100 dark:border-blue-800'>
-              <FileImage className='w-4 h-4 text-blue-600' />
-              <span className='text-xs text-blue-700 dark:text-blue-300 truncate max-w-[200px] md:max-w-[240px]'>
-                {selectedFile.name}
-              </span>
+            <div className='flex items-center gap-2'>
+              <button
+                onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
+                className='p-2 md:p-2.5 rounded-lg transition-all'
+                title={isDarkMode ? 'Mode Terang' : 'Mode Gelap'}
+                style={{
+                  background: isDarkMode
+                    ? 'rgba(255,255,255,0.03)'
+                    : 'rgba(0,0,0,0.03)',
+                  border: isDarkMode
+                    ? '1px solid rgba(255,255,255,0.06)'
+                    : '1px solid rgba(0,0,0,0.04)',
+                }}
+              >
+                {isDarkMode ? (
+                  <Sun className='w-5 h-5' />
+                ) : (
+                  <Moon className='w-5 h-5' />
+                )}
+              </button>
+
               <button
                 onClick={() => {
-                  setSelectedFile(null);
-                  if (fileInputRef.current) fileInputRef.current.value = '';
+                  setMessages(initialMessages);
+                  if (deviceToken) {
+                    ws.current?.send(
+                      JSON.stringify({
+                        action: 'create_chat',
+                        deviceToken: deviceToken,
+                      })
+                    );
+                  }
                 }}
-                className='ml-auto text-blue-400 hover:text-blue-600'
+                className='p-2 md:p-2.5 rounded-lg transition-all'
+                title='Reset Sesi Chat'
+                style={{
+                  background: isDarkMode
+                    ? 'rgba(255,255,255,0.02)'
+                    : 'rgba(0,0,0,0.02)',
+                  border: isDarkMode
+                    ? '1px solid rgba(255,255,255,0.04)'
+                    : '1px solid rgba(0,0,0,0.04)',
+                }}
               >
-                <X className='w-4 h-4' />
+                <RotateCcw className='w-5 h-5' />
               </button>
             </div>
-          )}
-
-          <div className='flex items-center gap-2 md:gap-3'>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className='p-2.5 md:p-3 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all'
-            >
-              <Paperclip className='w-5 h-5' />
-            </button>
-            <input
-              type='file'
-              ref={fileInputRef}
-              onChange={handleFileSelect}
-              className='hidden'
-              accept='.pdf,.jpg,.jpeg,.png,.txt'
-            />
-
-            <input
-              type='text'
-              placeholder={
-                !isWsConnected
-                  ? 'Menghubungkan...'
-                  : selectedFile
-                  ? 'Tambahkan keterangan...'
-                  : 'Ketik pertanyaan...'
-              }
-              value={input}
-              onChange={handleInputChange}
-              onKeyDown={(e) => e.key === 'Enter' && !loading && handleSend()}
-              disabled={loading || !isWsConnected}
-              className='flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-full border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none px-4 py-2.5 md:py-3 text-sm disabled:opacity-50'
-            />
-
-            <button
-              onClick={handleSend}
-              disabled={
-                loading || (!input.trim() && !selectedFile) || !isWsConnected
-              }
-              className='p-2.5 md:p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full disabled:bg-gray-300 shadow-md shrink-0'
-            >
-              {loading ? (
-                <Loader2 className='w-5 h-5 animate-spin' />
-              ) : (
-                <Send className='w-5 h-5' />
-              )}
-            </button>
           </div>
-          <p className='text-center text-[10px] md:text-[11px] text-gray-400 mt-2'>
-            {isWsConnected
-              ? 'Bot AI Layanan Unpad'
-              : 'Sedang menghubungkan ke server...'}
-          </p>
+
+          {/* Chat body */}
+          <div className='flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar'>
+            <div className='space-y-4 md:space-y-6'>
+              {messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`flex items-start gap-3 ${
+                    msg.sender === 'user' ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  {msg.sender === 'bot' && (
+                    <div className='hidden md:flex shrink-0 mt-1'>
+                      <div
+                        className='w-9 h-9 rounded-full overflow-hidden flex items-center justify-center'
+                        style={{
+                          border: '1px solid rgba(255,199,0,0.95)',
+                          background: isDarkMode
+                            ? 'rgba(255,255,255,0.03)'
+                            : 'rgba(0,0,0,0.03)',
+                        }}
+                      >
+                        <Image
+                          src={BOT_AVATAR_SRC}
+                          onError={(e) => {
+                            e.currentTarget.src = PLACEHOLDER_AVATAR;
+                          }}
+                          alt='Bot'
+                          width={36}
+                          height={36}
+                          className='object-contain'
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div
+                    className='max-w-[95%] md:max-w-[85%] message-bubble p-4 rounded-2xl shadow-sm transition-all'
+                    style={{
+                      background:
+                        msg.sender === 'user'
+                          ? '#9E6600' // FIX: User Bubble Dark Yellow (Konsisten)
+                          : isDarkMode
+                          ? 'rgba(44,46,49,0.9)' // Bot Dark (Slate Transparan)
+                          : '#FEF5D4', // Bot Light (Cream)
+                      color:
+                        msg.sender === 'user'
+                          ? '#FFFFFF' // FIX: User Text Putih agar terbaca di kuning
+                          : isDarkMode
+                          ? '#f3f4f6' // Bot Text Dark (Putih Tulang)
+                          : '#111827', // Bot Text Light (Hitam)
+                      border:
+                        msg.sender === 'bot'
+                          ? isDarkMode
+                            ? '1px solid rgba(255,255,255,0.06)'
+                            : '1px solid rgba(0,0,0,0.06)'
+                          : undefined,
+                    }}
+                  >
+                    {msg.attachmentUrl && (
+                      <div className='mb-3'>
+                        <Image
+                          src={msg.attachmentUrl}
+                          alt='Attachment'
+                          width={400}
+                          height={260}
+                          className='rounded-lg border border-black/10 object-contain max-h-[200px] w-auto bg-white'
+                        />
+                      </div>
+                    )}
+
+                    {msg.sender === 'bot' ? (
+                      <div className='prose prose-sm max-w-none text-sm leading-relaxed break-words dark:prose-invert transition-colors duration-300'>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[rehypeRaw]}
+                          components={{
+                            // 1. REVISI DIVIDER (HR)
+                            // Menggunakan inline style untuk memaksa warna dan ketebalan
+                            hr: ({ ...props }) => (
+                              <hr
+                                {...props}
+                                style={{
+                                  borderColor: isDarkMode
+                                    ? '#FFC700'
+                                    : '#111111', // Emas (Dark) / Hitam (Light)
+                                  borderTopWidth: '2px',
+                                  opacity: 1,
+                                  margin: '1.5rem 0',
+                                  width: '100%',
+                                }}
+                                className='border-t-2'
+                              />
+                            ),
+
+                            // 2. REVISI BOLD (STRONG) - SOLUSI FINAL
+                            // Kita hapus class text warna dan ganti pakai style={{ color: ... }}
+                            // Ini AKAN MENGALAHKAN semua css global/prose.
+                            strong: ({ ...props }) => (
+                              <strong
+                                {...props}
+                                style={{
+                                  color: isDarkMode ? '#FFC700' : '#111111', // Emas (Dark) / Hitam (Light)
+                                  fontWeight: 800,
+                                }}
+                              />
+                            ),
+
+                            // 3. REVISI LIST ANGKA (OL)
+                            // Menggunakan !marker:text-... (Important) untuk menimpa prose
+                            ol: ({ ...props }) => (
+                              <ol
+                                {...props}
+                                className='list-decimal list-inside ml-0 pl-4 mb-3 space-y-1 font-semibold'
+                                style={{
+                                  // Fallback manual jika class tailwind tertimpa
+                                  color: isDarkMode ? '#EDEDED' : '#111827',
+                                }}
+                              >
+                                {/* Kita manipulasi children agar li mewarisi marker yang benar */}
+                                <style jsx>{`
+                                  ol > li::marker {
+                                    color: ${isDarkMode
+                                      ? '#EDEDED'
+                                      : '#111111'} !important;
+                                    font-weight: bold;
+                                  }
+                                `}</style>
+                                {props.children}
+                              </ol>
+                            ),
+
+                            // --- Komponen Lainnya ---
+                            p: ({ ...props }) => (
+                              <p
+                                {...props}
+                                className='mb-2 last:mb-0 text-sm leading-relaxed'
+                              />
+                            ),
+                            // Link tetap menggunakan style yang sudah oke
+                            a: ({ ...props }) => (
+                              <a
+                                {...props}
+                                target='_blank'
+                                rel='noopener noreferrer'
+                                style={{
+                                  color: isDarkMode ? '#FFC700' : '#9E6600', // Gold (Dark) / DarkYellow (Light)
+                                  textDecoration: 'underline',
+                                }}
+                                className='font-bold decoration-dotted underline-offset-4 hover:opacity-80'
+                              />
+                            ),
+                            ul: ({ ...props }) => (
+                              <ul
+                                {...props}
+                                className='list-disc ml-5 mb-3 space-y-1'
+                                style={{
+                                  color: isDarkMode ? '#EDEDED' : '#111827',
+                                }}
+                              />
+                            ),
+                            li: ({ ...props }) => (
+                              <li {...props} className='pl-1 font-normal' />
+                            ),
+                            table: ({ ...props }) => (
+                              <div className='overflow-x-auto my-3 rounded-lg border border-[#1E3A8A]/70 shadow-sm'>
+                                <table
+                                  {...props}
+                                  className='min-w-full text-sm'
+                                />
+                              </div>
+                            ),
+                            thead: ({ ...props }) => (
+                              <thead
+                                {...props}
+                                className='bg-[#1E3A8A] text-white'
+                              />
+                            ),
+                            tbody: ({ ...props }) => (
+                              <tbody
+                                {...props}
+                                className='divide-y divide-gray-200 dark:divide-gray-700'
+                              />
+                            ),
+                            tr: ({ ...props }) => (
+                              <tr
+                                {...props}
+                                className='hover:bg-[#FFC700]/10 transition-colors'
+                              />
+                            ),
+                            th: ({ ...props }) => (
+                              <th
+                                {...props}
+                                className='px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider'
+                              />
+                            ),
+                            td: ({ ...props }) => (
+                              <td
+                                {...props}
+                                className='px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-black/0'
+                              />
+                            ),
+                          }}
+                        >
+                          {msg.text}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className='whitespace-pre-wrap text-sm leading-relaxed'>
+                        {msg.text}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+          </div>
+
+          {/* Input */}
+          <div
+            className='shrink-0 p-3 md:p-6'
+            style={{
+              borderTop: isDarkMode
+                ? '1px solid rgba(255,255,255,0.04)'
+                : '1px solid rgba(0,0,0,0.06)',
+              background: 'transparent',
+            }}
+          >
+            {selectedFile && (
+              <div
+                className='flex items-center space-x-2 mb-3 p-2.5 rounded-lg'
+                style={{
+                  background: isDarkMode
+                    ? 'rgba(44,46,49,0.85)'
+                    : 'rgba(254,245,212,0.9)',
+                  border: '1px solid rgba(255,199,0,0.95)',
+                }}
+              >
+                <div className='p-1 rounded' style={{ background: '#FFC700' }}>
+                  <FileImage className='w-4 h-4 text-black' />
+                </div>
+                <span
+                  className='text-xs font-bold truncate max-w-[200px] md:max-w-[240px]'
+                  style={{ color: isDarkMode ? '#fff' : '#111827' }}
+                >
+                  {selectedFile.name}
+                </span>
+                <button
+                  onClick={() => {
+                    setSelectedFile(null);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }}
+                  className='ml-auto text-gray-400 hover:text-rose-600'
+                >
+                  <X className='w-4 h-4' />
+                </button>
+              </div>
+            )}
+
+            <div className='flex items-end gap-2 md:gap-3'>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className='p-3 mb-2 text-gray-400 hover:text-[#1E3A8A] hover:bg-[#1E3A8A]/10 rounded-xl transition-all'
+                title='Lampirkan File'
+              >
+                <Paperclip className='w-5 h-5' />
+              </button>
+              <input
+                type='file'
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+                className='hidden'
+                accept='.pdf,.jpg,.jpeg,.png,.txt'
+              />
+
+              <div className='flex-1 relative'>
+                <textarea
+                  rows={1}
+                  placeholder={
+                    !isWsConnected
+                      ? 'Menghubungkan...'
+                      : selectedFile
+                      ? 'Tambahkan keterangan...'
+                      : 'Ketik pertanyaan kamu...'
+                  }
+                  value={input}
+                  onChange={handleInputChange}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      if (!loading) handleSend();
+                    }
+                  }}
+                  disabled={loading || !isWsConnected}
+                  className='w-full rounded-2xl px-4 py-3 text-sm resize-none outline-none'
+                  style={{
+                    minHeight: '48px',
+                    maxHeight: '120px',
+                    background: isDarkMode
+                      ? 'rgba(255,255,255,0.02)'
+                      : 'rgba(0,0,0,0.03)',
+                    color: isDarkMode ? '#EDEDED' : '#111827',
+                    border: isDarkMode
+                      ? '1px solid rgba(255,255,255,0.04)'
+                      : '1px solid rgba(0,0,0,0.06)',
+                  }}
+                />
+              </div>
+
+              <button
+                onClick={handleSend}
+                disabled={
+                  loading || (!input.trim() && !selectedFile) || !isWsConnected
+                }
+                className='p-3 mb-2 rounded-xl shadow-md transition-transform'
+                style={{ background: '#F9A129', color: '#fff' }}
+              >
+                {loading ? (
+                  <Loader2 className='w-5 h-5 animate-spin' />
+                ) : (
+                  <Send className='w-5 h-5' />
+                )}
+              </button>
+            </div>
+
+            <p
+              className='text-center text-[10px] md:text-[11px] mt-2'
+              style={{ color: isDarkMode ? '#9CA3AF' : '#6B7280' }}
+            >
+              {isWsConnected ? (
+                <span>
+                  Powered by{' '}
+                  <span style={{ color: '#FFC700', fontWeight: 700 }}>
+                    Unpad
+                  </span>{' '}
+                  AI System
+                </span>
+              ) : (
+                'Sedang menghubungkan ke server...'
+              )}
+            </p>
+          </div>
         </div>
       </div>
     </div>

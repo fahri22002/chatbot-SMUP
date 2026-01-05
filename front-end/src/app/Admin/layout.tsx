@@ -1,14 +1,12 @@
-// src/app/Admin/layout.tsx
-import React from 'react';
+// Admin/layout.tsx
+'use client'
+import { ThemeProvider } from './theme-provider' // Sesuaikan path import jika perlu
 
-// Hapus semua impor Metadata, Inter, dan ThemeProvider.
-// Layout ini sudah dibungkus oleh root layout (src/app/layout.tsx)
-// dan ThemeProvider-nya.
-
-export default function AdminLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return <>{children}</>;
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    // Jangan gunakan html/body di sini karena ini sub-layout
+    <ThemeProvider attribute="class" defaultTheme="light">
+      {children}
+    </ThemeProvider>
+  )
 }

@@ -1,11 +1,20 @@
+// app/login/page.tsx (atau lokasi file login Anda)
 'use client';
 import { useState } from 'react';
 import { LogIn, Loader2 } from 'lucide-react';
 
-// --- Type for successful and error responses ---
+
+// --- Type definitions ---
 interface LoginSuccessResponse {
   message: string;
-  token?: string; // optional if your backend sends token
+  token?: string;
+  // Menambahkan kemungkinan struktur respon dari backend
+  role?: string; 
+  user?: {
+    _id: string;
+    username: string;
+    role: string;
+  };
 }
 
 interface LoginErrorResponse {
@@ -29,17 +38,36 @@ export default function LoginPage() {
       const res = await fetch('http://localhost:5000/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // include cookies
+        credentials: 'include', // Penting agar cookie session tersimpan
         body: JSON.stringify({ username, password }),
       });
 
-      const data: LoginResponse = await res.json();
+      const data = await res.json() as LoginResponse;
 
       if (!res.ok) {
         throw new Error((data as LoginErrorResponse).message || 'Gagal untuk login.');
       }
 
+      // --- PERBAIKAN UTAMA: SIMPAN ROLE KE LOCALSTORAGE ---
+      // Kita coba ambil role dari data.role ATAU data.user.role
+      const successData = data as LoginSuccessResponse;
+      const userRole = successData.role || successData.user?.role;
+
+      if (userRole) {
+        localStorage.setItem('role', userRole);
+        // Opsional: Simpan username juga
+        if (successData.user?.username) {
+            localStorage.setItem('username', successData.user.username);
+        }
+      } else {
+        console.warn('Warning: Role tidak ditemukan dalam respon backend. Menu Admin mungkin terbatas.');
+        // Fallback: Jika backend lupa kirim role, set default atau biarkan kosong
+        // localStorage.setItem('role', 'ADMIN'); 
+      }
+
+      // Redirect ke dashboard
       window.location.href = '/Admin';
+
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -71,7 +99,7 @@ export default function LoginPage() {
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="mt-2 block w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-blue-500 focus:border-blue-500"
+              className="mt-2 block w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
               placeholder="Masukkan username Anda"
             />
           </div>
@@ -87,13 +115,13 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-2 block w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-blue-500 focus:border-blue-500"
+              className="mt-2 block w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
               placeholder="••••••••"
             />
           </div>
 
           {error && (
-            <div className="text-center text-red-400 text-sm">
+            <div className="p-3 bg-red-900/30 border border-red-800 rounded-lg text-center text-red-400 text-sm">
               <p>{error}</p>
             </div>
           )}
@@ -102,7 +130,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-neutral-600 transition-colors"
+              className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-neutral-600 disabled:cursor-not-allowed transition-all"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
               <span>{loading ? 'Memproses...' : 'Login'}</span>
